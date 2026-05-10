@@ -10,10 +10,28 @@ The milestones below mirror the implementation sequence in
 in [`docs/service-domain.md`](./docs/service-domain.md). Every milestone is
 gated on architecture sign-off per [`docs/architecture-plan.md`](./docs/architecture-plan.md).
 
+The concrete acceptance criteria for each milestone — the "done when" bar
+and the production / phone-readiness checklists — live in
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md).
+This file is the *order*; that file is the *bar*.
+
 Tags are `vX.Y.Z`. Pushing a tag triggers
 [`.github/workflows/release.yml`](./.github/workflows/release.yml), which
 validates `VERSION` + `CHANGELOG.md`, runs the suite, and publishes a
 GitHub Release. See [`.github/RELEASING.md`](./.github/RELEASING.md).
+
+## v1.0 scope (locked)
+
+- Single Flask/Jinja codebase. No SPA, no native mobile.
+- **Phones supported via PWA-light** (responsive + manifest + minimal
+  service worker). Online required for writes; full offline write queue
+  is deferred to v1.2.
+- Web Push deferred to v1.1; v1.0 notifications are in-app + email only.
+- Self-hosted single-server target (one VPS, one Postgres, one container).
+- Single-tenant.
+
+Full rationale and acceptance criteria:
+[`docs/v1-implementation-goals.md` §0](./docs/v1-implementation-goals.md#0-decided-scope-of-v1).
 
 ## Release cadence
 
@@ -57,7 +75,7 @@ already done; this milestone executes the approved plan).
 - [ ] `tests/` skeleton with the fixtures from [`python.tests.md`](./python.tests.md).
 - [ ] CI green on Python 3.11 and 3.12, both SQLite and Postgres.
 
-## 0.2.0 — "UI foundation"
+## 0.2.0 — "UI foundation (mobile-first from day one)"
 
 Mirrors [`docs/tasks.md`](./docs/tasks.md) step 7. UI shell only — no
 business logic. Requires the `oee-calculator2.0` source files (per
@@ -67,13 +85,24 @@ business logic. Requires the `oee-calculator2.0` source files (per
       `oee-calculator2.0`.
 - [ ] Vendor `static/css/style.css` (tokens, surfaces, buttons, tables, cards).
 - [ ] Topbar, KPI card macro, table macro, filter macro, form-shell macro,
-      tabs macro — all as Jinja includes.
+      tabs macro, modal macro — all as Jinja includes.
+- [ ] **PWA manifest** (`static/manifest.webmanifest`) with name, icons
+      (192/512/maskable), `display: standalone`, `start_url`.
+- [ ] **Service worker** (`static/service-worker.js`) registered from
+      `base.html`. Caches app shell + static assets only — no write-side
+      caching in v1.
+- [ ] Responsive breakpoints verified at 320 / 768 / 1024 / 1440 px.
+      Tables stack as cards below 640 px (`.table-stacked` pattern).
+- [ ] Touch targets ≥ 44 × 44 pt on every interactive element in the
+      smoke page.
 - [ ] Light mode default; `data-theme="dark"` only where it follows the OEE
       pattern.
 - [ ] Lucide icons via the existing base layout pattern.
 - [ ] No emoji; no left sidebar on technician screens.
 - [ ] Visual smoke test: a placeholder page that renders every macro looks
-      native to oee-calculator2.0.
+      native to oee-calculator2.0 on desktop **and** on phone.
+- [ ] Lighthouse mobile run on the smoke page: Performance ≥ 90,
+      Accessibility ≥ 95, PWA badge: yes.
 
 ## 0.3.0 — "Clients & contacts"
 
@@ -96,7 +125,9 @@ Mirrors [`docs/tasks.md`](./docs/tasks.md) steps 8–11 for the `clients` bluepr
 
 ## 0.5.0 — "Tickets & interventions"
 
-The core loop: open a ticket, log interventions, close it.
+The core loop: open a ticket, log interventions, close it. This is the
+phone-first slice — the technician must be able to do their whole job from
+a phone in the field.
 Mirrors [`docs/tasks.md`](./docs/tasks.md) step 12 (workflow tests).
 
 - [ ] `ServiceTicket` + status state machine
@@ -106,6 +137,13 @@ Mirrors [`docs/tasks.md`](./docs/tasks.md) step 12 (workflow tests).
 - [ ] `ServicePartUsage` per intervention.
 - [ ] Tickets list with filters (status, priority, due, technician).
 - [ ] Ticket detail with intervention timeline.
+- [ ] Intervention create/edit form built for one-handed phone use:
+      ≥ 44 pt taps, mobile keyboards (`type`/`inputmode`/`autocomplete`),
+      camera capture for photos
+      (`<input type="file" accept="image/*" capture="environment">`).
+- [ ] Server-side photo compression (Pillow): long edge ≤ 2048 px, WebP q85.
+- [ ] Idempotency token on every state-changing form (`(user_id, token)`
+      dedupe for 24 h). Tested by a forced-retry test.
 - [ ] Audit log entries for every state transition.
 - [ ] Tests: state machine ≥ 95% line+branch (via Hypothesis state machine).
 
@@ -128,28 +166,54 @@ Mirrors [`docs/tasks.md`](./docs/tasks.md) step 12 (workflow tests).
 
 Mirrors [`docs/service-domain.md`](./docs/service-domain.md) §"Dashboard V1".
 
-- [ ] Active clients, active tickets, interventions today, due maintenance,
-      technician capacity, latest interventions — all as compact cards.
-- [ ] Modeled on `oee-calculator2.0/templates/admin/dashboard.html`.
-- [ ] Technician variant modeled on `templates/operator/dashboard.html`.
+- [ ] Manager view (`templates/dashboard/admin.html`) — active clients,
+      active tickets, interventions today, due maintenance, tech capacity,
+      latest interventions. Modeled on
+      `oee-calculator2.0/templates/admin/dashboard.html`.
+- [ ] Technician view (`templates/dashboard/operator.html`) — no left
+      sidebar, today's queue, one-tap "start intervention". Modeled on
+      `oee-calculator2.0/templates/operator/dashboard.html`.
+- [ ] Both views meet the P95 budget on the reference dataset
+      (see [`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §1.3).
+- [ ] Lighthouse mobile run on both dashboards: Performance ≥ 90,
+      Accessibility ≥ 95.
 
 ## 0.9.0 — "Hardening for 1.0"
 
-Feature freeze. Stabilization, performance, docs.
+Feature freeze. Spend a milestone making the bars in
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §1
+and §2 actually true.
 
-- [ ] Backup/restore documented and tested end-to-end.
-- [ ] Upgrade path documented for every prior 0.x → 1.0.
-- [ ] Performance budget defined and met (P95 page < 300 ms on reference dataset).
-- [ ] Security review: dependency audit, session fixation, CSRF, RBAC matrix.
-- [ ] User guide and operator guide complete.
+- [ ] §1.1 functional completeness — manual walkthrough of every P1
+      journey passes.
+- [ ] §1.3 perf budget — load reference dataset (10 k clients, 100 k
+      tickets), verify P95 budgets, fix offenders.
+- [ ] §1.4 security — pen-test pass on auth + CSRF + RBAC matrix +
+      headers + uploads. `pip-audit` clean.
+- [ ] §1.5 observability — JSON logs, `/healthz` + `/readyz`, optional
+      `/metrics`, 24-h soak review.
+- [ ] §1.6 operability — backup → restore round-trip dry-run on the
+      release candidate.
+- [ ] §1.7 documentation — user guide, operator runbook, ADRs (≥ 6),
+      `CHANGELOG.md` populated for `1.0.0`.
+- [ ] §1.8 compliance — GDPR export + forget endpoints implemented and
+      tested.
+- [ ] §2 phone-readiness — Lighthouse mobile run on every P1 page meets
+      the §2.6 thresholds. Real-device pass on iPhone + Android.
+- [ ] §3.1 a11y — `axe-core` clean on every P1 page. Manual keyboard pass.
+- [ ] §3.2 i18n — `ro` catalog at 100 % coverage of user-facing strings.
 - [ ] Consistency pass per [`docs/tasks.md`](./docs/tasks.md) §"Consistency Pass".
 
 ## 1.0.0 — "Production-ready single-tenant"
 
-DB schema and HTTP routes covered by SemVer guarantees from this point forward.
+DB schema and HTTP routes covered by SemVer guarantees from this point
+forward. Tag only when the §5 release exit checklist in
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) is
+fully ticked.
 
 - Schema migrations are forward-only and tested both ways.
 - LTS-style support: critical fixes backported to `1.0.x` for 12 months.
+- Public REST API endpoints documented and stable.
 
 ---
 
@@ -157,8 +221,8 @@ DB schema and HTTP routes covered by SemVer guarantees from this point forward.
 
 | Version | Theme                       | Highlights                                                     |
 | ------- | --------------------------- | -------------------------------------------------------------- |
-| 1.1     | Customer portal             | Self-service ticket status, history download                   |
-| 1.2     | Field-tech offline mode     | PWA + local sync queue                                         |
+| 1.1     | Customer portal + Web Push  | Self-service ticket status, history download, opt-in Web Push  |
+| 1.2     | Field-tech offline writes   | IndexedDB queue + replay-on-reconnect for interventions        |
 | 1.3     | VMES/OEE integration        | Read-only OEE asset/equipment sync via API; no shared DB       |
 | 1.4     | Quoting & invoicing         | Quote → invoice flow, PDF, EU-style VAT                        |
 | 1.5     | Reporting & BI              | Saved reports, CSV/Parquet export, Metabase-friendly views     |

@@ -4,6 +4,8 @@ Standalone, self-hostable **Flask** CRM for service teams — clients,
 equipment, tickets, interventions, checklists, maintenance planning, and
 operational dashboards. UI design language is reused verbatim from
 [`vladutzeloo/oee-calculator2.0`](https://github.com/vladutzeloo/oee-calculator2.0).
+Runs **on desktop and on phones** (PWA-light: responsive + installable;
+see [`docs/v1-implementation-goals.md` §2](./docs/v1-implementation-goals.md#2-the-v10-phone-ready-bar)).
 
 > **Status: planning.** No application code has shipped yet. The first
 > runnable version is `0.1.0` on the [roadmap](./ROADMAP.md). All
@@ -16,13 +18,16 @@ operational dashboards. UI design language is reused verbatim from
 1. [`AGENTS.md`](./AGENTS.md) — always-loadable agent context. Read first.
 2. [`docs/architecture-plan.md`](./docs/architecture-plan.md) — current
    architectural proposal awaiting approval.
-3. [`docs/service-domain.md`](./docs/service-domain.md) — entities,
+3. [`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) —
+   the v1.0 production-ready and phone-ready bars. Concrete acceptance
+   criteria per milestone.
+4. [`docs/service-domain.md`](./docs/service-domain.md) — entities,
    workflows, modules.
-4. [`docs/ui-reference.md`](./docs/ui-reference.md) — pattern map between
+5. [`docs/ui-reference.md`](./docs/ui-reference.md) — pattern map between
    `oee-calculator2.0` and this app.
-5. [`docs/tasks.md`](./docs/tasks.md) — implementation sequence and prompt
+6. [`docs/tasks.md`](./docs/tasks.md) — implementation sequence and prompt
    templates.
-6. [`docs/commands.md`](./docs/commands.md) — install, run, test, migrate.
+7. [`docs/commands.md`](./docs/commands.md) — install, run, test, migrate.
 
 ## Reference docs
 

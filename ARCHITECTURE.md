@@ -167,6 +167,44 @@ Forbidden, per [`docs/ui-reference.md`](./docs/ui-reference.md): inventing a
 new design language, swapping in a component library, gradient/neon styling,
 emoji icons, left sidebars on technician screens.
 
+### 5.1 Mobile / PWA (v1 = "PWA-light")
+
+The same Flask app serves desktop browsers and phones; there is no
+separate mobile UI and no native mobile build. v1 ships **PWA-light**:
+responsive Jinja templates, an installable Web App Manifest, and a small
+service worker that caches the shell and static assets. **Online is
+required for writes**; an offline write queue is post-1.0 (see
+[`ROADMAP.md`](./ROADMAP.md) v1.2).
+
+Pieces that ship in v1 (concrete acceptance criteria in
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §2):
+
+- `service_crm/static/manifest.webmanifest` — name, icons (192/512/maskable),
+  `display: standalone`, `start_url`, `theme_color`, `background_color`.
+- `service_crm/static/service-worker.js` — versioned cache key tied to
+  `VERSION`; precaches the app shell + static assets; runtime-caches
+  recently rendered dashboard HTML; `skip waiting + reload` on cache
+  mismatch so a bad SW can't pin users on stale UI.
+- Responsive macros in `_macros/` — tables collapse to stacked card lists
+  below 640 px (`.table-stacked`).
+- Touch-target floor of **44 × 44 pt** on every interactive element.
+- Mobile-keyboard hints — `type` (`email`/`tel`/`number`/`date`),
+  `inputmode`, `autocomplete` set on every relevant field.
+- Camera capture for intervention photos via
+  `<input type="file" accept="image/*" capture="environment">`. No JS
+  beyond the file-input handler.
+- Server-side image compression (Pillow) — long edge ≤ 2048 px, WebP q85.
+- Idempotency tokens on every state-changing form, deduped server-side
+  for 24 h on `(user_id, token)` so a retry from a flaky mobile network
+  can't double-create.
+
+What's **not** in v1.0 — and where it goes:
+
+- IndexedDB write queue + replay → v1.2 ([`ROADMAP.md`](./ROADMAP.md)).
+- Web Push notifications → v1.1.
+- Background sync API → v1.2 alongside the offline queue.
+- Native iOS/Android apps → never in this codebase.
+
 ## 6. Risks & open questions
 
 - **`oee-calculator2.0` access** — the architecture-only audit in
@@ -185,6 +223,13 @@ emoji icons, left sidebars on technician screens.
   need to verify behaves the same on both backends. Worth testing in 0.2.0.
 - **Alembic + SQLite** — needs `render_as_batch=True`. Worth verifying in
   the 0.1.0 walking skeleton.
+- **iOS PWA quirks** — iOS Safari has gaps (storage limits; camera-in-PWA
+  edge cases). Mitigation: every camera path also has a regular file-input
+  fallback, and we manually pass real-device QA on iOS each release. See
+  [`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §6.
+- **Service worker shipping a stale shell** — a bad SW can pin users on
+  broken assets. Mitigation: cache key tied to `VERSION`, plus a
+  `skip waiting + reload` path on mismatch.
 
 ## 7. Decision log
 
@@ -199,3 +244,5 @@ v0.1 ships:
   centralised under `service_crm/templates/<bp>/`.
 - ADR-0005: ULID at the edges, native `UUID` storage on Postgres.
 - ADR-0006: Audit via SQLAlchemy event listeners on an `Auditable` mixin.
+- ADR-0007: Mobile = PWA-light in v1; full offline write queue deferred
+  to v1.2.

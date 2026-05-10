@@ -13,13 +13,28 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 ## [Unreleased]
 
 ### Added
-- `docs/architecture-plan.md` — synthesized architectural proposal awaiting
-  approval (assumptions, model set, file list, open questions).
-- `.claude/skills/` — five project-level Claude Code skills mirroring the
-  workflows in `docs/tasks.md`: `architecture-audit`, `ui-foundation`,
-  `data-model`, `module-slice`, `consistency-pass`.
-- `docs/commands.md` — concrete Flask / pytest / Alembic commands
-  (PowerShell + bash) replacing the placeholder version.
+- `docs/v1-implementation-goals.md` — the v1.0 production-ready and
+  phone-ready bars. Concrete acceptance criteria per milestone, plus a
+  release exit checklist. v1 mobile scope locked at "PWA-light":
+  responsive + installable, online required for writes, full offline
+  write queue deferred to v1.2.
+- `python.tests.md` §13 — mobile / PWA testing strategy: touch-target
+  audit (Playwright), Lighthouse-CI budgets, real-device pass per
+  release, service-worker cache-invalidation tests.
+- ARCHITECTURE.md §5.1 — Mobile / PWA architecture (manifest, service
+  worker, responsive macros, idempotency tokens).
+- ADR-0007 placeholder: PWA-light in v1, offline writes in v1.2.
+
+### Changed
+- ROADMAP.md milestones thread mobile/PWA through 0.2.0 (UI foundation),
+  0.5.0 (tickets — phone-first slice), 0.8.0 (dashboards), 0.9.0
+  (hardening).
+- 0.9.0 hardening checklist replaced with a direct mapping to the bars
+  in `docs/v1-implementation-goals.md` §1–§3.
+- `.claude/skills/ui-foundation/SKILL.md` and
+  `.claude/skills/consistency-pass/SKILL.md` updated with the mobile /
+  PWA hard rules and pre-merge checklist items.
+- README "Start here" lists v1-implementation-goals as required reading.
 
 ### Changed
 - Stack realigned to **Flask + Jinja + SQLAlchemy + Alembic + pytest**

@@ -421,3 +421,71 @@ disable it.
 
 `.github/workflows/release.yml` re-runs the suite before publishing a
 release — see [`.github/RELEASING.md`](./.github/RELEASING.md).
+
+## 13. Mobile / PWA testing
+
+v1 ships PWA-light (see
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §2).
+The pytest suite alone can't prove "works on phones"; we add three layers
+on top:
+
+### 13.1 Touch-target audit (Playwright, in CI)
+
+A Playwright spec walks every P1 page and asserts every interactive
+element (`a`, `button`, `input`, `[role=button]`) has a bounding box of
+**at least 44 × 44 pt** at the 375 px (iPhone) viewport.
+
+```python
+# tests/e2e/test_touch_targets.py
+@pytest.mark.e2e
+@pytest.mark.parametrize("path", P1_PATHS)
+def test_touch_targets_at_375px(playwright_page, path):
+    playwright_page.set_viewport_size({"width": 375, "height": 812})
+    playwright_page.goto(path)
+    too_small = playwright_page.evaluate("""() => {
+        const els = document.querySelectorAll('a, button, input, [role=button]');
+        return [...els].filter(el => {
+            const r = el.getBoundingClientRect();
+            return r.width < 44 || r.height < 44;
+        }).map(el => el.outerHTML.slice(0, 80));
+    }""")
+    assert too_small == [], f"Tap targets < 44pt: {too_small}"
+```
+
+### 13.2 Lighthouse CI
+
+`lighthouse-ci` runs against a production build (gunicorn + the seeded
+reference dataset) on every release-blocking PR. Budgets enforced (per
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §2.6):
+
+- Performance ≥ 90 (mobile profile, slow-4G, mid-tier CPU).
+- Accessibility ≥ 95.
+- Best Practices ≥ 95.
+- PWA badge: present.
+- LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+
+Routes audited at minimum: dashboard (admin + operator), tickets list,
+ticket detail, intervention create.
+
+### 13.3 Real-device pass (manual, per release)
+
+Lighthouse can't catch every iOS Safari quirk. Each release-blocker PR
+includes a manual real-device pass on iPhone (latest iOS Safari) and
+Android (latest Chrome). The findings list is appended to the release
+notes; any P1 regression blocks the tag.
+
+### 13.4 Service-worker tests
+
+The service worker is plain JS, not Python — but we still test it:
+
+- A unit test (Vitest, not pytest) over the cache-naming and stale-cache
+  invalidation logic.
+- An e2e Playwright test that:
+  1. loads `/` with the SW active,
+  2. goes offline,
+  3. reloads,
+  4. asserts the app shell still renders (the dashboard placeholder, not
+     a blank page).
+
+A bad SW can pin users on a broken build, so the test that the
+versioned cache key advances on every release is a **release blocker**.
