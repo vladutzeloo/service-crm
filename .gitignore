@@ -34,3 +34,4 @@ htmlcov/
 .env.local
 *.sqlite3
 *.db
+instance/
