@@ -71,6 +71,39 @@ Codifies the "Consistency Pass" checklist from
     and ≥ 95% on any `state.py` files.
 14. **Changelog updated.** New user-visible scope has a bullet under
     `## [Unreleased]` in `CHANGELOG.md` under the right heading.
+15. **Mobile / PWA bar.** For every new screen / form (per
+    [`docs/v1-implementation-goals.md`](../../../docs/v1-implementation-goals.md) §2):
+    - All interactive elements ≥ **44 × 44 pt** at 375 px.
+    - No hover-only behavior; tap and long-press paths exist.
+    - Form fields declare `type` / `inputmode` / `autocomplete`.
+    - State-changing forms include the idempotency-token hidden input.
+    - Tables that overflow at < 640 px collapse via `.table-stacked`
+      (no horizontal scrollbar at 320 px).
+    - Camera-capture inputs use
+      `<input type="file" accept="image/*" capture="environment">` with
+      a regular file-input fallback (iOS quirk).
+16. **Service worker hygiene.** If `static/service-worker.js` or the
+    cache-key constant changed, the cache key version-bumped (tied to
+    `VERSION`); a no-bump on a SW change is a `blocker`.
+17. **Lighthouse budget regressions.** If `lighthouse-ci` ran on this PR
+    and any metric in §2.6 of v1-implementation-goals dropped below the
+    threshold, that's a `blocker`.
+18. **Accessibility.** `axe-core` audit (where available) reports zero
+    critical/serious violations on new P1 pages.
+19. **i18n hygiene** (per
+    [`docs/v1-implementation-goals.md`](../../../docs/v1-implementation-goals.md) §3.2):
+    - No hardcoded user-facing strings — every visible text node passes
+      through `{% trans %}`, `_()`, or `gettext_lazy`.
+    - WTForms validators use translatable messages (`gettext_lazy` for
+      class-level defaults).
+    - DB enums and lookup `code` columns use stable English; UI labels
+      are translated.
+    - `pybabel update` produces no uncommitted diff — new `_()` calls
+      land with re-extracted catalogs.
+    - Layout audit at 320 px in **both** `ro` and `en` (no horizontal
+      scrollbar).
+    - Date / number formatting goes through Babel helpers, not
+      `strftime` directly.
 
 ## Procedure
 

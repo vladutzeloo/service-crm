@@ -12,10 +12,39 @@ gated on architecture sign-off per [`docs/architecture-plan.md`](./docs/architec
 The per-version testing capabilities that ship with each minor release
 are tracked in [`docs/testing-cadence.md`](./docs/testing-cadence.md) §4.
 
+The concrete acceptance criteria for each milestone — the "done when" bar
+and the production / phone-readiness checklists — live in
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md).
+This file is the *order*; that file is the *bar*.
+
 Tags are `vX.Y.Z`. Pushing a tag triggers
 [`.github/workflows/release.yml`](./.github/workflows/release.yml), which
 validates `VERSION` + `CHANGELOG.md`, runs the suite, and publishes a
 GitHub Release. See [`.github/RELEASING.md`](./.github/RELEASING.md).
+
+## v1.0 scope (locked)
+
+- Single Flask/Jinja codebase. No SPA, no native mobile.
+- **Phones supported via PWA-light** (responsive + manifest + minimal
+  service worker). Online required for writes; full offline write queue
+  is deferred to v1.2.
+- Web Push deferred to v1.1; v1.0 notifications are in-app + email only.
+- Self-hosted single-server target (one VPS, one Postgres, one container).
+- Single-tenant.
+- **Bilingual from day one**: Romanian (default) + English (selectable).
+  Flask-Babel + RO/EN catalogs land in 0.1.0; every milestone after has
+  translated UI, statuses, and form errors.
+- **CNC service domain in full** (per
+  [`docs/blueprint.md`](./docs/blueprint.md) §8) — equipment models,
+  controller types, warranties, ticket history/comments/attachments,
+  intervention actions/findings, parts master, maintenance
+  template/plan/task/execution, structured checklists, technician
+  capacity slots.
+- **Stack: Flask + Jinja + SQLAlchemy + Alembic + pytest** — confirmed
+  in [`docs/adr/0001-flask-vs-fastapi.md`](./docs/adr/0001-flask-vs-fastapi.md).
+
+Full rationale and acceptance criteria:
+[`docs/v1-implementation-goals.md` §0](./docs/v1-implementation-goals.md#0-decided-scope-of-v1).
 
 ## Release cadence
 
@@ -48,18 +77,25 @@ Mirrors [`docs/tasks.md`](./docs/tasks.md) steps 1–6 (audit + propose + review
 already done; this milestone executes the approved plan).
 
 - [ ] `service_crm/__init__.py` — `create_app()` factory.
-- [ ] `service_crm/extensions.py` — `db`, `migrate`, `login_manager`, `csrf`.
+- [ ] `service_crm/extensions.py` — `db`, `migrate`, `login_manager`,
+      `csrf`, `babel`.
 - [ ] `service_crm/config.py` — Dev / Test / Prod config classes.
-- [ ] `service_crm/cli.py` — `flask reset-db`, `flask seed`.
+- [ ] `service_crm/cli.py` — `flask reset-db`, `flask seed`,
+      `flask babel-compile`.
 - [ ] Alembic wired against Postgres and SQLite (`render_as_batch=True`).
 - [ ] `auth/` blueprint: `User`, `Role`, login/logout, Argon2 hashing.
 - [ ] First migration (`users`, `roles`).
-- [ ] Healthcheck route + version endpoint.
+- [ ] **Flask-Babel scaffold**: `babel.cfg`, `locale/ro/LC_MESSAGES/messages.po`,
+      `locale/en/LC_MESSAGES/messages.po`. Locale selector function set
+      up (user pref → query → header → default `ro`). Topbar language
+      switch present.
+- [ ] Healthcheck route + version endpoint, both translated.
 - [ ] Dockerfile + `docker compose up` runs the app against Postgres.
 - [ ] `tests/` skeleton with the fixtures from [`python.tests.md`](./python.tests.md).
+- [ ] i18n smoke test: `/healthz?lang=ro` returns RO text, `?lang=en` returns EN.
 - [ ] CI green on Python 3.11 and 3.12, both SQLite and Postgres.
 
-## 0.2.0 — "UI foundation"
+## 0.2.0 — "UI foundation (mobile-first from day one)"
 
 Mirrors [`docs/tasks.md`](./docs/tasks.md) step 7. UI shell only — no
 business logic. Requires the `oee-calculator2.0` source files (per
@@ -69,89 +105,169 @@ business logic. Requires the `oee-calculator2.0` source files (per
       `oee-calculator2.0`.
 - [ ] Vendor `static/css/style.css` (tokens, surfaces, buttons, tables, cards).
 - [ ] Topbar, KPI card macro, table macro, filter macro, form-shell macro,
-      tabs macro — all as Jinja includes.
+      tabs macro, modal macro — all as Jinja includes.
+- [ ] **PWA manifest** (`static/manifest.webmanifest`) with name, icons
+      (192/512/maskable), `display: standalone`, `start_url`.
+- [ ] **Service worker** (`static/service-worker.js`) registered from
+      `base.html`. Caches app shell + static assets only — no write-side
+      caching in v1.
+- [ ] Responsive breakpoints verified at 320 / 768 / 1024 / 1440 px.
+      Tables stack as cards below 640 px (`.table-stacked` pattern).
+- [ ] Touch targets ≥ 44 × 44 pt on every interactive element in the
+      smoke page.
 - [ ] Light mode default; `data-theme="dark"` only where it follows the OEE
       pattern.
 - [ ] Lucide icons via the existing base layout pattern.
 - [ ] No emoji; no left sidebar on technician screens.
 - [ ] Visual smoke test: a placeholder page that renders every macro looks
-      native to oee-calculator2.0.
+      native to oee-calculator2.0 on desktop **and** on phone.
+- [ ] Lighthouse mobile run on the smoke page: Performance ≥ 90,
+      Accessibility ≥ 95, PWA badge: yes.
+- [ ] Macro labels and tooltips wrapped in `_()` / `{% trans %}`. RO and
+      EN translations of every shipped macro.
 
-## 0.3.0 — "Clients & contacts"
+## 0.3.0 — "Clients, contacts, locations, contracts"
 
 Mirrors [`docs/tasks.md`](./docs/tasks.md) steps 8–11 for the `clients` blueprint.
 
-- [ ] `Client`, `Contact`, `Location` models + Alembic migration.
+- [ ] `Client`, `Contact`, `Location`, `ServiceContract` models + Alembic
+      migration.
 - [ ] CRUD routes, list, detail, edit-modal — all using the 0.2.0 macros.
 - [ ] Search across clients/contacts (Postgres `tsvector` + GIN, SQLite FTS5).
 - [ ] CSV import for clients.
-- [ ] Soft-delete (`is_active = False`) — financial/service history must remain queryable.
+- [ ] Soft-delete (`is_active = False`) — service history must remain queryable.
 - [ ] Tests: relationships, unique constraints, cascade behavior.
+- [ ] All form labels, validators, and flash messages translated (RO + EN).
 
 ## 0.4.0 — "Equipment / installed base"
 
-- [ ] `Equipment` model + migration (FKs to `Client`, `Location`).
-- [ ] Equipment list bound to a client; equipment detail page.
+- [ ] `Equipment`, `EquipmentModel`, `EquipmentControllerType`,
+      `EquipmentWarranty` models + migration (FKs to `Client`, `Location`).
+- [ ] Equipment list bound to a client; equipment detail page (with
+      warranties + tickets + maintenance plans tab).
 - [ ] Constraint: `Equipment.location_id`, when set, must belong to
       `Equipment.client_id`. Service-layer guard + integration test.
-- [ ] CSV import for equipment.
+- [ ] Constraint: `EquipmentWarranty.ends_on > starts_on`. CHECK + test.
+- [ ] CSV import for equipment + bulk-load of `EquipmentModel` / 
+      `EquipmentControllerType` lookups.
+- [ ] All UI strings translated.
 
-## 0.5.0 — "Tickets & interventions"
+## 0.5.0 — "Tickets — header, history, comments, attachments"
 
-The core loop: open a ticket, log interventions, close it.
-Mirrors [`docs/tasks.md`](./docs/tasks.md) step 12 (workflow tests).
+Core ticket workflow. Splits the ticket domain across two milestones so
+0.5 stays reviewable; interventions land in 0.6.
 
-- [ ] `ServiceTicket` + status state machine
-      (`open → scheduled → in_progress → awaiting_parts → resolved → closed`,
-      with `cancelled` reachable from any pre-closed state).
-- [ ] `ServiceIntervention` (technician, start/stop, notes).
-- [ ] `ServicePartUsage` per intervention.
-- [ ] Tickets list with filters (status, priority, due, technician).
-- [ ] Ticket detail with intervention timeline.
-- [ ] Audit log entries for every state transition.
-- [ ] Tests: state machine ≥ 95% line+branch (via Hypothesis state machine).
+- [ ] `ServiceTicket` + state machine
+      (`new → qualified → scheduled → in_progress → waiting_parts →
+      monitoring → completed → closed`, `cancelled` from any pre-completed
+      state) — pure-Python `tickets/state.py`.
+- [ ] `TicketStatusHistory` (append-only); `before_flush` hook writes a
+      row on every status change.
+- [ ] `TicketComment`, `TicketAttachment`.
+- [ ] `TicketType`, `TicketPriority` lookup tables seeded with default
+      RO/EN-translated labels.
+- [ ] Tickets list with filters (status, priority, type, due, technician,
+      client) and translated filter chips.
+- [ ] Ticket detail page with status-history timeline.
+- [ ] Idempotency token on every state-changing form (server-rendered
+      UUID, `(user_id, token)` dedupe for 24 h). Tested by forced retry.
+- [ ] Tests: state machine ≥ 95 % line+branch (Hypothesis state machine);
+      integration tests assert no history-less status transitions.
 
-## 0.6.0 — "Knowledge: checklists & procedures"
+## 0.6.0 — "Interventions, parts, knowledge"
 
-- [ ] `ChecklistTemplate` (items as JSON: `{key, label, kind}`).
-- [ ] `ChecklistRun` with frozen template snapshot.
-- [ ] `ProcedureDocument` (Markdown body, tags).
-- [ ] Attach a checklist run to a ticket / intervention / equipment item.
-- [ ] Procedure search.
+Phone-first slice: the technician must be able to do their whole job
+from a phone in the field.
 
-## 0.7.0 — "Maintenance planning"
+- [ ] `ServiceIntervention`, `InterventionAction`, `InterventionFinding`.
+- [ ] `PartMaster` lookup, `ServicePartUsage` per intervention.
+- [ ] `ChecklistTemplate`, `ChecklistTemplateItem`, `ChecklistRun`,
+      `ChecklistRunItem` — frozen snapshot pattern; property-based test
+      that historical runs survive template edits.
+- [ ] `ProcedureDocument`, `ProcedureTag`.
+- [ ] Intervention create/edit form built for one-handed phone use:
+      ≥ 44 pt taps, mobile keyboards (`type`/`inputmode`/`autocomplete`),
+      camera capture
+      (`<input type="file" accept="image/*" capture="environment">`).
+- [ ] Server-side photo compression (Pillow): long edge ≤ 2048 px, WebP q85.
+- [ ] Procedure search (PG `tsvector` / SQLite FTS5).
+- [ ] All form labels, status labels, intervention-action templates
+      translated.
 
-- [ ] `MaintenancePlan` model (cadence_days, last_done_at, next_due_at).
-- [ ] Background job (APScheduler) to recompute `next_due_at`.
-- [ ] "Equipment with due maintenance" surfaced on the dashboard.
-- [ ] Generate a ticket from an overdue maintenance plan.
+## 0.7.0 — "Maintenance + planning"
 
-## 0.8.0 — "Operational dashboard"
+- [ ] `MaintenanceTemplate`, `MaintenancePlan`, `MaintenanceTask`,
+      `MaintenanceExecution` models + migration.
+- [ ] APScheduler job: recompute `MaintenancePlan.next_due_at` and
+      generate `MaintenanceTask` rows for the upcoming window.
+- [ ] One-click "open a ticket from this overdue plan" — links the
+      ticket back to the plan via `MaintenanceTask.ticket_id`.
+- [ ] `Technician`, `TechnicianAssignment`, `TechnicianCapacitySlot`
+      models + migration.
+- [ ] Technician capacity view (per-day load) modeled on
+      `oee-calculator2.0/templates/capacity.html`.
+- [ ] All planning labels translated.
 
-Mirrors [`docs/service-domain.md`](./docs/service-domain.md) §"Dashboard V1".
+## 0.8.0 — "Operational dashboard + reporting"
 
-- [ ] Active clients, active tickets, interventions today, due maintenance,
-      technician capacity, latest interventions — all as compact cards.
-- [ ] Modeled on `oee-calculator2.0/templates/admin/dashboard.html`.
-- [ ] Technician variant modeled on `templates/operator/dashboard.html`.
+Mirrors [`docs/service-domain.md`](./docs/service-domain.md) §"Dashboard V1"
+and [`docs/blueprint.md`](./docs/blueprint.md) §13–§14.
+
+- [ ] Manager view (`templates/dashboard/admin.html`) — KPI tiles for
+      active clients, open tickets, overdue tickets, due maintenance
+      this week, tickets waiting parts, technician utilization.
+      Secondary panels: tickets by status, upcoming maintenance, recent
+      interventions, high-risk machines, technician load by week.
+      Modeled on `oee-calculator2.0/templates/admin/dashboard.html`.
+- [ ] Technician view (`templates/dashboard/operator.html`) — no left
+      sidebar, today's queue, one-tap "start intervention". Modeled on
+      `oee-calculator2.0/templates/operator/dashboard.html`.
+- [ ] Core reports (per [`docs/blueprint.md`](./docs/blueprint.md) §14):
+      tickets by status & period, interventions by machine, parts used,
+      due-vs-completed maintenance, technician workload, repeat-issue
+      report. Translated labels; stable internal codes; locale-aware
+      dates and numbers; CSV export.
+- [ ] Both views meet the P95 budget on the reference dataset
+      (see [`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §1.3).
+- [ ] Lighthouse mobile run on both dashboards: Performance ≥ 90,
+      Accessibility ≥ 95.
 
 ## 0.9.0 — "Hardening for 1.0"
 
-Feature freeze. Stabilization, performance, docs.
+Feature freeze. Spend a milestone making the bars in
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §1
+and §2 actually true.
 
-- [ ] Backup/restore documented and tested end-to-end.
-- [ ] Upgrade path documented for every prior 0.x → 1.0.
-- [ ] Performance budget defined and met (P95 page < 300 ms on reference dataset).
-- [ ] Security review: dependency audit, session fixation, CSRF, RBAC matrix.
-- [ ] User guide and operator guide complete.
+- [ ] §1.1 functional completeness — manual walkthrough of every P1
+      journey passes.
+- [ ] §1.3 perf budget — load reference dataset (10 k clients, 100 k
+      tickets), verify P95 budgets, fix offenders.
+- [ ] §1.4 security — pen-test pass on auth + CSRF + RBAC matrix +
+      headers + uploads. `pip-audit` clean.
+- [ ] §1.5 observability — JSON logs, `/healthz` + `/readyz`, optional
+      `/metrics`, 24-h soak review.
+- [ ] §1.6 operability — backup → restore round-trip dry-run on the
+      release candidate.
+- [ ] §1.7 documentation — user guide, operator runbook, ADRs (≥ 6),
+      `CHANGELOG.md` populated for `1.0.0`.
+- [ ] §1.8 compliance — GDPR export + forget endpoints implemented and
+      tested.
+- [ ] §2 phone-readiness — Lighthouse mobile run on every P1 page meets
+      the §2.6 thresholds. Real-device pass on iPhone + Android.
+- [ ] §3.1 a11y — `axe-core` clean on every P1 page. Manual keyboard pass.
+- [ ] §3.2 i18n — `ro` catalog at 100 % coverage of user-facing strings.
 - [ ] Consistency pass per [`docs/tasks.md`](./docs/tasks.md) §"Consistency Pass".
 
 ## 1.0.0 — "Production-ready single-tenant"
 
-DB schema and HTTP routes covered by SemVer guarantees from this point forward.
+DB schema and HTTP routes covered by SemVer guarantees from this point
+forward. Tag only when the §5 release exit checklist in
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) is
+fully ticked.
 
 - Schema migrations are forward-only and tested both ways.
 - LTS-style support: critical fixes backported to `1.0.x` for 12 months.
+- Public REST API endpoints documented and stable.
 
 ---
 
@@ -159,11 +275,12 @@ DB schema and HTTP routes covered by SemVer guarantees from this point forward.
 
 | Version | Theme                       | Highlights                                                     |
 | ------- | --------------------------- | -------------------------------------------------------------- |
-| 1.1     | Customer portal             | Self-service ticket status, history download                   |
-| 1.2     | Field-tech offline mode     | PWA + local sync queue                                         |
-| 1.3     | VMES/OEE integration        | Read-only OEE asset/equipment sync via API; no shared DB       |
-| 1.4     | Quoting & invoicing         | Quote → invoice flow, PDF, EU-style VAT                        |
-| 1.5     | Reporting & BI              | Saved reports, CSV/Parquet export, Metabase-friendly views     |
+| 1.1     | Customer portal + Web Push  | Self-service ticket status, history download, opt-in Web Push  |
+| 1.2     | Field-tech offline writes   | IndexedDB queue + replay-on-reconnect for interventions        |
+| 1.3     | CNC depth                   | Controller alarm knowledge base, runtime-based maintenance triggers, `TechnicianSkill` matching (per [`docs/blueprint.md`](./docs/blueprint.md) §21 Phase 5) |
+| 1.4     | VMES/OEE integration        | Read-only OEE asset/equipment sync via API; no shared DB       |
+| 1.5     | Quoting & invoicing         | Quote → invoice flow, PDF, EU-style VAT                        |
+| 1.6     | Reporting & BI              | Saved reports, CSV/Parquet export, Metabase-friendly views     |
 | 2.0     | Multi-location single-tenant| Branches under one tenant; *not* multi-tenant SaaS             |
 
 ## How items get on the roadmap

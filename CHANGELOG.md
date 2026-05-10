@@ -13,6 +13,25 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 ## [Unreleased]
 
 ### Added
+- `docs/blueprint.md` — user-pasted CNC Service & Maintenance App
+  blueprint, saved verbatim as the long-form product source-of-truth.
+- `docs/adr/0001-flask-vs-fastapi.md` — accepted: Flask wins for v1.
+  Reasoning around forms, auth, i18n, and the OEE-vendored UI.
+- `docs/v1-implementation-goals.md` — the v1.0 production-ready and
+  phone-ready bars. Concrete acceptance criteria per milestone, plus a
+  release exit checklist. v1 mobile scope locked at "PWA-light":
+  responsive + installable, online required for writes, full offline
+  write queue deferred to v1.2.
+- `python.tests.md` §13 — mobile / PWA testing strategy: touch-target
+  audit (Playwright), Lighthouse-CI budgets, real-device pass per
+  release, service-worker cache-invalidation tests.
+- `python.tests.md` §14 — i18n testing strategy: locale-selector tests,
+  no-hardcoded-strings template walk, catalog freshness CI gate, layout
+  audit at 320 px in both languages.
+- ARCHITECTURE.md §5.1 — Mobile / PWA architecture (manifest, service
+  worker, responsive macros, idempotency tokens).
+- ARCHITECTURE.md cross-cutting i18n entry; ADR-0007 (PWA-light) and
+  ADR-0008 (RO/EN day-one) placeholders.
 - **First application code lands.** Walking-skeleton foundation for v0.1.0:
   - `service_crm/` package: `create_app()` factory (`__init__.py`),
     extensions (`extensions.py`), Flask config classes (`config.py`),
@@ -22,19 +41,11 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
     as native UUID on Postgres and `BLOB(16)` on SQLite, `Auditable`
     mixin and `AuditEvent` model wired through a `before_flush` listener.
   - Alembic scaffolding (`migrations/env.py`, `script.py.mako`,
-    `alembic.ini`) with `render_as_batch=True` on SQLite. No revisions
-    yet — first revision lands with the auth data-model PR.
+    `alembic.ini`) with `render_as_batch=True` on SQLite.
   - `tests/conftest.py` with `app`, `client`, and `frozen_clock`
-    fixtures; unit tests covering the factory, CLI, healthcheck, error
-    handlers, clock, ULID encode/decode and time-prefix ordering, and
-    the `Auditable`/`AuditEvent` shape.
-  - `Dockerfile` (`python:3.12-slim` + `libpq5` + `gunicorn`),
-    `docker-compose.yml` (Postgres 15 + app + auto-`db upgrade`),
-    `.dockerignore`.
-  - `.pre-commit-config.yaml` running `ruff check --fix`,
-    `ruff format`, and `pytest -m unit`.
-- `docs/architecture-plan.md` — synthesized architectural proposal awaiting
-  approval (assumptions, model set, file list, open questions).
+    fixtures; 58 unit tests covering the foundation surface exhaustively.
+  - `Dockerfile`, `docker-compose.yml`, `.dockerignore`,
+    `.pre-commit-config.yaml`.
 - `.claude/skills/` — five project-level Claude Code skills mirroring the
   workflows in `docs/tasks.md`: `architecture-audit`, `ui-foundation`,
   `data-model`, `module-slice`, `consistency-pass`.
@@ -62,18 +73,49 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 - Stack realigned to **Flask + Jinja + SQLAlchemy + Alembic + pytest**
   (was FastAPI + HTMX in the prior planning round). Drives matching
   rewrites of `ARCHITECTURE.md`, `ROADMAP.md`, `python.tests.md`, and
-  `pyproject.toml`.
-- Domain model realigned to the entities in `docs/service-domain.md`
-  (`Client`, `Contact`, `Location`, `Equipment`, `ServiceTicket`,
-  `ServiceIntervention`, `ServicePartUsage`, `ChecklistTemplate`,
-  `ChecklistRun`, `ProcedureDocument`) grouped under the five blueprints
-  in `AGENTS.md`.
-- `ROADMAP.md` milestones reordered around the five blueprints and the
-  sequence in `docs/tasks.md`.
+  `pyproject.toml`. Confirmed in `docs/adr/0001-flask-vs-fastapi.md`.
+- Domain model **adopted in full from `docs/blueprint.md` §8** — adds
+  `EquipmentModel`, `EquipmentControllerType`, `EquipmentWarranty`,
+  `ServiceContract`, `TicketStatusHistory`, `TicketComment`,
+  `TicketAttachment`, `TicketType`, `TicketPriority`,
+  `InterventionAction`, `InterventionFinding`, `PartMaster`,
+  `MaintenanceTemplate`, `MaintenanceTask`, `MaintenanceExecution`,
+  `ChecklistTemplateItem`, `ChecklistRunItem`, `ProcedureTag`,
+  `Technician`, `TechnicianAssignment`, `TechnicianCapacitySlot` to
+  the prior generic set.
+- Ticket lifecycle replaced: `new → qualified → scheduled → in_progress
+  → waiting_parts → monitoring → completed → closed`, `cancelled` from
+  any pre-`completed` state. Was `open → … → resolved → closed`.
+- Two new blueprints — `planning` (technicians + capacity) and
+  `dashboard` (manager + technician views).
+- `ROADMAP.md` milestones reordered around the eight blueprints and the
+  sequence in `docs/tasks.md`. 0.5 split into 0.5 (ticket header /
+  history / comments / attachments) and 0.6 (interventions / parts /
+  knowledge). 0.7 now bundles maintenance + planning. Beyond-1.0 sketch
+  promotes the CNC-specific enhancements to v1.3.
+- 0.9.0 hardening checklist replaced with a direct mapping to the bars
+  in `docs/v1-implementation-goals.md` §1–§3.
+- `docs/service-domain.md` adopted the full CNC entity list, the new
+  ticket lifecycle, and the eight-blueprint module map.
 - User-supplied support docs moved from repo root into `docs/` to match
   the links in `AGENTS.md`.
+- `pyproject.toml` adds Flask-Babel + Babel + APScheduler + Pillow.
+- `docs/commands.md` gains a "Translations" section with `pybabel`
+  flow.
 - `README.md` rewritten as a "Start here" index pointing at `AGENTS.md`,
-  the docs/, and the project skills.
+  the docs/, and the project skills; subsequently expanded to list
+  `v1-implementation-goals` as required reading.
+- `.claude/skills/ui-foundation/SKILL.md`,
+  `.claude/skills/consistency-pass/SKILL.md`, and
+  `.claude/skills/data-model/SKILL.md` updated with the mobile / PWA,
+  i18n, lookup-table, and CNC-domain rules.
+
+### Decisions
+- 2026-05-10: Flask wins over FastAPI for v1
+  (`docs/adr/0001-flask-vs-fastapi.md`).
+- 2026-05-10: bilingual RO+EN from day one, RO default; Flask-Babel
+  scaffold lands in 0.1.0 walking skeleton.
+- 2026-05-10: adopt the blueprint's CNC domain in full.
 
 <!--
 Future release sections look like this:

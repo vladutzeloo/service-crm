@@ -1,12 +1,18 @@
 # service-crm
 
-Standalone, self-hostable **Flask** CRM for service teams — clients,
-equipment, tickets, interventions, checklists, maintenance planning, and
-operational dashboards. UI design language is reused verbatim from
+Standalone, self-hostable **Flask** CRM for **CNC service teams** —
+clients, equipment (machines + controllers + warranties), tickets,
+interventions, parts, checklists, procedures, maintenance planning,
+technician capacity, and operational dashboards. UI design language is
+reused verbatim from
 [`vladutzeloo/oee-calculator2.0`](https://github.com/vladutzeloo/oee-calculator2.0).
 
+Runs on **desktop and on phones** (PWA-light: responsive + installable;
+see [`docs/v1-implementation-goals.md` §2](./docs/v1-implementation-goals.md#2-the-v10-phone-ready-bar)).
+Bilingual from day one — **Romanian (default) + English**.
+
 > **Status: 0.1.0 in flight.** Architecture plan approved 2026-05-10;
-> implementation of the "walking skeleton" milestone has begun. See
+> walking-skeleton foundation landed. See
 > [`docs/architecture-plan.md`](./docs/architecture-plan.md) for the
 > approved decisions and [`ROADMAP.md`](./ROADMAP.md) for the milestone
 > checklist.
@@ -16,22 +22,28 @@ operational dashboards. UI design language is reused verbatim from
 1. [`AGENTS.md`](./AGENTS.md) — always-loadable agent context. Read first.
 2. [`docs/architecture-plan.md`](./docs/architecture-plan.md) — approved
    architectural plan (signed off 2026-05-10).
-3. [`docs/service-domain.md`](./docs/service-domain.md) — entities,
+3. [`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) —
+   the v1.0 production-ready and phone-ready bars. Concrete acceptance
+   criteria per milestone.
+4. [`docs/service-domain.md`](./docs/service-domain.md) — entities,
    workflows, modules.
-4. [`docs/ui-reference.md`](./docs/ui-reference.md) — pattern map between
+5. [`docs/ui-reference.md`](./docs/ui-reference.md) — pattern map between
    `oee-calculator2.0` and this app.
-5. [`docs/tasks.md`](./docs/tasks.md) — implementation sequence and prompt
+6. [`docs/tasks.md`](./docs/tasks.md) — implementation sequence and prompt
    templates.
-6. [`docs/commands.md`](./docs/commands.md) — install, run, test, migrate.
+7. [`docs/commands.md`](./docs/commands.md) — install, run, test, migrate.
 
 ## Reference docs
 
+- [`docs/blueprint.md`](./docs/blueprint.md) — long-form CNC product blueprint.
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — stack, layout, layering rules,
   cross-cutting decisions.
 - [`ROADMAP.md`](./ROADMAP.md) — versioned milestones, `0.1.0 → 1.0.0`.
 - [`python.tests.md`](./python.tests.md) — testing strategy: layers,
-  fixtures, coverage gate, property-based tests.
+  fixtures, coverage gate, property-based tests, mobile + i18n tests.
 - [`CHANGELOG.md`](./CHANGELOG.md) — Keep-a-Changelog log of every release.
+- [`docs/adr/`](./docs/adr/) — Architecture Decision Records (ADR-0001
+  pinned the Flask choice).
 - [`docs/obsidian-brain.md`](./docs/obsidian-brain.md) — optional external
   AI memory vault (not part of the app).
 - [`.github/RELEASING.md`](./.github/RELEASING.md) — how to cut a release.

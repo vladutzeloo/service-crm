@@ -86,13 +86,21 @@ For the requested module(s):
   history, add an `is_active` flag, not a hard `DELETE`.
 - **Audit by inheritance.** Inherit `Auditable` so `after_*` listeners
   produce audit events automatically. Don't call an `audit(...)` helper
-  by hand.
+  by hand. *Exception: `TicketStatusHistory` is the audit; it does not
+  inherit `Auditable`.*
 - **No business logic in `models.py`.** Validation that needs the DB
   goes into `services.py`. Models hold structure, relationships, and
   cheap computed properties.
 - **No raw SQL** in `routes.py` or templates. Ever.
 - **Migrations must be reversible** unless the user explicitly approves
   a forward-only migration (and the downgrade docstring says why).
+- **DB stores stable English codes** for enums and lookup tables
+  (`TicketStatus`, `TicketType.code`, `TicketPriority.code`,
+  `EquipmentControllerType.code`, `ProcedureTag.code`). UI translates
+  display labels via Flask-Babel; codes never reach the user.
+- **Lookup tables ship with a seed.** Adding `TicketType` etc. requires
+  a data migration that inserts a project-default set of rows
+  (e.g. `incident`, `preventive`, `commissioning`, `warranty`).
 
 ## Stop conditions
 

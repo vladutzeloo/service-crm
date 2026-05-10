@@ -423,3 +423,158 @@ disable it.
 
 `.github/workflows/release.yml` re-runs the suite before publishing a
 release — see [`.github/RELEASING.md`](./.github/RELEASING.md).
+
+## 13. Mobile / PWA testing
+
+v1 ships PWA-light (see
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §2).
+The pytest suite alone can't prove "works on phones"; we add three layers
+on top:
+
+### 13.1 Touch-target audit (Playwright, in CI)
+
+A Playwright spec walks every P1 page and asserts every interactive
+element (`a`, `button`, `input`, `[role=button]`) has a bounding box of
+**at least 44 × 44 pt** at the 375 px (iPhone) viewport.
+
+```python
+# tests/e2e/test_touch_targets.py
+@pytest.mark.e2e
+@pytest.mark.parametrize("path", P1_PATHS)
+def test_touch_targets_at_375px(playwright_page, path):
+    playwright_page.set_viewport_size({"width": 375, "height": 812})
+    playwright_page.goto(path)
+    too_small = playwright_page.evaluate("""() => {
+        const els = document.querySelectorAll('a, button, input, [role=button]');
+        return [...els].filter(el => {
+            const r = el.getBoundingClientRect();
+            return r.width < 44 || r.height < 44;
+        }).map(el => el.outerHTML.slice(0, 80));
+    }""")
+    assert too_small == [], f"Tap targets < 44pt: {too_small}"
+```
+
+### 13.2 Lighthouse CI
+
+`lighthouse-ci` runs against a production build (gunicorn + the seeded
+reference dataset) on every release-blocking PR. Budgets enforced (per
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §2.6):
+
+- Performance ≥ 90 (mobile profile, slow-4G, mid-tier CPU).
+- Accessibility ≥ 95.
+- Best Practices ≥ 95.
+- PWA badge: present.
+- LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms.
+
+Routes audited at minimum: dashboard (admin + operator), tickets list,
+ticket detail, intervention create.
+
+### 13.3 Real-device pass (manual, per release)
+
+Lighthouse can't catch every iOS Safari quirk. Each release-blocker PR
+includes a manual real-device pass on iPhone (latest iOS Safari) and
+Android (latest Chrome). The findings list is appended to the release
+notes; any P1 regression blocks the tag.
+
+### 13.4 Service-worker tests
+
+The service worker is plain JS, not Python — but we still test it:
+
+- A unit test (Vitest, not pytest) over the cache-naming and stale-cache
+  invalidation logic.
+- An e2e Playwright test that:
+  1. loads `/` with the SW active,
+  2. goes offline,
+  3. reloads,
+  4. asserts the app shell still renders (the dashboard placeholder, not
+     a blank page).
+
+A bad SW can pin users on a broken build, so the test that the
+versioned cache key advances on every release is a **release blocker**.
+
+## 14. i18n testing (RO + EN)
+
+i18n is a v1 foundation concern (per
+[`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §3.2).
+Tests fall into four buckets:
+
+### 14.1 Locale selector (unit + integration)
+
+```python
+# tests/i18n/test_locale_selector.py
+@pytest.mark.unit
+@pytest.mark.parametrize("user_pref, query, header, expected", [
+    ("ro", None,  "en",         "ro"),  # user pref wins
+    (None, "en",  "ro",         "en"),  # query wins over header
+    (None, None,  "en;q=0.9",   "en"),  # header honored
+    (None, None,  None,         "ro"),  # default
+    (None, None,  "fr",         "ro"),  # unsupported → default
+])
+def test_locale_selector(user_pref, query, header, expected):
+    ...
+```
+
+Plus an integration test that hits `/healthz?lang=ro` and `/healthz?lang=en`
+and asserts the response body contains the translated text.
+
+### 14.2 No-hardcoded-strings template walk (CI gate)
+
+```python
+# tests/i18n/test_no_hardcoded_strings.py
+@pytest.mark.unit
+def test_every_visible_text_is_translated():
+    """Walk every shipped Jinja template; assert no bare text node
+    that isn't inside {% trans %}, {{ _(...) }}, or a Babel filter."""
+    offenders = scan_templates_for_hardcoded_text(Path("service_crm/templates"))
+    assert offenders == [], "\n".join(map(str, offenders))
+```
+
+The walker uses `jinja2.lex` to tokenise and tracks `Output` blocks that
+aren't wrapped in a translation call. Allowlist: numeric output, dates,
+identifiers, content explicitly marked `{# i18n: ignore #}`.
+
+### 14.3 Catalog freshness (CI gate)
+
+```bash
+# .github/workflows/ci.yml — sketch
+- name: Catalog freshness
+  run: |
+    pybabel extract -F babel.cfg -o locale/messages.pot service_crm
+    pybabel update  -i locale/messages.pot -d locale --omit-header
+    git diff --exit-code locale || (
+      echo "::error::Translation catalogs out of date. Run pybabel update locally."
+      exit 1
+    )
+```
+
+A new `_()` call without a fresh extraction fails the PR.
+
+### 14.4 Layout under the longer string
+
+RO and EN labels can differ by 50 %+ in length. Add a Playwright spec
+that loads each P1 page once in `ro` and once in `en`, asserts no
+horizontal scrollbar at 320 px, and snapshots the topbar height to
+catch label overflow.
+
+```python
+# tests/e2e/test_layout_in_both_locales.py
+@pytest.mark.e2e
+@pytest.mark.parametrize("locale", ["ro", "en"])
+@pytest.mark.parametrize("path", P1_PATHS)
+def test_no_horizontal_scroll_at_320px(playwright_page, locale, path):
+    playwright_page.set_viewport_size({"width": 320, "height": 700})
+    playwright_page.goto(f"{path}?lang={locale}")
+    has_h_scroll = playwright_page.evaluate(
+        "() => document.documentElement.scrollWidth > document.documentElement.clientWidth"
+    )
+    assert not has_h_scroll, f"horizontal scroll at 320px on {path} ({locale})"
+```
+
+### 14.5 What we do *not* translate
+
+- Stable enum values (`TicketStatus.NEW = "new"`) — these are DB-stored
+  identifiers, not display text.
+- Lookup `code` columns (`TicketType.code`, `EquipmentControllerType.code`).
+- Test assertions — tests run in `en` by default.
+- Log lines (operator audience, English).
+- Internal route paths.

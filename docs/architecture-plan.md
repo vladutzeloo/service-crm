@@ -108,18 +108,23 @@ service_crm/
 ├── extensions.py          # db, login_manager, csrf, migrate
 ├── config.py              # Dev / Test / Prod config classes
 ├── cli.py                 # `flask seed`, `flask reset-db`, etc.
-├── auth/                  # blueprint
-│   ├── __init__.py        # bp = Blueprint(...)
-│   ├── models.py          # User, Role
-│   ├── routes.py          # login/logout/profile
-│   ├── forms.py           # WTForms
-│   └── services.py        # password hashing, session helpers
-├── clients/               # blueprint — Client, Contact, Location
-├── equipment/             # blueprint — Equipment / installed base
-├── tickets/               # blueprint — ServiceTicket, ServiceIntervention, ServicePartUsage
-├── maintenance/           # blueprint — maintenance plans + due/overdue surfacing
-├── knowledge/             # blueprint — ChecklistTemplate, ChecklistRun, ProcedureDocument
-├── dashboard/             # blueprint — operational dashboard (no left sidebar version)
+├── auth/                  # blueprint: User, Role
+├── clients/               # blueprint: Client, Contact, Location, ServiceContract
+├── equipment/             # blueprint: Equipment, EquipmentModel,
+│                          #   EquipmentControllerType, EquipmentWarranty
+├── tickets/               # blueprint: ServiceTicket, TicketStatusHistory,
+│                          #   TicketComment, TicketAttachment, TicketPriority,
+│                          #   TicketType, ServiceIntervention,
+│                          #   InterventionAction, InterventionFinding,
+│                          #   PartMaster, ServicePartUsage
+├── maintenance/           # blueprint: MaintenancePlan, MaintenanceTask,
+│                          #   MaintenanceExecution, MaintenanceTemplate
+├── knowledge/             # blueprint: ChecklistTemplate, ChecklistTemplateItem,
+│                          #   ChecklistRun, ChecklistRunItem,
+│                          #   ProcedureDocument, ProcedureTag
+├── planning/              # blueprint: Technician, TechnicianAssignment,
+│                          #   TechnicianCapacitySlot, TechnicianSkill (v2)
+├── dashboard/             # blueprint — operational dashboard (manager + technician)
 ├── shared/
 │   ├── audit.py           # SQLAlchemy event-listener audit log
 │   ├── ulid.py            # ULID type, stored as UUID on PG, BLOB(16) on SQLite
@@ -190,17 +195,20 @@ Cross-module access goes through the other module's `services.py`.
 
 ## 4. Proposed SQLAlchemy model set (v1)
 
-Mapping the ten entities from [`docs/service-domain.md`](./service-domain.md)
-to the five blueprints from [`AGENTS.md`](../AGENTS.md):
+Mapping the entities from [`docs/service-domain.md`](./service-domain.md)
+(adopted in full from [`docs/blueprint.md`](./blueprint.md) §8) to
+blueprints. The richer entity set is the result of the 2026-05-10
+decision to "adopt blueprint's CNC domain in full".
 
 | Blueprint     | Owns models                                                            |
 | ------------- | ---------------------------------------------------------------------- |
 | `auth`        | `User`, `Role`                                                         |
-| `clients`     | `Client`, `Contact`, `Location`                                        |
-| `equipment`   | `Equipment`                                                            |
-| `tickets`     | `ServiceTicket`, `ServiceIntervention`, `ServicePartUsage`             |
-| `maintenance` | `MaintenancePlan`, `MaintenanceDueItem` *(derived view, not a table)*  |
-| `knowledge`   | `ChecklistTemplate`, `ChecklistRun`, `ProcedureDocument`               |
+| `clients`     | `Client`, `Contact`, `Location`, `ServiceContract`                     |
+| `equipment`   | `Equipment`, `EquipmentModel`, `EquipmentControllerType`, `EquipmentWarranty` |
+| `tickets`     | `ServiceTicket`, `TicketStatusHistory`, `TicketComment`, `TicketAttachment`, `TicketPriority` (lookup), `TicketType` (lookup), `ServiceIntervention`, `InterventionAction`, `InterventionFinding`, `PartMaster`, `ServicePartUsage` |
+| `maintenance` | `MaintenancePlan`, `MaintenanceTask`, `MaintenanceExecution`, `MaintenanceTemplate` |
+| `knowledge`   | `ChecklistTemplate`, `ChecklistTemplateItem`, `ChecklistRun`, `ChecklistRunItem`, `ProcedureDocument`, `ProcedureTag` |
+| `planning`    | `Technician`, `TechnicianAssignment`, `TechnicianCapacitySlot`, `TechnicianSkill` *(v2)* |
 
 ### 4.1 Sketch (not the final DDL — this is the shape)
 
@@ -250,40 +258,91 @@ class Equipment(db.Model, Auditable):
 
 # service_crm/tickets/models.py
 class TicketStatus(str, Enum):
-    OPEN = "open"
+    """Ticket lifecycle per docs/blueprint.md §10 / docs/service-domain.md.
+
+    Stored values are stable English identifiers; display labels are
+    translated (RO/EN) per docs/v1-implementation-goals.md §3.2.
+    """
+    NEW = "new"
+    QUALIFIED = "qualified"
     SCHEDULED = "scheduled"
     IN_PROGRESS = "in_progress"
-    AWAITING_PARTS = "awaiting_parts"
-    RESOLVED = "resolved"
+    WAITING_PARTS = "waiting_parts"
+    MONITORING = "monitoring"
+    COMPLETED = "completed"
     CLOSED = "closed"
     CANCELLED = "cancelled"
-
-class TicketPriority(str, Enum):
-    LOW = "low"
-    NORMAL = "normal"
-    HIGH = "high"
-    URGENT = "urgent"
 
 # Postgres uses the SEQUENCE; SQLAlchemy treats Sequence() as a no-op on
 # SQLite, so on SQLite the service layer falls back to MAX(number)+1 inside
 # the same transaction. Either way `number` is unique and human-friendly.
 ticket_number_seq = Sequence("ticket_number_seq", start=1)
 
+class TicketPriority(db.Model, Auditable):
+    """Lookup table — per blueprint §8 ticket priorities are configurable."""
+    id    = mapped_column(ULID, primary_key=True, default=ulid_new)
+    code  = mapped_column(String(40), unique=True, nullable=False)  # e.g. "low"
+    label = mapped_column(String(80), nullable=False)               # translated in UI
+
+class TicketType(db.Model, Auditable):
+    """Lookup — incident / preventive / commissioning / warranty / ..."""
+    id    = mapped_column(ULID, primary_key=True, default=ulid_new)
+    code  = mapped_column(String(40), unique=True, nullable=False)
+    label = mapped_column(String(80), nullable=False)
+
 class ServiceTicket(db.Model, Auditable):
+    id            = mapped_column(ULID, primary_key=True, default=ulid_new)
+    number        = mapped_column(Integer, ticket_number_seq, unique=True, nullable=False,
+                                  server_default=ticket_number_seq.next_value())
+    client_id     = mapped_column(ForeignKey("client.id"), nullable=False, index=True)
+    location_id   = mapped_column(ForeignKey("location.id"), nullable=True)
+    equipment_id  = mapped_column(ForeignKey("equipment.id"), nullable=True, index=True)
+    type_id       = mapped_column(ForeignKey("ticket_type.id"), nullable=False)
+    priority_id   = mapped_column(ForeignKey("ticket_priority.id"), nullable=False)
+    title         = mapped_column(String(200), nullable=False)
+    description   = mapped_column(Text, default="")
+    status        = mapped_column(SAEnum(TicketStatus), default=TicketStatus.NEW, index=True)
+    due_date      = mapped_column(Date, nullable=True, index=True)
+    sla_due_at    = mapped_column(DateTime(timezone=True), nullable=True)
+    opened_at     = mapped_column(DateTime(timezone=True), default=clock.now)
+    closed_at     = mapped_column(DateTime(timezone=True), nullable=True)
+    interventions = relationship("ServiceIntervention", back_populates="ticket",
+                                 cascade="all, delete-orphan")
+    history       = relationship("TicketStatusHistory", back_populates="ticket",
+                                 cascade="all, delete-orphan")
+    comments      = relationship("TicketComment", back_populates="ticket",
+                                 cascade="all, delete-orphan")
+    attachments   = relationship("TicketAttachment", back_populates="ticket",
+                                 cascade="all, delete-orphan")
+
+class TicketStatusHistory(db.Model):
+    """Append-only state-transition log. No Auditable mixin — this *is* the audit."""
+    id         = mapped_column(ULID, primary_key=True, default=ulid_new)
+    ticket_id  = mapped_column(ForeignKey("service_ticket.id", ondelete="CASCADE"))
+    from_state = mapped_column(SAEnum(TicketStatus), nullable=True)  # NULL on create
+    to_state   = mapped_column(SAEnum(TicketStatus), nullable=False)
+    actor_id   = mapped_column(ForeignKey("user.id"), nullable=False)
+    reason     = mapped_column(Text, default="")
+    at         = mapped_column(DateTime(timezone=True), default=clock.now, index=True)
+    ticket     = relationship("ServiceTicket", back_populates="history")
+
+class TicketComment(db.Model, Auditable):
+    id        = mapped_column(ULID, primary_key=True, default=ulid_new)
+    ticket_id = mapped_column(ForeignKey("service_ticket.id", ondelete="CASCADE"))
+    author_id = mapped_column(ForeignKey("user.id"), nullable=False)
+    body      = mapped_column(Text, nullable=False)
+    at        = mapped_column(DateTime(timezone=True), default=clock.now, index=True)
+    ticket    = relationship("ServiceTicket", back_populates="comments")
+
+class TicketAttachment(db.Model, Auditable):
     id           = mapped_column(ULID, primary_key=True, default=ulid_new)
-    number       = mapped_column(Integer, ticket_number_seq, unique=True, nullable=False,
-                                 server_default=ticket_number_seq.next_value())
-    client_id    = mapped_column(ForeignKey("client.id"), nullable=False, index=True)
-    location_id  = mapped_column(ForeignKey("location.id"), nullable=True)
-    equipment_id = mapped_column(ForeignKey("equipment.id"), nullable=True)
-    title        = mapped_column(String(200), nullable=False)
-    description  = mapped_column(Text, default="")
-    status       = mapped_column(SAEnum(TicketStatus), default=TicketStatus.OPEN, index=True)
-    priority     = mapped_column(SAEnum(TicketPriority), default=TicketPriority.NORMAL)
-    due_date     = mapped_column(Date, nullable=True)
-    opened_at    = mapped_column(DateTime(timezone=True), default=clock.now)
-    closed_at    = mapped_column(DateTime(timezone=True), nullable=True)
-    interventions = relationship("ServiceIntervention", back_populates="ticket", cascade="all, delete-orphan")
+    ticket_id    = mapped_column(ForeignKey("service_ticket.id", ondelete="CASCADE"))
+    intervention_id = mapped_column(ForeignKey("service_intervention.id"), nullable=True)
+    filename     = mapped_column(String(200), nullable=False)
+    content_type = mapped_column(String(120), nullable=False)
+    size_bytes   = mapped_column(Integer, nullable=False)
+    storage_key  = mapped_column(String(300), nullable=False)  # path under instance/uploads/
+    ticket       = relationship("ServiceTicket", back_populates="attachments")
 
 class ServiceIntervention(db.Model, Auditable):
     id            = mapped_column(ULID, primary_key=True, default=ulid_new)
@@ -293,30 +352,118 @@ class ServiceIntervention(db.Model, Auditable):
     ended_at      = mapped_column(DateTime(timezone=True), nullable=True)
     notes         = mapped_column(Text, default="")
     ticket        = relationship("ServiceTicket", back_populates="interventions")
-    parts         = relationship("ServicePartUsage", back_populates="intervention", cascade="all, delete-orphan")
+    actions       = relationship("InterventionAction", back_populates="intervention",
+                                 cascade="all, delete-orphan")
+    findings      = relationship("InterventionFinding", back_populates="intervention",
+                                 cascade="all, delete-orphan")
+    parts         = relationship("ServicePartUsage", back_populates="intervention",
+                                 cascade="all, delete-orphan")
+
+class InterventionAction(db.Model, Auditable):
+    """A discrete action performed during an intervention (e.g. "replaced spindle bearing")."""
+    id              = mapped_column(ULID, primary_key=True, default=ulid_new)
+    intervention_id = mapped_column(ForeignKey("service_intervention.id", ondelete="CASCADE"))
+    description     = mapped_column(Text, nullable=False)
+    duration_min    = mapped_column(Integer, nullable=True)
+    intervention    = relationship("ServiceIntervention", back_populates="actions")
+
+class InterventionFinding(db.Model, Auditable):
+    """An observation / diagnosis (e.g. "axis encoder showing intermittent dropout")."""
+    id              = mapped_column(ULID, primary_key=True, default=ulid_new)
+    intervention_id = mapped_column(ForeignKey("service_intervention.id", ondelete="CASCADE"))
+    description     = mapped_column(Text, nullable=False)
+    is_root_cause   = mapped_column(Boolean, default=False)
+    intervention    = relationship("ServiceIntervention", back_populates="findings")
+
+class PartMaster(db.Model, Auditable):
+    """Lightweight catalog. Not a warehouse — see blueprint §2 out-of-scope."""
+    id          = mapped_column(ULID, primary_key=True, default=ulid_new)
+    code        = mapped_column(String(80), unique=True, nullable=False)
+    description = mapped_column(String(200), nullable=False)
+    is_active   = mapped_column(Boolean, default=True)
 
 class ServicePartUsage(db.Model, Auditable):
     id              = mapped_column(ULID, primary_key=True, default=ulid_new)
     intervention_id = mapped_column(ForeignKey("service_intervention.id", ondelete="CASCADE"))
-    part_code       = mapped_column(String(80), nullable=False)
+    part_id         = mapped_column(ForeignKey("part_master.id"), nullable=True)  # NULL = ad-hoc
+    part_code       = mapped_column(String(80), nullable=False)  # snapshot for ad-hoc + history
     description     = mapped_column(String(200), default="")
     qty             = mapped_column(Integer, default=1)
     intervention    = relationship("ServiceIntervention", back_populates="parts")
 
+# service_crm/equipment/models.py — additions for the CNC domain
+class EquipmentModel(db.Model, Auditable):
+    """Manufacturer + model lookup."""
+    id           = mapped_column(ULID, primary_key=True, default=ulid_new)
+    manufacturer = mapped_column(String(120), nullable=False)
+    model        = mapped_column(String(120), nullable=False)
+    family       = mapped_column(String(120), default="")
+    __table_args__ = (UniqueConstraint("manufacturer", "model"),)
+
+class EquipmentControllerType(db.Model, Auditable):
+    """Fanuc / Siemens / Heidenhain / Haas / Mazatrol / ..."""
+    id   = mapped_column(ULID, primary_key=True, default=ulid_new)
+    code = mapped_column(String(60), unique=True, nullable=False)
+    name = mapped_column(String(120), nullable=False)
+
+class EquipmentWarranty(db.Model, Auditable):
+    id           = mapped_column(ULID, primary_key=True, default=ulid_new)
+    equipment_id = mapped_column(ForeignKey("equipment.id", ondelete="CASCADE"), nullable=False)
+    starts_on    = mapped_column(Date, nullable=False)
+    ends_on      = mapped_column(Date, nullable=False, index=True)
+    coverage     = mapped_column(Text, default="")  # free-form description
+
 # service_crm/maintenance/models.py
-class MaintenancePlan(db.Model, Auditable):
-    id              = mapped_column(ULID, primary_key=True, default=ulid_new)
-    equipment_id    = mapped_column(ForeignKey("equipment.id"), nullable=False, index=True)
-    cadence_days    = mapped_column(Integer, nullable=False)  # e.g. every 90 days
-    last_done_at    = mapped_column(Date, nullable=True)
-    next_due_at     = mapped_column(Date, nullable=True, index=True)  # computed; index for "due soon"
+class MaintenanceTemplate(db.Model, Auditable):
+    """Reusable recipe (bundles a checklist + parts list + estimated time)."""
+    id                    = mapped_column(ULID, primary_key=True, default=ulid_new)
+    name                  = mapped_column(String(200), nullable=False)
     checklist_template_id = mapped_column(ForeignKey("checklist_template.id"), nullable=True)
+    estimated_minutes     = mapped_column(Integer, nullable=True)
+
+class MaintenancePlan(db.Model, Auditable):
+    id           = mapped_column(ULID, primary_key=True, default=ulid_new)
+    equipment_id = mapped_column(ForeignKey("equipment.id"), nullable=False, index=True)
+    template_id  = mapped_column(ForeignKey("maintenance_template.id"), nullable=False)
+    cadence_days = mapped_column(Integer, nullable=False)
+    last_done_at = mapped_column(Date, nullable=True)
+    next_due_at  = mapped_column(Date, nullable=True, index=True)  # recomputed by APScheduler
+    is_active    = mapped_column(Boolean, default=True)
+
+class MaintenanceTask(db.Model, Auditable):
+    """A generated due-task instance from a plan."""
+    id          = mapped_column(ULID, primary_key=True, default=ulid_new)
+    plan_id     = mapped_column(ForeignKey("maintenance_plan.id", ondelete="CASCADE"))
+    due_on      = mapped_column(Date, nullable=False, index=True)
+    assigned_to = mapped_column(ForeignKey("technician.id"), nullable=True)
+    ticket_id   = mapped_column(ForeignKey("service_ticket.id"), nullable=True)  # if escalated
+    is_done     = mapped_column(Boolean, default=False, index=True)
+
+class MaintenanceExecution(db.Model, Auditable):
+    """Completed task with findings + parts."""
+    id              = mapped_column(ULID, primary_key=True, default=ulid_new)
+    task_id         = mapped_column(ForeignKey("maintenance_task.id", ondelete="CASCADE"))
+    intervention_id = mapped_column(ForeignKey("service_intervention.id"), nullable=True)
+    completed_at    = mapped_column(DateTime(timezone=True), default=clock.now)
+    notes           = mapped_column(Text, default="")
 
 # service_crm/knowledge/models.py
 class ChecklistTemplate(db.Model, Auditable):
-    id    = mapped_column(ULID, primary_key=True, default=ulid_new)
-    name  = mapped_column(String(200), nullable=False)
-    items = mapped_column(JSON, default=list)        # [{key, label, kind: 'bool'|'text'|'number'}]
+    id        = mapped_column(ULID, primary_key=True, default=ulid_new)
+    name      = mapped_column(String(200), nullable=False)
+    is_active = mapped_column(Boolean, default=True)
+    items     = relationship("ChecklistTemplateItem", back_populates="template",
+                             cascade="all, delete-orphan", order_by="ChecklistTemplateItem.position")
+
+class ChecklistTemplateItem(db.Model, Auditable):
+    id          = mapped_column(ULID, primary_key=True, default=ulid_new)
+    template_id = mapped_column(ForeignKey("checklist_template.id", ondelete="CASCADE"))
+    position    = mapped_column(Integer, nullable=False)
+    key         = mapped_column(String(80), nullable=False)
+    label       = mapped_column(String(200), nullable=False)
+    kind        = mapped_column(String(20), nullable=False)  # bool | text | number | choice
+    is_required = mapped_column(Boolean, default=True)
+    template    = relationship("ChecklistTemplate", back_populates="items")
 
 class ChecklistRun(db.Model, Auditable):
     id              = mapped_column(ULID, primary_key=True, default=ulid_new)
@@ -324,28 +471,90 @@ class ChecklistRun(db.Model, Auditable):
     intervention_id = mapped_column(ForeignKey("service_intervention.id"), nullable=True)
     equipment_id    = mapped_column(ForeignKey("equipment.id"), nullable=True)
     snapshot        = mapped_column(JSON, nullable=False)  # frozen template at run time
-    answers         = mapped_column(JSON, default=dict)
     completed_at    = mapped_column(DateTime(timezone=True), nullable=True)
+    items           = relationship("ChecklistRunItem", back_populates="run",
+                                   cascade="all, delete-orphan")
+
+class ChecklistRunItem(db.Model, Auditable):
+    """One answered line in a run. Decoupled from the template so historical
+    runs survive template edits (template_item_id stored as-was)."""
+    id               = mapped_column(ULID, primary_key=True, default=ulid_new)
+    run_id           = mapped_column(ForeignKey("checklist_run.id", ondelete="CASCADE"))
+    template_item_id = mapped_column(ULID, nullable=False)  # not a FK — decoupled
+    answer           = mapped_column(JSON, nullable=True)
+    notes            = mapped_column(Text, default="")
+    run              = relationship("ChecklistRun", back_populates="items")
+
+class ProcedureTag(db.Model, Auditable):
+    id   = mapped_column(ULID, primary_key=True, default=ulid_new)
+    code = mapped_column(String(40), unique=True, nullable=False)
+    name = mapped_column(String(120), nullable=False)
 
 class ProcedureDocument(db.Model, Auditable):
     id      = mapped_column(ULID, primary_key=True, default=ulid_new)
     title   = mapped_column(String(200), nullable=False)
     body_md = mapped_column(Text, default="")
-    tags    = mapped_column(JSON, default=list)
+    tags    = relationship("ProcedureTag", secondary="procedure_document_tag")
+
+# service_crm/planning/models.py
+class Technician(db.Model, Auditable):
+    """1:1 with User but separate so we can track planning attributes
+    (capacity, timezone, working hours) without bloating User."""
+    id        = mapped_column(ULID, primary_key=True, default=ulid_new)
+    user_id   = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), unique=True)
+    timezone  = mapped_column(String(60), default="Europe/Bucharest")
+    is_active = mapped_column(Boolean, default=True)
+
+class TechnicianAssignment(db.Model, Auditable):
+    """Ticket / intervention assigned to a technician."""
+    id              = mapped_column(ULID, primary_key=True, default=ulid_new)
+    technician_id   = mapped_column(ForeignKey("technician.id", ondelete="CASCADE"), index=True)
+    ticket_id       = mapped_column(ForeignKey("service_ticket.id"), nullable=True)
+    intervention_id = mapped_column(ForeignKey("service_intervention.id"), nullable=True)
+    assigned_at     = mapped_column(DateTime(timezone=True), default=clock.now)
+
+class TechnicianCapacitySlot(db.Model, Auditable):
+    """Declared capacity per day / shift."""
+    id            = mapped_column(ULID, primary_key=True, default=ulid_new)
+    technician_id = mapped_column(ForeignKey("technician.id", ondelete="CASCADE"), index=True)
+    day           = mapped_column(Date, nullable=False, index=True)
+    capacity_min  = mapped_column(Integer, nullable=False)  # minutes available
+    __table_args__ = (UniqueConstraint("technician_id", "day"),)
 ```
 
 Constraints worth calling out (these get tests in
 [`python.tests.md`](../python.tests.md) §"Integration"):
 
 - `Equipment.location_id`, when set, must point at a `Location` whose
-  `client_id` matches `Equipment.client_id`. Enforced via service layer
-  + a CHECK-style integration test.
+  `client_id` matches `Equipment.client_id`. Service-layer guard +
+  integration test.
 - `ServiceTicket.equipment_id`, when set, must belong to
   `ServiceTicket.client_id`. Same pattern.
-- `ChecklistRun.snapshot` is **frozen** at run-time; subsequent template
-  edits never mutate historical runs.
-- Soft-delete: `Client.is_active = False` rather than DELETE; financial /
-  service history must remain queryable. (Same pattern as my prior round.)
+- `ServiceTicket.status` transitions are constrained to the lifecycle
+  in [`docs/service-domain.md`](./service-domain.md) "Ticket Lifecycle".
+  Pure-Python `transition()` function in `tickets/state.py`; ≥ 95 %
+  line+branch coverage.
+- Every `ServiceTicket.status` change writes a `TicketStatusHistory`
+  row in the same transaction — enforced by a SQLAlchemy `before_flush`
+  hook + an integration test that asserts no history-less transitions.
+- `ChecklistRun.snapshot` and `ChecklistRunItem.template_item_id` are
+  **frozen** at run-time; subsequent template edits never mutate
+  historical runs. Tested with an "edit-after-snapshot" property test.
+- `MaintenancePlan.next_due_at` is recomputed by the APScheduler job;
+  the column has a non-null index for "due soon" queries.
+- `MaintenanceTask.is_done` flips only via `MaintenanceExecution`
+  insert. A standalone update on `is_done` is a service-layer error.
+- `EquipmentWarranty.ends_on > EquipmentWarranty.starts_on`. CHECK
+  constraint + integration test.
+- Soft-delete: `Client.is_active = False`, `Equipment.is_active = False`,
+  `Technician.is_active = False`, `PartMaster.is_active = False`,
+  `MaintenancePlan.is_active = False`. Hard delete is reserved for
+  the GDPR forget endpoint (per
+  [`docs/v1-implementation-goals.md`](./v1-implementation-goals.md) §1.8).
+- Lookup tables (`TicketType`, `TicketPriority`,
+  `EquipmentControllerType`, `ProcedureTag`) store stable English
+  `code` values and `label` strings. UI translates labels via
+  Flask-Babel; codes never touch the user.
 
 ✅ **Approved 2026-05-10:** entity↔blueprint mapping in §4 and the
 constraint list above stand.
@@ -365,17 +574,17 @@ constraint list above stand.
 
 ### 5.2 To create after approval (in order — see [`ROADMAP.md`](../ROADMAP.md))
 
-| Step | Artifact                                                                    |
-| ---- | --------------------------------------------------------------------------- |
-| 1    | `service_crm/__init__.py`, `extensions.py`, `config.py`, `cli.py`           |
-| 2    | `service_crm/templates/base.html`, `static/css/style.css` (vendored OEE)    |
-| 3    | `service_crm/auth/` — User/Role + login/logout + tests                      |
-| 4    | `service_crm/clients/` — Client/Contact/Location + CRUD + tests             |
-| 5    | `service_crm/equipment/` — Equipment + CRUD + tests                         |
-| 6    | `service_crm/tickets/` — Tickets + interventions + parts + status flow      |
-| 7    | `service_crm/maintenance/` — plans + due/overdue surfacing                  |
-| 8    | `service_crm/knowledge/` — checklists + procedures                          |
-| 9    | `service_crm/dashboard/` — operational dashboard tying it together          |
+| Step | Milestone | Artifact                                                                                            |
+| ---- | --------- | --------------------------------------------------------------------------------------------------- |
+| 1    | 0.1.0     | `service_crm/__init__.py`, `extensions.py`, `config.py`, `cli.py`; auth (`User`, `Role`); Flask-Babel + RO/EN catalogs scaffold |
+| 2    | 0.2.0     | `service_crm/templates/base.html`, `static/css/style.css`, manifest, service worker (vendored OEE)  |
+| 3    | 0.3.0     | `service_crm/clients/` — `Client`/`Contact`/`Location`/`ServiceContract` + CRUD + tests             |
+| 4    | 0.4.0     | `service_crm/equipment/` — `Equipment`/`EquipmentModel`/`EquipmentControllerType`/`EquipmentWarranty` |
+| 5    | 0.5.0     | `service_crm/tickets/` — full ticket + status history + comments + attachments + state machine      |
+| 6    | 0.6.0     | `service_crm/tickets/` — interventions + actions + findings + part usage; `service_crm/knowledge/` checklists + procedures |
+| 7    | 0.7.0     | `service_crm/maintenance/` — plans / tasks / executions / templates + APScheduler `next_due_at` recompute |
+| 8    | 0.7.0     | `service_crm/planning/` — technicians + assignments + capacity slots                                |
+| 9    | 0.8.0     | `service_crm/dashboard/` — manager + technician views, KPI panels per `docs/service-domain.md` "Dashboard V1" |
 
 Each step lands as its own PR with a roadmap milestone.
 
