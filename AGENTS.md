@@ -26,6 +26,7 @@
 - Service domain and workflows: [docs/service-domain.md](docs/service-domain.md)
 - Implementation sequence: [docs/tasks.md](docs/tasks.md)
 - Run/test/lint commands: [docs/commands.md](docs/commands.md)
+- Testing cadence (per-version, web + mobile/PWA): [docs/testing-cadence.md](docs/testing-cadence.md)
 - Optional AI memory layer: [docs/obsidian-brain.md](docs/obsidian-brain.md)
 
 ## Operating Rules
