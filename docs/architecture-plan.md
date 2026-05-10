@@ -276,16 +276,29 @@ class TicketStatus(str, Enum):
 # Postgres uses the SEQUENCE; SQLAlchemy treats Sequence() as a no-op on
 # SQLite, so on SQLite the service layer falls back to MAX(number)+1 inside
 # the same transaction. Either way `number` is unique and human-friendly.
+#
+# SQLite race-condition note (low risk for v1's single-VPS / single-tenant
+# target, but real): MAX(number)+1 inside a transaction can collide under
+# concurrent writes on SQLite WAL. Mitigations to consider during 0.5.0
+# implementation, in order of preference:
+#   1. Serialise `services.create_ticket` via a tiny advisory lock
+#      (`PRAGMA locking_mode=EXCLUSIVE` for the open transaction, or a
+#      `SELECT ... FOR UPDATE`-equivalent on a sentinel row).
+#   2. Use `Integer, primary_key=True, autoincrement=True` on a separate
+#      surrogate column (DB-managed; loses the human-friendly `number` =
+#      ULID-derived value, but is collision-free).
+# Postgres has no such risk; the SEQUENCE serialises by design.
 ticket_number_seq = Sequence("ticket_number_seq", start=1)
 
-class TicketPriority(db.Model, Auditable):
-    """Lookup table — per blueprint §8 ticket priorities are configurable."""
+class TicketPriority(db.Model):
+    """Lookup table — admin-managed; excluded from Auditable to avoid noise."""
     id    = mapped_column(ULID, primary_key=True, default=ulid_new)
     code  = mapped_column(String(40), unique=True, nullable=False)  # e.g. "low"
     label = mapped_column(String(80), nullable=False)               # translated in UI
 
-class TicketType(db.Model, Auditable):
-    """Lookup — incident / preventive / commissioning / warranty / ..."""
+class TicketType(db.Model):
+    """Lookup — incident / preventive / commissioning / warranty / ...
+    Admin-managed; excluded from Auditable for the same reason as TicketPriority."""
     id    = mapped_column(ULID, primary_key=True, default=ulid_new)
     code  = mapped_column(String(40), unique=True, nullable=False)
     label = mapped_column(String(80), nullable=False)
@@ -319,7 +332,10 @@ class TicketStatusHistory(db.Model):
     """Append-only state-transition log. No Auditable mixin — this *is* the audit."""
     id         = mapped_column(ULID, primary_key=True, default=ulid_new)
     ticket_id  = mapped_column(ForeignKey("service_ticket.id", ondelete="CASCADE"))
-    from_state = mapped_column(SAEnum(TicketStatus), nullable=True)  # NULL on create
+    # NULL means ticket creation (no prior state).
+    # Filter creation rows with `from_state IS NULL`, NOT `from_state = 'new'` —
+    # the latter would silently miss every creation event.
+    from_state = mapped_column(SAEnum(TicketStatus), nullable=True)
     to_state   = mapped_column(SAEnum(TicketStatus), nullable=False)
     actor_id   = mapped_column(ForeignKey("user.id"), nullable=False)
     reason     = mapped_column(Text, default="")
@@ -506,12 +522,21 @@ class Technician(db.Model, Auditable):
     is_active = mapped_column(Boolean, default=True)
 
 class TechnicianAssignment(db.Model, Auditable):
-    """Ticket / intervention assigned to a technician."""
+    """Ticket / intervention assigned to a technician.
+
+    Exactly one of `ticket_id` or `intervention_id` must be set; the
+    CHECK below makes "neither" illegal at the DB level."""
     id              = mapped_column(ULID, primary_key=True, default=ulid_new)
     technician_id   = mapped_column(ForeignKey("technician.id", ondelete="CASCADE"), index=True)
     ticket_id       = mapped_column(ForeignKey("service_ticket.id"), nullable=True)
     intervention_id = mapped_column(ForeignKey("service_intervention.id"), nullable=True)
     assigned_at     = mapped_column(DateTime(timezone=True), default=clock.now)
+    __table_args__  = (
+        CheckConstraint(
+            "ticket_id IS NOT NULL OR intervention_id IS NOT NULL",
+            name="ck_technician_assignment_target",
+        ),
+    )
 
 class TechnicianCapacitySlot(db.Model, Auditable):
     """Declared capacity per day / shift."""
