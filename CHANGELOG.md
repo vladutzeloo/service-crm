@@ -13,9 +13,30 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 ## [Unreleased]
 
 ### Added
-- Project planning documents: `ARCHITECTURE.md`, `ROADMAP.md`, `python.tests.md`.
-- Release workflow scaffolding under `.github/workflows/`.
-- `pyproject.toml` and `VERSION` stubs.
+- `docs/architecture-plan.md` — synthesized architectural proposal awaiting
+  approval (assumptions, model set, file list, open questions).
+- `.claude/skills/` — five project-level Claude Code skills mirroring the
+  workflows in `docs/tasks.md`: `architecture-audit`, `ui-foundation`,
+  `data-model`, `module-slice`, `consistency-pass`.
+- `docs/commands.md` — concrete Flask / pytest / Alembic commands
+  (PowerShell + bash) replacing the placeholder version.
+
+### Changed
+- Stack realigned to **Flask + Jinja + SQLAlchemy + Alembic + pytest**
+  (was FastAPI + HTMX in the prior planning round). Drives matching
+  rewrites of `ARCHITECTURE.md`, `ROADMAP.md`, `python.tests.md`, and
+  `pyproject.toml`.
+- Domain model realigned to the entities in `docs/service-domain.md`
+  (`Client`, `Contact`, `Location`, `Equipment`, `ServiceTicket`,
+  `ServiceIntervention`, `ServicePartUsage`, `ChecklistTemplate`,
+  `ChecklistRun`, `ProcedureDocument`) grouped under the five blueprints
+  in `AGENTS.md`.
+- `ROADMAP.md` milestones reordered around the five blueprints and the
+  sequence in `docs/tasks.md`.
+- User-supplied support docs moved from repo root into `docs/` to match
+  the links in `AGENTS.md`.
+- `README.md` rewritten as a "Start here" index pointing at `AGENTS.md`,
+  the docs/, and the project skills.
 
 <!--
 Future release sections look like this:

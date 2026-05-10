@@ -5,14 +5,15 @@ build-backend = "hatchling.build"
 [project]
 name = "service-crm"
 dynamic = ["version"]
-description = "Standalone, self-hostable CRM for service-oriented small businesses."
+description = "Standalone, self-hostable Flask CRM for service teams (clients, equipment, tickets, maintenance, knowledge)."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "service-crm contributors" }]
-keywords = ["crm", "service", "workshop", "field-service", "self-hosted"]
+keywords = ["crm", "service", "field-service", "flask", "self-hosted"]
 classifiers = [
     "Development Status :: 1 - Planning",
+    "Framework :: Flask",
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
@@ -21,29 +22,71 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Office/Business",
 ]
-# Runtime deps land alongside the first feature that needs them; keeping the
-# planning phase lock-file-free is intentional.
-dependencies = []
+# Runtime deps land alongside the first feature that needs them; staying
+# unpinned during the planning phase is intentional — see ROADMAP 0.1.0.
+dependencies = [
+    # web + templating
+    "Flask>=3.0",
+    "Jinja2>=3.1",
+    "Werkzeug>=3.0",
+    # data
+    "SQLAlchemy>=2.0",
+    "Flask-SQLAlchemy>=3.1",
+    "alembic>=1.13",
+    "Flask-Migrate>=4.0",
+    # auth + forms
+    "Flask-Login>=0.6",
+    "Flask-WTF>=1.2",
+    "WTForms>=3.1",
+    "argon2-cffi>=23.1",
+    # config
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "python-dotenv>=1.0",
+    # serving
+    "gunicorn>=22.0; sys_platform != 'win32'",
+    "waitress>=3.0; sys_platform == 'win32'",
+]
 
 [project.optional-dependencies]
+postgres = [
+    # Base psycopg — relies on libpq + openssl from the system / container.
+    # `psycopg[binary]` is fine for local hacking on Windows/Mac, but the
+    # production install path (Docker image, Linux host) provides the
+    # system libraries, so we default to the unbundled package.
+    "psycopg>=3.2",
+]
 dev = [
     "pytest>=8",
     "pytest-cov>=5",
     "pytest-xdist>=3",
+    "factory-boy>=3.3",
     "hypothesis>=6",
     "ruff>=0.5",
     "mypy>=1.10",
+    "types-WTForms",
+    "pre-commit>=3.7",
 ]
 
+[project.scripts]
+# `flask` is the canonical entrypoint; this is reserved for ops scripts that
+# need to run without a Flask app context.
+service-crm-cli = "service_crm.cli:main"
+
 [project.urls]
-Homepage = "https://github.com/vladutzeloo/service-crm"
-Issues = "https://github.com/vladutzeloo/service-crm/issues"
+Homepage  = "https://github.com/vladutzeloo/service-crm"
+Issues    = "https://github.com/vladutzeloo/service-crm/issues"
 Changelog = "https://github.com/vladutzeloo/service-crm/blob/main/CHANGELOG.md"
-Roadmap = "https://github.com/vladutzeloo/service-crm/blob/main/ROADMAP.md"
+Roadmap   = "https://github.com/vladutzeloo/service-crm/blob/main/ROADMAP.md"
+Docs      = "https://github.com/vladutzeloo/service-crm/blob/main/docs/architecture-plan.md"
 
 [tool.hatch.version]
 path = "VERSION"
 pattern = "^(?P<version>[^\\s]+)\\s*$"
+
+[tool.hatch.build.targets.wheel]
+# Will start matching real files in 0.1.0 when service_crm/ lands.
+packages = ["service_crm"]
 
 [tool.ruff]
 line-length = 100
@@ -56,6 +99,11 @@ select = ["E", "F", "I", "B", "UP", "SIM", "PL", "RUF"]
 python_version = "3.11"
 strict = true
 warn_unused_ignores = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["factory.*", "factory_boy.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "8.0"
@@ -64,7 +112,7 @@ testpaths = ["tests"]
 markers = [
     "unit: fast, no I/O",
     "integration: hits the database or filesystem",
-    "e2e: drives the HTTP layer end-to-end",
+    "e2e: drives the Flask test_client end-to-end",
     "slow: skipped by default in pre-commit",
 ]
 
