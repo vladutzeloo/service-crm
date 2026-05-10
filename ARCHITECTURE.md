@@ -1,156 +1,201 @@
-# Service CRM — Architecture & Planning
+# Service-CRM — Architecture
 
-> Status: **planning** — no code has landed yet. This document is the source of
-> truth for what we are building and why. The [ROADMAP](./ROADMAP.md) tracks
-> when each piece ships.
+> Status: **planning, Flask edition.** Realigned to match the user-supplied
+> direction in [`AGENTS.md`](./AGENTS.md), [`docs/service-domain.md`](./docs/service-domain.md),
+> [`docs/ui-reference.md`](./docs/ui-reference.md) and [`docs/tasks.md`](./docs/tasks.md).
+>
+> This document describes *what* we are building and *how the layers fit*.
+> The roadmap of *when* each piece ships is in [`ROADMAP.md`](./ROADMAP.md).
+> The currently-pending architectural proposal (assumptions, model set,
+> approval gate) is in [`docs/architecture-plan.md`](./docs/architecture-plan.md).
 
 ## 1. Product summary
 
-Service CRM is a **standalone, self-hostable CRM for service-oriented small
-businesses** — repair shops, IT/MSP outfits, HVAC, appliance repair, mobile
-field technicians, and similar. It is opinionated and narrow on purpose: it
-manages customers, the equipment they own, the work performed on that
-equipment, and the money that changes hands as a result.
+Service-CRM is a **standalone, self-hostable Flask app for service teams** —
+client management, equipment registry, service tickets and interventions,
+checklists/SOPs, and operational dashboards. It is opinionated and narrow on
+purpose; explicit non-goals are in [`AGENTS.md`](./AGENTS.md).
 
-Non-goals (explicit):
-
-- Marketing automation, email campaigns, lead funnels.
-- A general-purpose sales pipeline (Hubspot/Salesforce territory).
-- Multi-tenant SaaS hosting. A single deployment serves a single business.
-  Multiple businesses run multiple deployments.
-- Mobile-first UX. Mobile is supported but the design center is a desk.
+The design language is reused verbatim from
+[`vladutzeloo/oee-calculator2.0`](https://github.com/vladutzeloo/oee-calculator2.0).
+We **do not** import business logic from that repo — only its UI patterns,
+templates, and CSS tokens (mapping in [`docs/ui-reference.md`](./docs/ui-reference.md)).
 
 ## 2. Primary users & jobs-to-be-done
 
 | User           | Top jobs                                                                  |
 | -------------- | ------------------------------------------------------------------------- |
-| Front-desk     | Intake a customer + asset, open a work order, quote/invoice, take payment |
-| Technician     | See queued jobs, log time and parts, mark complete                        |
-| Owner/manager  | See backlog, technician utilization, revenue, outstanding A/R             |
-| Customer       | (v0.4+) Self-service portal: status of their job, history, invoices       |
+| Front-desk     | Register a client + equipment, open a ticket, schedule an intervention    |
+| Technician     | See queued tickets, log an intervention, fill a checklist, mark complete  |
+| Manager / Owner| Operational dashboard: open tickets, today's interventions, due maintenance |
+| Future         | Customer/portal access, VMES/OEE integration via API/sync (post-v1)       |
 
-## 3. Domain model (initial cut)
+## 3. Stack
 
-```
-Customer 1───* Asset 1───* WorkOrder 1───* WorkLog
-                                  │
-                                  ├──* PartUsage *──1 InventoryItem
-                                  └──1 Invoice 1──* Payment
-
-User (technician/admin) 1──* WorkLog
-```
-
-Key entities and the invariants they enforce:
-
-- **Customer** — person or company. Soft-delete only; financial history must
-  remain queryable.
-- **Asset** — the *thing* being serviced (laptop, furnace, vehicle). Belongs
-  to one customer at a time; ownership transfers are an audited event.
-- **WorkOrder** — the unit of work. State machine:
-  `draft → scheduled → in_progress → awaiting_parts → completed → invoiced → closed`,
-  with `cancelled` reachable from any pre-`invoiced` state.
-- **WorkLog** — append-only labor entries (technician, start/stop, notes).
-- **InventoryItem / PartUsage** — stock decrement happens on `PartUsage`
-  insert, not on invoice. This matches what actually happens on the bench.
-- **Invoice / Payment** — invoices are immutable once issued; corrections are
-  credit notes, not edits. (Required for any jurisdiction with VAT/sales-tax
-  audit obligations.)
-
-## 4. Architecture
-
-### 4.1 Stack
-
-| Layer         | Choice                                       | Why                                                       |
-| ------------- | -------------------------------------------- | --------------------------------------------------------- |
-| Language      | Python 3.11+                                 | Mandated by the project; matches small-shop ops skill set |
-| Web framework | FastAPI                                      | Async, OpenAPI for free, type-driven, easy to test        |
-| ORM           | SQLAlchemy 2.x + Alembic                     | Mature, supports both Postgres and SQLite                 |
-| DB (prod)     | PostgreSQL 15+                               | Money + audit + FTS                                       |
-| DB (dev/test) | SQLite                                       | Zero-setup for contributors and CI                        |
-| Auth          | Session cookies + Argon2 password hashing    | Single-tenant, server-rendered admin                      |
-| Frontend      | Server-rendered Jinja2 + HTMX + Alpine.js    | No SPA build pipeline; ships in one container             |
-| Background    | APScheduler (v0.x), RQ + Redis (v1.0+)       | Start in-process, graduate when load justifies it         |
-| Packaging     | `pyproject.toml` (PEP 621), Docker image     | One install path for hackers, one for operators           |
+| Layer         | Choice                                  | Why                                                        |
+| ------------- | --------------------------------------- | ---------------------------------------------------------- |
+| Language      | Python 3.11+                            | Project standard                                           |
+| Web framework | Flask                                   | Mandated by AGENTS.md                                      |
+| Templating    | Jinja2 (server-rendered)                | Mandated; matches oee-calculator2.0                        |
+| ORM           | SQLAlchemy 2.x + Flask-SQLAlchemy       | Mandated                                                   |
+| Migrations    | Alembic (via Flask-Migrate)             | Mandated; reviewable + reversible                          |
+| Forms         | Flask-WTF + WTForms                     | CSRF + validation in one place                             |
+| Auth          | Flask-Login + Argon2 (`argon2-cffi`)    | Server-rendered sessions, single-tenant                    |
+| DB (prod)     | PostgreSQL 15+                          | Money + audit + FTS                                        |
+| DB (dev/test) | SQLite                                  | Zero-setup, runs in CI                                     |
+| Background    | APScheduler (later: RQ + Redis)         | Start in-process; graduate when justified                  |
+| Testing       | pytest + pytest-cov + factory-boy + Hypothesis | See [`python.tests.md`](./python.tests.md)          |
+| Lint / Type   | ruff + mypy                             | Cheap, fast feedback                                       |
+| Packaging     | `pyproject.toml` (PEP 621), Docker      | One install path for hackers, one for operators            |
+| Shell         | PowerShell-friendly                     | [`docs/commands.md`](./docs/commands.md)                   |
 
 The deliberate constraint is **"runs from a single container against a single
 Postgres"**. Anything that breaks that constraint needs an explicit roadmap
 entry.
 
-### 4.2 Layout (target)
+## 4. Application architecture
 
-The importable package is `service_crm` (matches `pyproject.toml` and the
-mirror layout in [python.tests.md §1](./python.tests.md#1-layout)).
+### 4.1 App factory + blueprints
+
+```python
+# service_crm/__init__.py
+def create_app(config: type[Config] = ProdConfig) -> Flask:
+    app = Flask(__name__)
+    app.config.from_object(config)
+    extensions.init_app(app)        # db, migrate, login_manager, csrf
+    register_blueprints(app)        # auth, clients, equipment, tickets, ...
+    register_cli(app)               # flask seed, flask reset-db, ...
+    register_error_handlers(app)
+    return app
+```
+
+Why a factory: per-test app instance, swappable config, no module-level side
+effects. Every test in [`python.tests.md`](./python.tests.md) starts from
+`create_app(TestConfig)`.
+
+### 4.2 Layout
 
 ```
-service_crm/            # the importable Python package
-├── api/                # FastAPI routers
-├── web/                # Jinja templates + HTMX endpoints
-├── domain/             # Pure-Python models, state machines, money math
-├── db/                 # SQLAlchemy models, session, alembic env
-├── services/           # Use-cases (issue_invoice, record_payment, ...)
-├── auth/               # Sessions, password hashing, RBAC
-├── jobs/               # Scheduled / background tasks
-├── clock.py            # `now()` shim (mockable in tests)
-└── settings.py         # Pydantic Settings, 12-factor env
-migrations/             # Alembic, lives at the repo root
-tests/                  # See python.tests.md
-docs/
-pyproject.toml
-Dockerfile
+service_crm/                 # importable package
+├── __init__.py              # create_app() factory + register_*() helpers
+├── extensions.py            # db, migrate, login_manager, csrf  (all .init_app())
+├── config.py                # Dev / Test / Prod config classes (12-factor)
+├── cli.py                   # Flask CLI commands
+├── auth/                    # blueprint: User, Role, login/logout
+├── clients/                 # blueprint: Client, Contact, Location
+├── equipment/               # blueprint: Equipment / installed base
+├── tickets/                 # blueprint: ServiceTicket, ServiceIntervention, ServicePartUsage
+├── maintenance/             # blueprint: MaintenancePlan + due/overdue surfacing
+├── knowledge/               # blueprint: ChecklistTemplate, ChecklistRun, ProcedureDocument
+├── dashboard/               # blueprint: operational dashboard
+├── shared/                  # cross-cutting (audit, ulid, money, clock, filters)
+├── templates/               # Jinja, mirrors oee-calculator2.0 layout
+│   ├── base.html
+│   ├── partials/
+│   ├── auth/  clients/  equipment/  tickets/  maintenance/  knowledge/  dashboard/
+└── static/
+    ├── css/style.css        # vendored from oee-calculator2.0 + project additions
+    └── js/
+migrations/                  # alembic, lives at repo root
+tests/                       # mirrors service_crm/ one-for-one
 ```
+
+Each blueprint owns its own `models.py`, `routes.py`, `forms.py`, and
+`services.py`. Templates live centrally under `service_crm/templates/<bp>/`
+because Jinja inheritance from `base.html` is easier when all templates
+share a single search path — the same pattern oee-calculator2.0 uses.
+
+### 4.3 Layering rules
 
 Two rules that keep the layers honest:
 
-1. `service_crm.domain` imports nothing from `service_crm.db`,
-   `service_crm.api`, or `service_crm.web`. Domain is pure functions and
-   dataclasses — trivially unit-testable.
-2. `service_crm.api` and `service_crm.web` never touch `db.session`
-   directly; they call `service_crm.services`. Services are the only
-   callers of the ORM.
+1. **Routes are thin.** A `routes.py` view parses the request, calls a
+   function in the blueprint's `services.py`, and renders a template. No
+   SQL, no business rules.
+2. **Services own the ORM.** Cross-blueprint access goes through the other
+   blueprint's `services.py`, never through its `models.py` directly. This
+   is the seam that lets us split a blueprint into its own deployable
+   later if we ever need to.
 
-### 4.3 Cross-cutting
+A unit test that passes a fake DB session into a service function should be
+the cheapest test in the suite — see [`python.tests.md`](./python.tests.md) §2.1.
+
+### 4.4 Cross-cutting
 
 - **Money** — never floats. `decimal.Decimal` end-to-end, persisted as
   `NUMERIC(12, 2)`. A `Money(amount, currency)` value object lives in
-  `service_crm/domain/money.py`.
+  `service_crm/shared/money.py`. (Reaches v1 only if pricing/invoicing
+  lands; defer otherwise.)
 - **Time** — UTC in storage, business timezone in UI. A single
-  `service_crm.clock.now()` helper makes time mockable in tests.
-- **IDs** — ULIDs for externally-visible IDs (sortable, URL-safe, no
-  enumeration). ULIDs are 128-bit and binary-compatible with UUIDs, so on
-  Postgres they are stored in native `UUID` columns (16 bytes, fast index,
-  small foot­print) and rendered/parsed as Crockford-base32 at the edges.
-  On SQLite — dev/test only — they fall back to a `BLOB(16)` column with the
-  same binary encoding so behavior matches.
+  `service_crm.shared.clock.now()` helper makes time mockable in tests.
+- **IDs** — ULIDs at the edges (sortable, URL-safe, no enumeration).
+  ULIDs are 128-bit, binary-compatible with UUIDs, so they're stored as
+  native `UUID` on Postgres and `BLOB(16)` on SQLite. The `ULID` type
+  lives in `service_crm/shared/ulid.py`.
 - **Audit log** — every mutation writes an immutable `AuditEvent` row with
-  free-form `before`/`after` JSON. We don't trust developers to remember:
-  the writes are produced by SQLAlchemy `after_insert` / `after_update` /
-  `after_delete` event listeners on a marker base class (`Auditable`), so
-  any model that inherits from it is covered automatically. Service-level
-  context (acting user, request id, reason) is attached via a contextvar
-  set by the request middleware, so the listener has everything it needs
-  without each service remembering to call an `audit(...)` helper.
-- **Config** — 12-factor. `service_crm/settings.py` is the only place that
-  reads env.
+  free-form `before`/`after` JSON. Writes are produced by SQLAlchemy
+  `after_insert` / `after_update` / `after_delete` event listeners on an
+  `Auditable` mixin, so every model that inherits from it is covered
+  automatically. Request context (acting user, request id, reason) is
+  attached via a `contextvars.ContextVar` set by a `before_request` hook.
+- **Search** — Postgres `tsvector` + GIN index; SQLite FTS5 with a matching
+  tokenizer config so dev and prod behave the same (stemming + ranked
+  results in both).
+- **Config** — 12-factor. `service_crm/config.py` is the only module that
+  reads `os.environ`.
 
-## 5. Risks & open questions
+## 5. UI architecture
 
-- **Tax compliance** — invoice immutability and credit-note semantics need
-  legal review per market. We only commit to EU-style VAT in v1.0; US sales
-  tax via TaxJar/Avalara is post-1.0.
-- **Offline technician mode** — explicitly out of scope until v1.2. Field
-  techs use the mobile web view online.
-- **Migrations on SQLite** — Alembic + SQLite needs `render_as_batch=True`.
-  Worth verifying early so we don't paint ourselves into a corner.
-- **HTMX vs SPA** — we are betting that HTMX scales to the whole app. If a
-  single screen forces us into React, we cordon it off rather than rewriting.
+The visual system is **vendored** from oee-calculator2.0 (per
+[`docs/ui-reference.md`](./docs/ui-reference.md)) — copied, not submoduled,
+so the standalone constraint holds. Pattern mapping:
 
-## 6. Decision log
+| Service-CRM screen          | Vendored pattern (in oee-calculator2.0)              |
+| --------------------------- | ---------------------------------------------------- |
+| Global shell, topbar        | `templates/base.html` + `partials/theme_init.html`   |
+| Operational dashboard       | `templates/admin/dashboard.html`                     |
+| Tickets list / list-CRUD    | `templates/admin/orders.html`                        |
+| Master-data list (clients)  | `templates/admin/items.html`                         |
+| Detail page (ticket, equipment, client) | `templates/admin/item_detail.html`       |
+| Filter / report screen      | `templates/admin/reports.html`                       |
+| Planning / scheduling       | `templates/admin/planning.html`                      |
+| Modal form                  | `templates/forecast_orders.html`                     |
+| Dense operational cockpit   | `templates/capacity.html`                            |
+| Technician screen (no sidebar) | `templates/operator/dashboard.html`               |
+
+Forbidden, per [`docs/ui-reference.md`](./docs/ui-reference.md): inventing a
+new design language, swapping in a component library, gradient/neon styling,
+emoji icons, left sidebars on technician screens.
+
+## 6. Risks & open questions
+
+- **`oee-calculator2.0` access** — the architecture-only audit in
+  [`docs/tasks.md`](./docs/tasks.md) step 2 needs the sibling repo on disk
+  or via WebFetch. Until that lands, UI-related decisions are based on
+  pattern *names* in [`docs/ui-reference.md`](./docs/ui-reference.md) rather
+  than the actual templates. Tracked in
+  [`docs/architecture-plan.md`](./docs/architecture-plan.md) §1.2.
+- **Blueprints with internal models vs. flat `models/`** — proposed in
+  [`docs/architecture-plan.md`](./docs/architecture-plan.md) §3.2; pending
+  approval.
+- **Maintenance scope** — does it deserve its own blueprint or live inside
+  `equipment/`? Pending approval.
+- **`Auditable` mixin vs. explicit service-side audits** — pending approval.
+- **Postgres FTS / SQLite FTS5** — feasible but adds a tokenizer config we
+  need to verify behaves the same on both backends. Worth testing in 0.2.0.
+- **Alembic + SQLite** — needs `render_as_batch=True`. Worth verifying in
+  the 0.1.0 walking skeleton.
+
+## 7. Decision log
 
 Architectural decisions live as numbered ADRs in `docs/adr/NNNN-title.md`
-(format: [MADR](https://adr.github.io/madr/)). The first ADRs to write before
+([MADR](https://adr.github.io/madr/)). The first ADRs to write before
 v0.1 ships:
 
-- ADR-0001: FastAPI + Jinja + HTMX over a SPA.
+- ADR-0001: Flask + Jinja over a SPA / FastAPI.
 - ADR-0002: Single-tenant deployment model.
-- ADR-0003: Invoices are immutable; corrections are credit notes.
-- ADR-0004: Inventory decrements on part usage, not on invoice.
+- ADR-0003: UI design language is vendored from `oee-calculator2.0`.
+- ADR-0004: Blueprints own their models, routes, forms, services; templates
+  centralised under `service_crm/templates/<bp>/`.
+- ADR-0005: ULID at the edges, native `UUID` storage on Postgres.
+- ADR-0006: Audit via SQLAlchemy event listeners on an `Auditable` mixin.
