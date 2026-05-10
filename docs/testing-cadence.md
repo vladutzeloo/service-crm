@@ -168,8 +168,12 @@ remain enforced.
 - Land: snapshot test for `ChecklistRun` frozen template (golden JSON):
   editing the template after the fact must not mutate any historical run.
 - Land: FTS parity test — the same query against SQLite FTS5 and Postgres
-  `tsvector` must rank the same top-3 hits. Catches the "works in dev,
-  surprises in prod" class of search bugs.
+  `tsvector` must return the **same result set** for a fixture query, and
+  the expected record must appear in the **top N** (N=3) on both engines.
+  Ordering within that set is **not** asserted: the engines use different
+  scoring algorithms (BM25 vs. `ts_rank`), so byte-for-byte rank parity
+  would be flaky. Catches the "works in dev, surprises in prod" class of
+  search bugs without chasing scoring noise.
 
 ### 0.7.0 — Maintenance planning
 
@@ -206,8 +210,27 @@ remain enforced.
   A `tests/contracts/snapshot_v1.{openapi.yaml,schema.sql}` fixture is
   committed; any PR that mutates either fails CI unless the diff is
   acknowledged in `CHANGELOG.md` under a `### Schema/API` heading.
-- Forward-only migration policy enforced by a CI step that flags any
-  `downgrade()` body which destroys data.
+- **Migration policy from 1.0.0 onward:**
+  - `downgrade()` implementations remain **required for dev/test** so
+    `pytest-alembic` (landed at 0.9.0) can run the `up → down → up`
+    round-trip. They exist for local resets and for the schema test
+    matrix, not for production.
+  - **Production rollback is roll-forward only.** Reverting a deployed
+    change means writing a *new* migration that undoes it (with whatever
+    data-preservation logic the situation needs) — never running
+    `downgrade()` against a production database.
+  - **Shipped migrations are immutable.** Once a migration file appears
+    under `service_crm/migrations/versions/` in a tagged release, its
+    body is frozen. Bug fixes go in a *new* migration that supersedes
+    the old one.
+  - **CI enforcement** (automatable, not heuristic): a `migration-immutability`
+    job runs `git diff <previous-tag>..HEAD -- service_crm/migrations/versions/`
+    and fails if any already-shipped file is modified or deleted. This
+    catches the real failure mode (silently editing a migration that has
+    already run against a real database) without trying to classify
+    `downgrade()` bodies as "destructive" — many legitimate downgrades
+    drop columns or constraints, and that classification is not worth
+    automating.
 
 ## 5. Pre-tag smoke checklist
 
@@ -284,8 +307,8 @@ Writing this section now keeps the option **cheap**, not committed.
   advance.
 - Visual snapshot tolerance: per-pixel vs. perceptual diff. Decide at
   0.2.0 with the first showcase page.
-- FTS parity granularity (0.6.0): we accept "top-3 hits parity" between
-  SQLite FTS5 and Postgres `tsvector`, **not** byte-for-byte ordering.
-  Revisit if a real bug slips through.
+- FTS parity granularity (0.6.0): resolved — assert set equality + the
+  expected record's presence in the top N, never within-set ordering. See
+  §4 "0.6.0".
 - `docs/test-journal.md` retention: append-only quarterly file vs. yearly
   rollup. Decide after the first quarter has data.
