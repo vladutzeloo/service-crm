@@ -50,7 +50,11 @@ dependencies = [
 
 [project.optional-dependencies]
 postgres = [
-    "psycopg[binary]>=3.2",
+    # Base psycopg — relies on libpq + openssl from the system / container.
+    # `psycopg[binary]` is fine for local hacking on Windows/Mac, but the
+    # production install path (Docker image, Linux host) provides the
+    # system libraries, so we default to the unbundled package.
+    "psycopg>=3.2",
 ]
 dev = [
     "pytest>=8",

@@ -248,15 +248,29 @@ class Equipment(db.Model, Auditable):
 
 # service_crm/tickets/models.py
 class TicketStatus(str, Enum):
-    OPEN = "open"; SCHEDULED = "scheduled"; IN_PROGRESS = "in_progress"
-    AWAITING_PARTS = "awaiting_parts"; RESOLVED = "resolved"; CLOSED = "closed"; CANCELLED = "cancelled"
+    OPEN = "open"
+    SCHEDULED = "scheduled"
+    IN_PROGRESS = "in_progress"
+    AWAITING_PARTS = "awaiting_parts"
+    RESOLVED = "resolved"
+    CLOSED = "closed"
+    CANCELLED = "cancelled"
 
 class TicketPriority(str, Enum):
-    LOW = "low"; NORMAL = "normal"; HIGH = "high"; URGENT = "urgent"
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    URGENT = "urgent"
+
+# Postgres uses the SEQUENCE; SQLAlchemy treats Sequence() as a no-op on
+# SQLite, so on SQLite the service layer falls back to MAX(number)+1 inside
+# the same transaction. Either way `number` is unique and human-friendly.
+ticket_number_seq = Sequence("ticket_number_seq", start=1)
 
 class ServiceTicket(db.Model, Auditable):
     id           = mapped_column(ULID, primary_key=True, default=ulid_new)
-    number       = mapped_column(Integer, unique=True, nullable=False)  # human-friendly seq.
+    number       = mapped_column(Integer, ticket_number_seq, unique=True, nullable=False,
+                                 server_default=ticket_number_seq.next_value())
     client_id    = mapped_column(ForeignKey("client.id"), nullable=False, index=True)
     location_id  = mapped_column(ForeignKey("location.id"), nullable=True)
     equipment_id = mapped_column(ForeignKey("equipment.id"), nullable=True)
