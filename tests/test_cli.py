@@ -49,3 +49,28 @@ def test_seed_is_a_no_op(app: Flask) -> None:
         result = runner.invoke(seed, [])
     assert result.exit_code == 0
     assert "Nothing to seed yet" in result.output
+
+
+@pytest.mark.unit
+def test_main_entrypoint_invokes_flask_group(monkeypatch: pytest.MonkeyPatch) -> None:
+    """``service_crm.cli:main`` is the ``service-crm-cli`` console-script
+    entry. We don't want to invoke the real Flask CLI from the suite, so
+    we patch ``FlaskGroup`` and assert it's constructed with our factory
+    and then called."""
+    from service_crm import cli as cli_mod
+
+    constructed: dict[str, object] = {}
+    called = []
+
+    class _FakeFlaskGroup:
+        def __init__(self, *, create_app: object) -> None:
+            constructed["create_app"] = create_app
+
+        def __call__(self) -> None:
+            called.append(True)
+
+    monkeypatch.setattr("flask.cli.FlaskGroup", _FakeFlaskGroup)
+    cli_mod.main()
+
+    assert called == [True]
+    assert callable(constructed["create_app"])

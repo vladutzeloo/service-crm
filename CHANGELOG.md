@@ -47,6 +47,12 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
   `DATABASE_URL`. Mypy strict and the full pytest run are now
   unconditional (the planning-phase "skip if no service_crm/" stub is
   removed).
+- Coverage gate raised from 85% to **100%** (line + branch). 58 tests
+  cover the foundation surface exhaustively, including the
+  `_read_version_file` fallback, the `service-crm-cli` console-script
+  entry, every config helper branch, the JSON 500 and HTTPException
+  handlers, the audit listener's non-Auditable / NO_VALUE / skip-keys
+  paths, and the ULID dialect impls.
 - Dropped `pydantic` and `pydantic-settings` from `pyproject.toml` —
   config is plain Flask classes per the approved architecture plan §3.1.
 - `docs/architecture-plan.md` — **approved 2026-05-10**. Status header,

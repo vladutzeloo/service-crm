@@ -7,6 +7,8 @@ we just verify the mixin shape and the context-var plumbing.
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 import pytest
 
 from service_crm.shared.audit import (
@@ -191,6 +193,34 @@ def test_listener_emits_create_update_delete_events(
 
 
 @pytest.mark.unit
+def test_listener_ignores_non_auditable_instances(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Non-Auditable objects in ``session.new``/``dirty``/``deleted`` must
+    slip through the ``isinstance`` guard without producing audit events.
+
+    This covers the ``if`` → next-iteration branch in each of the three
+    loops in ``_record_audit_events``.
+    """
+    from service_crm.shared.audit import _record_audit_events
+
+    monkeypatch.setattr("service_crm.shared.audit.has_app_context", lambda: True)
+
+    class _App:
+        def __init__(self) -> None:
+            self.config: dict[str, object] = {"AUDIT_LOG_ENABLED": True}
+
+    monkeypatch.setattr("service_crm.shared.audit.current_app", _App())
+
+    class _Plain:
+        """Not an Auditable subclass — listener must skip."""
+
+    session = _FakeSession(new={_Plain()}, dirty={_Plain()}, deleted={_Plain()})
+    _record_audit_events(session, None, None)  # type: ignore[arg-type]
+    assert session.added == []
+
+
+@pytest.mark.unit
 def test_listener_eagerly_assigns_id_when_missing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -236,6 +266,98 @@ def test_listener_respects_audit_disabled_flag(
     session = _FakeSession(new={_FakeAuditable("x")})
     _record_audit_events(session, None, None)  # type: ignore[arg-type]
     assert session.added == []
+
+
+@pytest.mark.unit
+def test_snapshot_after_skips_timestamp_keys_and_no_value() -> None:
+    """``_snapshot_after`` should skip ``created_at``/``updated_at`` and any
+    attribute whose ``loaded_value`` is ``NO_VALUE``."""
+    from sqlalchemy.orm.base import NO_VALUE
+
+    from service_crm.shared.audit import _snapshot_after
+
+    class _Attr:
+        def __init__(self, loaded_value: object) -> None:
+            self.loaded_value = loaded_value
+
+    class _ColumnProp:
+        def __init__(self, key: str) -> None:
+            self.key = key
+
+    class _Mapper:
+        column_attrs: ClassVar[list[_ColumnProp]] = [
+            _ColumnProp("id"),
+            _ColumnProp("name"),
+            _ColumnProp("created_at"),  # skipped via _SKIP_KEYS
+            _ColumnProp("unloaded"),  # skipped via NO_VALUE
+        ]
+
+    class _State:
+        attrs: ClassVar[dict[str, _Attr]] = {
+            "id": _Attr(b"\xab" * 16),
+            "name": _Attr("alice"),
+            "created_at": _Attr("2026-01-01T00:00:00+00:00"),
+            "unloaded": _Attr(NO_VALUE),
+        }
+        mapper = _Mapper()
+
+    snapshot = _snapshot_after(_State())
+    assert snapshot == {"id": "ab" * 16, "name": "alice"}
+
+
+@pytest.mark.unit
+def test_snapshot_update_handles_skipped_and_unloaded() -> None:
+    """``_snapshot_update`` should skip timestamps, fall back to
+    ``unchanged`` when ``deleted`` is empty, and exclude ``NO_VALUE``
+    from ``after``."""
+    from sqlalchemy.orm.base import NO_VALUE
+
+    from service_crm.shared.audit import _snapshot_update
+
+    class _History:
+        def __init__(
+            self,
+            deleted: tuple[object, ...] = (),
+            unchanged: tuple[object, ...] = (),
+        ) -> None:
+            self.deleted = deleted
+            self.unchanged = unchanged
+
+    class _Attr:
+        def __init__(self, loaded_value: object, history: _History) -> None:
+            self.loaded_value = loaded_value
+            self.history = history
+
+    class _ColumnProp:
+        def __init__(self, key: str) -> None:
+            self.key = key
+
+    class _Mapper:
+        column_attrs: ClassVar[list[_ColumnProp]] = [
+            _ColumnProp("changed"),  # has history.deleted → before = old
+            _ColumnProp("untouched"),  # no deleted, falls back to unchanged
+            _ColumnProp("created_at"),  # _SKIP_KEYS branch
+            _ColumnProp("unloaded"),  # current is NO_VALUE → after skips it
+            _ColumnProp("fresh"),  # history empty → no before entry
+        ]
+
+    class _State:
+        attrs: ClassVar[dict[str, _Attr]] = {
+            "changed": _Attr("new", _History(deleted=("old",))),
+            "untouched": _Attr("steady", _History(unchanged=("steady",))),
+            "created_at": _Attr("ts", _History(unchanged=("ts",))),
+            "unloaded": _Attr(NO_VALUE, _History()),
+            "fresh": _Attr("brand-new", _History()),
+        }
+        mapper = _Mapper()
+
+    before, after = _snapshot_update(_State())
+    assert before == {"changed": "old", "untouched": "steady"}
+    assert after == {
+        "changed": "new",
+        "untouched": "steady",
+        "fresh": "brand-new",
+    }
 
 
 @pytest.mark.unit
