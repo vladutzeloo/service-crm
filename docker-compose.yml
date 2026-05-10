@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: service_crm
+      POSTGRES_PASSWORD: service_crm
+      POSTGRES_DB: service_crm
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U service_crm -d service_crm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://service_crm:service_crm@db:5432/service_crm
+      SECRET_KEY: change-me-in-prod
+      FLASK_APP: service_crm
+    command: >
+      sh -c "flask --app service_crm db upgrade &&
+             gunicorn 'service_crm:create_app()' --bind 0.0.0.0:5000 --workers 4"
+    ports:
+      - "5000:5000"
+
+volumes:
+  pgdata:

@@ -1,0 +1,4 @@
+Single-database configuration for Flask.
+
+Run via ``flask --app service_crm db <command>``. See
+``docs/commands.md`` §"Run migrations" / §"Create migration".
