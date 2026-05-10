@@ -95,7 +95,7 @@ pattern = "^(?P<version>[^\\s]+)\\s*$"
 # Will start matching real files in 0.1.0 when service_crm/ lands.
 packages = ["service_crm"]
 # Compiled message catalogs ship in the wheel; .po files do not.
-artifacts = ["service_crm/locale/**/*.mo"]
+artifacts = ["locale/**/*.mo"]
 
 [tool.ruff]
 line-length = 100
