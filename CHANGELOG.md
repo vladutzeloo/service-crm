@@ -23,9 +23,9 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 ### Changed
 - `docs/architecture-plan.md` — **approved 2026-05-10**. Status header,
-  open-questions section, and downstream pointers in `README.md` /
-  `ROADMAP.md` updated to reflect sign-off. Implementation of the 0.1.0
-  walking skeleton begins from this baseline.
+  open-questions section, and downstream pointers in `README.md`,
+  `ROADMAP.md`, and `ARCHITECTURE.md` updated to reflect sign-off.
+  Implementation of the 0.1.0 walking skeleton begins from this baseline.
 - Stack realigned to **Flask + Jinja + SQLAlchemy + Alembic + pytest**
   (was FastAPI + HTMX in the prior planning round). Drives matching
   rewrites of `ARCHITECTURE.md`, `ROADMAP.md`, `python.tests.md`, and
