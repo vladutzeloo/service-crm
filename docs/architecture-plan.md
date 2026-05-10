@@ -1,7 +1,8 @@
 # Service-CRM — Architecture Plan
 
 > Output of the "Architecture Only" prompt in [`tasks.md`](./tasks.md).
-> **Status: awaiting approval.** No application code lands until this is signed off.
+> **Status: approved (2026-05-10).** Implementation may begin against the
+> 0.1.0 milestone in [`ROADMAP.md`](../ROADMAP.md).
 
 ## 0. How to read this file
 
@@ -73,7 +74,7 @@ Numbered so you can shoot them down individually.
     [`AGENTS.md`](../AGENTS.md) §"Task Split". This plan and the project
     skills under `.claude/skills/` are Claude's lane.
 
-❓ **Awaiting approval on assumptions 1–10.**
+✅ **Approved 2026-05-10.** Assumptions 1–10 stand.
 
 ## 3. Proposed standalone architecture
 
@@ -183,8 +184,9 @@ Because we are *consuming* an existing design language (per
 3. **Forbidden** — inventing a new design system, swapping in Bootstrap /
    Tailwind / Bulma / a component library, or using emoji icons.
 
-❓ **Awaiting approval on: blueprints-with-internal-models layout (vs.
-flat `models/` and `services/` directories).**
+✅ **Approved 2026-05-10:** blueprints-with-internal-models layout.
+Each blueprint owns its `models.py`, `routes.py`, `forms.py`, `services.py`.
+Cross-module access goes through the other module's `services.py`.
 
 ## 4. Proposed SQLAlchemy model set (v1)
 
@@ -345,8 +347,8 @@ Constraints worth calling out (these get tests in
 - Soft-delete: `Client.is_active = False` rather than DELETE; financial /
   service history must remain queryable. (Same pattern as my prior round.)
 
-❓ **Awaiting approval on: the entity↔blueprint mapping in §4 and the
-constraint list above.**
+✅ **Approved 2026-05-10:** entity↔blueprint mapping in §4 and the
+constraint list above stand.
 
 ## 5. Files to create vs. adapt
 
@@ -377,20 +379,22 @@ constraint list above.**
 
 Each step lands as its own PR with a roadmap milestone.
 
-## 6. Open questions / approval gate
+## 6. Approval record
 
-- ❓ Are assumptions 1–10 in §2 correct?
-- ❓ Blueprint-internal models (proposed) vs. flat `service_crm/models/` (alternative)?
-- ❓ Module mapping in §4 — is `maintenance` correctly its own blueprint, or
-      does it belong inside `equipment`?
-- ❓ Is the `Auditable` mixin acceptable, or would you rather we audit only
-      explicit service calls?
-- ❓ Should the `dashboard` blueprint own the technician/operator screen
-      *and* the manager/admin screen, or do they need separate blueprints
-      (matches the `templates/admin/` vs `templates/operator/` split in OEE)?
-- ❓ Once approved, who runs the implementation — me, GPT-5/Codex per
-      [`AGENTS.md`](../AGENTS.md) §"Task Split", or a mix?
+Approved by repo owner on 2026-05-10. Resolutions:
 
-When these are answered I'll cut the first implementation PR (the app
-factory + extensions, no business code), targeting `v0.1.0` per
+- ✅ Assumptions 1–10 (§2) stand.
+- ✅ Blueprint-internal models layout (§3.2) stands; flat `models/` rejected.
+- ✅ Module mapping in §4 stands; `maintenance` is its own blueprint.
+- ✅ `Auditable` mixin is the v1 audit approach.
+- ✅ `dashboard` blueprint owns both manager and technician variants
+      (separate templates, single blueprint).
+
+Deferred to a future ADR (not blocking 0.1.0):
+
+- Implementation split between Claude and GPT-5/Codex (per AGENTS.md
+  §"Task Split") — applied per-PR rather than fixed up-front.
+
+Next action: cut the first implementation PR (app factory + extensions
++ auth slice + first migration), targeting `v0.1.0` per
 [`ROADMAP.md`](../ROADMAP.md).
