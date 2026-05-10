@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if grep -q '^\[project.optional-dependencies\]' pyproject.toml && \
+             grep -qE '^dev *= *\[' pyproject.toml; then
+            pip install -e ".[dev]" || pip install ruff mypy pytest pytest-cov
+          else
+            pip install ruff mypy pytest pytest-cov
+          fi
+
+      - name: Ruff (lint + format check)
+        run: |
+          ruff check .
+          ruff format --check .
+
+      - name: Mypy
+        run: |
+          if [ -d service_crm ]; then
+            mypy service_crm
+          else
+            echo "No service_crm package yet — skipping mypy."
+          fi
+
+      - name: Pytest
+        run: |
+          if [ -d tests ]; then
+            pytest -q --cov --cov-report=xml
+          else
+            echo "No tests/ directory yet — skipping (planning phase)."
+          fi
