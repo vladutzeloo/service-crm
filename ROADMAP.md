@@ -38,7 +38,7 @@ Documentation and skills only — no application code.
 - [x] CI + release workflow scaffolding (stack-agnostic).
 - [x] `pyproject.toml`, `VERSION`, `CHANGELOG.md`, `.gitignore`.
 - [x] `ARCHITECTURE.md`, `ROADMAP.md`, `python.tests.md` realigned to Flask.
-- [x] `docs/architecture-plan.md` — the architectural proposal awaiting approval.
+- [x] `docs/architecture-plan.md` — architectural plan **approved 2026-05-10**.
 - [x] `.claude/skills/` — project-level Claude Code skills mirroring [`docs/tasks.md`](./docs/tasks.md).
 
 ## 0.1.0 — "Walking skeleton"

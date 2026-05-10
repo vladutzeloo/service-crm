@@ -5,17 +5,17 @@ equipment, tickets, interventions, checklists, maintenance planning, and
 operational dashboards. UI design language is reused verbatim from
 [`vladutzeloo/oee-calculator2.0`](https://github.com/vladutzeloo/oee-calculator2.0).
 
-> **Status: planning.** No application code has shipped yet. The first
-> runnable version is `0.1.0` on the [roadmap](./ROADMAP.md). All
-> architectural decisions go through
-> [`docs/architecture-plan.md`](./docs/architecture-plan.md) before any
-> code lands.
+> **Status: 0.1.0 in flight.** Architecture plan approved 2026-05-10;
+> implementation of the "walking skeleton" milestone has begun. See
+> [`docs/architecture-plan.md`](./docs/architecture-plan.md) for the
+> approved decisions and [`ROADMAP.md`](./ROADMAP.md) for the milestone
+> checklist.
 
 ## Start here
 
 1. [`AGENTS.md`](./AGENTS.md) — always-loadable agent context. Read first.
-2. [`docs/architecture-plan.md`](./docs/architecture-plan.md) — current
-   architectural proposal awaiting approval.
+2. [`docs/architecture-plan.md`](./docs/architecture-plan.md) — approved
+   architectural plan (signed off 2026-05-10).
 3. [`docs/service-domain.md`](./docs/service-domain.md) — entities,
    workflows, modules.
 4. [`docs/ui-reference.md`](./docs/ui-reference.md) — pattern map between
