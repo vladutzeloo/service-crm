@@ -19,12 +19,27 @@ def test_reset_db_requires_yes_flag(app: Flask) -> None:
 
 
 @pytest.mark.integration
-def test_reset_db_with_yes_creates_schema(app: Flask) -> None:
+def test_reset_db_with_yes_runs_migrations(app: Flask, monkeypatch: pytest.MonkeyPatch) -> None:
+    """``reset_db`` should ``db.drop_all`` and then ``flask_migrate.upgrade``.
+
+    Asserting on the upgrade *call* rather than the schema state because
+    the foundation PR ships zero Alembic revisions; the real upgrade
+    round-trip is exercised once /data-model lands the first revision.
+    """
+    calls: list[str] = []
+
+    def _fake_upgrade(*_args: object, **_kwargs: object) -> None:
+        calls.append("upgrade")
+
+    monkeypatch.setattr("flask_migrate.upgrade", _fake_upgrade)
+
     runner = CliRunner()
     with app.app_context():
         result = runner.invoke(reset_db, ["--yes"])
-    assert result.exit_code == 0
+
+    assert result.exit_code == 0, result.output
     assert "Database reset." in result.output
+    assert calls == ["upgrade"]
 
 
 @pytest.mark.unit

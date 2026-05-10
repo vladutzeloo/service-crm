@@ -38,8 +38,13 @@ def reset_db(yes: bool) -> None:
             err=True,
         )
         sys.exit(1)
+    # Drop everything and run migrations from scratch, so ``alembic_version``
+    # is rebuilt alongside the schema. ``db.create_all()`` would skip it and
+    # leave the next ``flask db upgrade`` thinking nothing has been applied.
+    from flask_migrate import upgrade as flask_migrate_upgrade
+
     db.drop_all()
-    db.create_all()
+    flask_migrate_upgrade()
     click.echo("Database reset.")
 
 

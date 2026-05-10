@@ -29,6 +29,7 @@ from typing import Any
 from flask import current_app, has_app_context
 from sqlalchemy import JSON, DateTime, Enum, String, event, inspect
 from sqlalchemy.orm import Mapped, Session, mapped_column
+from sqlalchemy.orm.base import NO_VALUE
 
 from ..extensions import db
 from . import clock, ulid
@@ -82,6 +83,19 @@ def _record_audit_events(session: Session, _flush_ctx: Any, _instances: Any) -> 
     actor = ACTOR_CTX.get()
     request_id = REQUEST_ID_CTX.get()
 
+    # Python-side ``default=ulid.new`` hasn't fired yet at before_flush, so
+    # ``instance.id`` would still be ``None`` for new rows and the audit
+    # event would lose its link back to the entity. Eagerly populate.
+    # The mixin doesn't declare ``id`` itself (each subclass owns its PK),
+    # so we set it dynamically.
+    for instance in session.new:
+        if (
+            isinstance(instance, Auditable)
+            and not isinstance(instance, AuditEvent)
+            and getattr(instance, "id", None) is None
+        ):
+            instance.id = ulid.new()  # type: ignore[attr-defined]
+
     pending: list[AuditEvent] = []
     for instance in session.new:
         if isinstance(instance, Auditable) and not isinstance(instance, AuditEvent):
@@ -107,6 +121,9 @@ def _audit_enabled() -> bool:
     return bool(current_app.config.get("AUDIT_LOG_ENABLED", True))
 
 
+_SKIP_KEYS = frozenset({"created_at", "updated_at"})
+
+
 def _event_for(
     instance: Any,
     action: str,
@@ -114,14 +131,16 @@ def _event_for(
     request_id: str | None,
 ) -> AuditEvent:
     state = inspect(instance)
-    after: dict[str, Any] = {}
-    for attr in state.attrs:
-        if attr.key in {"created_at", "updated_at"}:
-            continue
-        try:
-            after[attr.key] = _coerce(attr.loaded_value)
-        except Exception:
-            after[attr.key] = None
+
+    before: dict[str, Any] | None = None
+    after: dict[str, Any] | None = None
+
+    if action == "create":
+        after = _snapshot_after(state)
+    elif action == "update":
+        before, after = _snapshot_update(state)
+    else:  # delete
+        before = _snapshot_after(state)
 
     return AuditEvent(
         action=action,
@@ -129,9 +148,46 @@ def _event_for(
         entity_id=getattr(instance, "id", None),
         actor_user_id=actor,
         request_id=request_id,
-        before=None,
-        after=after if action != "delete" else None,
+        before=before,
+        after=after,
     )
+
+
+def _snapshot_after(state: Any) -> dict[str, Any]:
+    """Current column values, skipping relationships and timestamp clutter."""
+    out: dict[str, Any] = {}
+    for prop in state.mapper.column_attrs:
+        if prop.key in _SKIP_KEYS:
+            continue
+        value = state.attrs[prop.key].loaded_value
+        if value is NO_VALUE:
+            continue
+        out[prop.key] = _coerce(value)
+    return out
+
+
+def _snapshot_update(state: Any) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Pre- and post-flush column values for an update.
+
+    Walks ``state.get_history`` per column so we capture the *original*
+    value (from ``deleted``) when an attribute changed, falling back to
+    ``unchanged`` otherwise. The "after" side is the current loaded value.
+    """
+    before: dict[str, Any] = {}
+    after: dict[str, Any] = {}
+    for prop in state.mapper.column_attrs:
+        if prop.key in _SKIP_KEYS:
+            continue
+        history = state.attrs[prop.key].history
+        if history.deleted:
+            before[prop.key] = _coerce(history.deleted[0])
+        elif history.unchanged:
+            before[prop.key] = _coerce(history.unchanged[0])
+
+        current = state.attrs[prop.key].loaded_value
+        if current is not NO_VALUE:
+            after[prop.key] = _coerce(current)
+    return before, after
 
 
 def _coerce(value: Any) -> Any:
