@@ -78,43 +78,59 @@ entry.
 
 ### 4.2 Layout (target)
 
+The importable package is `service_crm` (matches `pyproject.toml` and the
+mirror layout in [python.tests.md §1](./python.tests.md#1-layout)).
+
 ```
-service_crm/
-├── app/
-│   ├── api/            # FastAPI routers
-│   ├── web/            # Jinja templates + HTMX endpoints
-│   ├── domain/         # Pure-Python models, state machines, money math
-│   ├── db/             # SQLAlchemy models, session, alembic env
-│   ├── services/       # Use-cases (issue_invoice, record_payment, ...)
-│   ├── auth/           # Sessions, password hashing, RBAC
-│   ├── jobs/           # Scheduled / background tasks
-│   └── settings.py     # Pydantic Settings, 12-factor env
-├── migrations/         # Alembic
-├── tests/              # See python.tests.md
-├── docs/
-├── pyproject.toml
-└── Dockerfile
+service_crm/            # the importable Python package
+├── api/                # FastAPI routers
+├── web/                # Jinja templates + HTMX endpoints
+├── domain/             # Pure-Python models, state machines, money math
+├── db/                 # SQLAlchemy models, session, alembic env
+├── services/           # Use-cases (issue_invoice, record_payment, ...)
+├── auth/               # Sessions, password hashing, RBAC
+├── jobs/               # Scheduled / background tasks
+├── clock.py            # `now()` shim (mockable in tests)
+└── settings.py         # Pydantic Settings, 12-factor env
+migrations/             # Alembic, lives at the repo root
+tests/                  # See python.tests.md
+docs/
+pyproject.toml
+Dockerfile
 ```
 
 Two rules that keep the layers honest:
 
-1. `app/domain/` imports nothing from `app/db/`, `app/api/`, or `app/web/`.
-   Domain is pure functions and dataclasses — trivially unit-testable.
-2. `app/api/` and `app/web/` never touch `db.session` directly; they call
-   `app/services/`. Services are the only callers of the ORM.
+1. `service_crm.domain` imports nothing from `service_crm.db`,
+   `service_crm.api`, or `service_crm.web`. Domain is pure functions and
+   dataclasses — trivially unit-testable.
+2. `service_crm.api` and `service_crm.web` never touch `db.session`
+   directly; they call `service_crm.services`. Services are the only
+   callers of the ORM.
 
 ### 4.3 Cross-cutting
 
 - **Money** — never floats. `decimal.Decimal` end-to-end, persisted as
   `NUMERIC(12, 2)`. A `Money(amount, currency)` value object lives in
-  `domain/money.py`.
+  `service_crm/domain/money.py`.
 - **Time** — UTC in storage, business timezone in UI. A single
-  `app.clock.now()` helper makes time mockable in tests.
-- **IDs** — ULIDs for externally-visible IDs (sortable, URL-safe, no enumeration).
-- **Audit log** — every mutation through `services/` writes an immutable
-  `AuditEvent` row. Free-form `before`/`after` JSON; cheap and good enough for
-  a small business.
-- **Config** — 12-factor. `app/settings.py` is the only place that reads env.
+  `service_crm.clock.now()` helper makes time mockable in tests.
+- **IDs** — ULIDs for externally-visible IDs (sortable, URL-safe, no
+  enumeration). ULIDs are 128-bit and binary-compatible with UUIDs, so on
+  Postgres they are stored in native `UUID` columns (16 bytes, fast index,
+  small foot­print) and rendered/parsed as Crockford-base32 at the edges.
+  On SQLite — dev/test only — they fall back to a `BLOB(16)` column with the
+  same binary encoding so behavior matches.
+- **Audit log** — every mutation writes an immutable `AuditEvent` row with
+  free-form `before`/`after` JSON. We don't trust developers to remember:
+  the writes are produced by SQLAlchemy `after_insert` / `after_update` /
+  `after_delete` event listeners on a marker base class (`Auditable`), so
+  any model that inherits from it is covered automatically. Service-level
+  context (acting user, request id, reason) is attached via a contextvar
+  set by the request middleware, so the listener has everything it needs
+  without each service remembering to call an `audit(...)` helper.
+- **Config** — 12-factor. `service_crm/settings.py` is the only place that
+  reads env.
 
 ## 5. Risks & open questions
 

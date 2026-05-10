@@ -41,7 +41,9 @@ Operators can put real data in.
 - [ ] Customer CRUD (web + API), soft-delete.
 - [ ] Asset CRUD bound to a customer.
 - [ ] ULID IDs for external surfaces.
-- [ ] Search across customers and assets (Postgres `tsvector`, `LIKE` on SQLite).
+- [ ] Search across customers and assets — Postgres `tsvector` + GIN, SQLite
+      FTS5 with the same tokenizer config so dev and prod behave the same
+      (stemming + ranked results in both).
 - [ ] Import: CSV import for customers.
 
 ## 0.3.0 — "Work orders"
