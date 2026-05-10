@@ -11,17 +11,17 @@ Runs on **desktop and on phones** (PWA-light: responsive + installable;
 see [`docs/v1-implementation-goals.md` §2](./docs/v1-implementation-goals.md#2-the-v10-phone-ready-bar)).
 Bilingual from day one — **Romanian (default) + English**.
 
-> **Status: planning.** No application code has shipped yet. The first
-> runnable version is `0.1.0` on the [roadmap](./ROADMAP.md). All
-> architectural decisions go through
-> [`docs/architecture-plan.md`](./docs/architecture-plan.md) before any
-> code lands.
+> **Status: 0.1.0 in flight.** Architecture plan approved 2026-05-10;
+> walking-skeleton foundation landed. See
+> [`docs/architecture-plan.md`](./docs/architecture-plan.md) for the
+> approved decisions and [`ROADMAP.md`](./ROADMAP.md) for the milestone
+> checklist.
 
 ## Start here
 
 1. [`AGENTS.md`](./AGENTS.md) — always-loadable agent context. Read first.
-2. [`docs/architecture-plan.md`](./docs/architecture-plan.md) — current
-   architectural proposal awaiting approval.
+2. [`docs/architecture-plan.md`](./docs/architecture-plan.md) — approved
+   architectural plan (signed off 2026-05-10).
 3. [`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) —
    the v1.0 production-ready and phone-ready bars. Concrete acceptance
    criteria per milestone.

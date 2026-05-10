@@ -1,13 +1,14 @@
 # Service-CRM — Architecture
 
-> Status: **planning, Flask edition.** Realigned to match the user-supplied
+> Status: **0.1.0 in flight, Flask edition.** Aligned with the user-supplied
 > direction in [`AGENTS.md`](./AGENTS.md), [`docs/service-domain.md`](./docs/service-domain.md),
 > [`docs/ui-reference.md`](./docs/ui-reference.md) and [`docs/tasks.md`](./docs/tasks.md).
 >
 > This document describes *what* we are building and *how the layers fit*.
 > The roadmap of *when* each piece ships is in [`ROADMAP.md`](./ROADMAP.md).
-> The currently-pending architectural proposal (assumptions, model set,
-> approval gate) is in [`docs/architecture-plan.md`](./docs/architecture-plan.md).
+> The architectural plan (assumptions, model set, sign-off record) is in
+> [`docs/architecture-plan.md`](./docs/architecture-plan.md) — **approved
+> 2026-05-10**.
 
 ## 1. Product summary
 
@@ -242,12 +243,13 @@ What's **not** in v1.0 — and where it goes:
   pattern *names* in [`docs/ui-reference.md`](./docs/ui-reference.md) rather
   than the actual templates. Tracked in
   [`docs/architecture-plan.md`](./docs/architecture-plan.md) §1.2.
-- **Blueprints with internal models vs. flat `models/`** — proposed in
-  [`docs/architecture-plan.md`](./docs/architecture-plan.md) §3.2; pending
-  approval.
-- **Maintenance scope** — does it deserve its own blueprint or live inside
-  `equipment/`? Pending approval.
-- **`Auditable` mixin vs. explicit service-side audits** — pending approval.
+- **Blueprints with internal models vs. flat `models/`** — resolved
+  2026-05-10 in favor of blueprint-internal models per
+  [`docs/architecture-plan.md`](./docs/architecture-plan.md) §3.2.
+- **Maintenance scope** — resolved 2026-05-10: `maintenance` is its own
+  blueprint, not nested inside `equipment/`.
+- **`Auditable` mixin vs. explicit service-side audits** — resolved
+  2026-05-10 in favor of the `Auditable` mixin.
 - **Postgres FTS / SQLite FTS5** — feasible but adds a tokenizer config we
   need to verify behaves the same on both backends. Worth testing in 0.2.0.
 - **Alembic + SQLite** — needs `render_as_batch=True`. Worth verifying in

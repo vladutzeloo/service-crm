@@ -9,6 +9,8 @@ The milestones below mirror the implementation sequence in
 [`AGENTS.md`](./AGENTS.md) §"Architecture Rules", and the entities defined
 in [`docs/service-domain.md`](./docs/service-domain.md). Every milestone is
 gated on architecture sign-off per [`docs/architecture-plan.md`](./docs/architecture-plan.md).
+The per-version testing capabilities that ship with each minor release
+are tracked in [`docs/testing-cadence.md`](./docs/testing-cadence.md) §4.
 
 The concrete acceptance criteria for each milestone — the "done when" bar
 and the production / phone-readiness checklists — live in
@@ -65,7 +67,7 @@ Documentation and skills only — no application code.
 - [x] CI + release workflow scaffolding (stack-agnostic).
 - [x] `pyproject.toml`, `VERSION`, `CHANGELOG.md`, `.gitignore`.
 - [x] `ARCHITECTURE.md`, `ROADMAP.md`, `python.tests.md` realigned to Flask.
-- [x] `docs/architecture-plan.md` — the architectural proposal awaiting approval.
+- [x] `docs/architecture-plan.md` — architectural plan **approved 2026-05-10**.
 - [x] `.claude/skills/` — project-level Claude Code skills mirroring [`docs/tasks.md`](./docs/tasks.md).
 
 ## 0.1.0 — "Walking skeleton"

@@ -43,8 +43,6 @@ dependencies = [
     "Flask-Babel>=4.0",
     "Babel>=2.15",
     # config
-    "pydantic>=2.7",
-    "pydantic-settings>=2.3",
     "python-dotenv>=1.0",
     # background jobs (in-process; RQ + Redis post-1.0)
     "APScheduler>=3.10",
@@ -103,15 +101,30 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "PL", "RUF"]
+# Lazy imports inside the factory and CLI entrypoint are intentional
+# (avoid blueprint-vs-factory import cycles); PLC0415 misreads them.
+ignore = ["PLC0415"]
+
+[tool.ruff.lint.per-file-ignores]
+# HTTP status codes and other in-test literals don't earn names.
+"tests/**/*.py" = ["PLR2004"]
 
 [tool.mypy]
 python_version = "3.11"
 strict = true
 warn_unused_ignores = true
-plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["factory.*", "factory_boy.*"]
+module = [
+    "factory.*",
+    "factory_boy.*",
+    "flask_login",
+    "flask_login.*",
+    "flask_migrate",
+    "flask_migrate.*",
+    "flask_wtf",
+    "flask_wtf.*",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
@@ -132,4 +145,4 @@ source = ["service_crm"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-fail_under = 85
+fail_under = 100
