@@ -4,7 +4,9 @@ How we test Service-CRM. Opinionated; deviating needs a comment in the PR.
 
 > Companion docs: [`ARCHITECTURE.md`](./ARCHITECTURE.md),
 > [`ROADMAP.md`](./ROADMAP.md), [`AGENTS.md`](./AGENTS.md),
-> [`docs/architecture-plan.md`](./docs/architecture-plan.md).
+> [`docs/architecture-plan.md`](./docs/architecture-plan.md),
+> [`docs/testing-cadence.md`](./docs/testing-cadence.md) (the *when* —
+> per-version cadence, mobile/PWA strategy, pre-tag smoke checklist).
 
 ## TL;DR
 

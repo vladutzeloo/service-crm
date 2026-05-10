@@ -9,6 +9,8 @@ The milestones below mirror the implementation sequence in
 [`AGENTS.md`](./AGENTS.md) §"Architecture Rules", and the entities defined
 in [`docs/service-domain.md`](./docs/service-domain.md). Every milestone is
 gated on architecture sign-off per [`docs/architecture-plan.md`](./docs/architecture-plan.md).
+The per-version testing capabilities that ship with each minor release
+are tracked in [`docs/testing-cadence.md`](./docs/testing-cadence.md) §4.
 
 Tags are `vX.Y.Z`. Pushing a tag triggers
 [`.github/workflows/release.yml`](./.github/workflows/release.yml), which
