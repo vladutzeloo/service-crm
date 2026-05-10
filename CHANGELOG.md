@@ -26,17 +26,6 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 - ADR-0007 placeholder: PWA-light in v1, offline writes in v1.2.
 
 ### Changed
-- ROADMAP.md milestones thread mobile/PWA through 0.2.0 (UI foundation),
-  0.5.0 (tickets — phone-first slice), 0.8.0 (dashboards), 0.9.0
-  (hardening).
-- 0.9.0 hardening checklist replaced with a direct mapping to the bars
-  in `docs/v1-implementation-goals.md` §1–§3.
-- `.claude/skills/ui-foundation/SKILL.md` and
-  `.claude/skills/consistency-pass/SKILL.md` updated with the mobile /
-  PWA hard rules and pre-merge checklist items.
-- README "Start here" lists v1-implementation-goals as required reading.
-
-### Changed
 - Stack realigned to **Flask + Jinja + SQLAlchemy + Alembic + pytest**
   (was FastAPI + HTMX in the prior planning round). Drives matching
   rewrites of `ARCHITECTURE.md`, `ROADMAP.md`, `python.tests.md`, and
@@ -47,11 +36,19 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
   `ChecklistRun`, `ProcedureDocument`) grouped under the five blueprints
   in `AGENTS.md`.
 - `ROADMAP.md` milestones reordered around the five blueprints and the
-  sequence in `docs/tasks.md`.
+  sequence in `docs/tasks.md`; subsequently threaded mobile/PWA through
+  0.2.0 (UI foundation), 0.5.0 (tickets — phone-first slice), 0.8.0
+  (dashboards), 0.9.0 (hardening).
+- 0.9.0 hardening checklist replaced with a direct mapping to the bars
+  in `docs/v1-implementation-goals.md` §1–§3.
 - User-supplied support docs moved from repo root into `docs/` to match
   the links in `AGENTS.md`.
 - `README.md` rewritten as a "Start here" index pointing at `AGENTS.md`,
-  the docs/, and the project skills.
+  the docs/, and the project skills; subsequently expanded to list
+  `v1-implementation-goals` as required reading.
+- `.claude/skills/ui-foundation/SKILL.md` and
+  `.claude/skills/consistency-pass/SKILL.md` updated with the mobile /
+  PWA hard rules and pre-merge checklist items.
 
 <!--
 Future release sections look like this:

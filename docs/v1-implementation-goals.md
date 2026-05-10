@@ -161,7 +161,7 @@ mobile Chrome. We are **not** building a separate mobile UI.
       the most recent dashboard render. **No write-side caching in v1.0.**
 - [ ] "Add to Home Screen" works on iOS Safari **and** Android Chrome
       (last 2 stable major versions of each).
-- [ ] Installed PWA opens to the dashboard within **2 seconds** on a
+- [ ] Installed PWA opens to the dashboard within **2.5 seconds** on a
       mid-range phone (Lighthouse LCP budget; see §2.6).
 
 ### 2.2 Touch + responsive layout
@@ -206,9 +206,11 @@ mobile Chrome. We are **not** building a separate mobile UI.
 ### 2.5 Network resilience
 
 - [ ] Every state-changing form submits with an idempotency token
-      (UUID generated client-side, stored in a hidden input). The server
-      dedupes by `(user_id, idempotency_token)` for 24 h. Tested with a
-      forced retry.
+      (UUID generated server-side at form-render time, stored in a hidden
+      input). The server dedupes by `(user_id, idempotency_token)` for
+      24 h. Tested with a forced retry. Server-side generation matches
+      the Flask/Jinja minimal-JS posture and the rule in
+      [`.claude/skills/ui-foundation/SKILL.md`](../.claude/skills/ui-foundation/SKILL.md).
 - [ ] Long-running operations (CSV import, photo upload) show progress
       and resume-or-fail predictably; never silently double-create.
 - [ ] If the user is logged out (or the network drops mid-submit), the
