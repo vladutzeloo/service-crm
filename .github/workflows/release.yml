@@ -1,0 +1,157 @@
+name: Release
+
+# Triggered by pushing a SemVer tag (e.g. `v0.1.0`, `v1.2.3-rc.1`).
+# Manual `workflow_dispatch` is allowed for re-running a release after a
+# transient failure; it does not create or move tags on its own.
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)release, e.g. v0.1.0"
+        required: true
+
+permissions:
+  contents: write   # create the GitHub Release
+  id-token: write   # reserved for PyPI Trusted Publishing once we publish
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify tag matches VERSION + CHANGELOG
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      tag: ${{ steps.resolve.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag and version
+        id: resolve
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing tag=$TAG version=$VERSION"
+
+      - name: VERSION file matches tag
+        run: |
+          set -euo pipefail
+          FILE_VERSION="$(tr -d '[:space:]' < VERSION)"
+          if [ "$FILE_VERSION" != "${{ steps.resolve.outputs.version }}" ]; then
+            echo "::error::VERSION file ($FILE_VERSION) does not match tag (${{ steps.resolve.outputs.version }})"
+            exit 1
+          fi
+
+      - name: CHANGELOG has a section for this version
+        run: |
+          set -euo pipefail
+          if ! grep -qE "^## \[${{ steps.resolve.outputs.version }}\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md is missing a '## [${{ steps.resolve.outputs.version }}]' section"
+            exit 1
+          fi
+
+  test:
+    name: Test
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          # Once the project has real code, switch to: pip install -e ".[dev]"
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install pytest
+      - name: Run test suite
+        run: |
+          if [ -d tests ]; then
+            pytest -q
+          else
+            echo "No tests/ directory yet — skipping (planning phase)."
+          fi
+
+  build:
+    name: Build artifacts
+    needs: [verify, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build sdist + wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: [verify, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Extract release notes from CHANGELOG.md
+        id: notes
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.verify.outputs.version }}"
+          # Pull the lines between '## [VERSION]' and the next '## [' header.
+          awk -v v="$VERSION" '
+            BEGIN { inside = 0 }
+            /^## \[/ {
+              if (inside) exit
+              if ($0 ~ "^## \\[" v "\\]") { inside = 1; next }
+            }
+            inside { print }
+          ' CHANGELOG.md > RELEASE_NOTES.md
+          if [ ! -s RELEASE_NOTES.md ]; then
+            echo "::error::Empty release notes for $VERSION"
+            exit 1
+          fi
+          echo "Release notes preview:"
+          sed -n '1,40p' RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.verify.outputs.tag }}
+          name: ${{ needs.verify.outputs.tag }}
+          body_path: RELEASE_NOTES.md
+          # Pre-1.0 we mark every release as a pre-release, and any tag that
+          # contains a hyphen (e.g. -rc.1, -beta.2) is also pre-release.
+          prerelease: ${{ startsWith(needs.verify.outputs.version, '0.') || contains(needs.verify.outputs.version, '-') }}
+          files: dist/*
+          fail_on_unmatched_files: true
+          generate_release_notes: false
