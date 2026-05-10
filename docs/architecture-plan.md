@@ -512,6 +512,16 @@ class ProcedureDocument(db.Model, Auditable):
     body_md = mapped_column(Text, default="")
     tags    = relationship("ProcedureTag", secondary="procedure_document_tag")
 
+procedure_document_tag = db.Table(
+    "procedure_document_tag",
+    db.Column("procedure_document_id",
+              ForeignKey("procedure_document.id", ondelete="CASCADE"),
+              primary_key=True),
+    db.Column("procedure_tag_id",
+              ForeignKey("procedure_tag.id", ondelete="CASCADE"),
+              primary_key=True),
+)
+
 # service_crm/planning/models.py
 class Technician(db.Model, Auditable):
     """1:1 with User but separate so we can track planning attributes
@@ -524,8 +534,11 @@ class Technician(db.Model, Auditable):
 class TechnicianAssignment(db.Model, Auditable):
     """Ticket / intervention assigned to a technician.
 
-    Exactly one of `ticket_id` or `intervention_id` must be set; the
-    CHECK below makes "neither" illegal at the DB level."""
+    At least one of `ticket_id` or `intervention_id` must be set; the
+    CHECK below makes "neither" illegal at the DB level. Both can be
+    set simultaneously (a technician assigned to a specific
+    intervention on a specific ticket) — that's the redundant-but-
+    explicit case, not an error."""
     id              = mapped_column(ULID, primary_key=True, default=ulid_new)
     technician_id   = mapped_column(ForeignKey("technician.id", ondelete="CASCADE"), index=True)
     ticket_id       = mapped_column(ForeignKey("service_ticket.id"), nullable=True)
