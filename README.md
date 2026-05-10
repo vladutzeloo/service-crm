@@ -1,11 +1,15 @@
 # service-crm
 
-Standalone, self-hostable **Flask** CRM for service teams — clients,
-equipment, tickets, interventions, checklists, maintenance planning, and
-operational dashboards. UI design language is reused verbatim from
+Standalone, self-hostable **Flask** CRM for **CNC service teams** —
+clients, equipment (machines + controllers + warranties), tickets,
+interventions, parts, checklists, procedures, maintenance planning,
+technician capacity, and operational dashboards. UI design language is
+reused verbatim from
 [`vladutzeloo/oee-calculator2.0`](https://github.com/vladutzeloo/oee-calculator2.0).
-Runs **on desktop and on phones** (PWA-light: responsive + installable;
+
+Runs on **desktop and on phones** (PWA-light: responsive + installable;
 see [`docs/v1-implementation-goals.md` §2](./docs/v1-implementation-goals.md#2-the-v10-phone-ready-bar)).
+Bilingual from day one — **Romanian (default) + English**.
 
 > **Status: planning.** No application code has shipped yet. The first
 > runnable version is `0.1.0` on the [roadmap](./ROADMAP.md). All
@@ -31,12 +35,15 @@ see [`docs/v1-implementation-goals.md` §2](./docs/v1-implementation-goals.md#2-
 
 ## Reference docs
 
+- [`docs/blueprint.md`](./docs/blueprint.md) — long-form CNC product blueprint.
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — stack, layout, layering rules,
   cross-cutting decisions.
 - [`ROADMAP.md`](./ROADMAP.md) — versioned milestones, `0.1.0 → 1.0.0`.
 - [`python.tests.md`](./python.tests.md) — testing strategy: layers,
-  fixtures, coverage gate, property-based tests.
+  fixtures, coverage gate, property-based tests, mobile + i18n tests.
 - [`CHANGELOG.md`](./CHANGELOG.md) — Keep-a-Changelog log of every release.
+- [`docs/adr/`](./docs/adr/) — Architecture Decision Records (ADR-0001
+  pinned the Flask choice).
 - [`docs/obsidian-brain.md`](./docs/obsidian-brain.md) — optional external
   AI memory vault (not part of the app).
 - [`.github/RELEASING.md`](./.github/RELEASING.md) — how to cut a release.

@@ -39,10 +39,17 @@ dependencies = [
     "Flask-WTF>=1.2",
     "WTForms>=3.1",
     "argon2-cffi>=23.1",
+    # i18n
+    "Flask-Babel>=4.0",
+    "Babel>=2.15",
     # config
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "python-dotenv>=1.0",
+    # background jobs (in-process; RQ + Redis post-1.0)
+    "APScheduler>=3.10",
+    # image handling for intervention photos
+    "Pillow>=10.3",
     # serving
     "gunicorn>=22.0; sys_platform != 'win32'",
     "waitress>=3.0; sys_platform == 'win32'",
@@ -87,6 +94,8 @@ pattern = "^(?P<version>[^\\s]+)\\s*$"
 [tool.hatch.build.targets.wheel]
 # Will start matching real files in 0.1.0 when service_crm/ lands.
 packages = ["service_crm"]
+# Compiled message catalogs ship in the wheel; .po files do not.
+artifacts = ["service_crm/locale/**/*.mo"]
 
 [tool.ruff]
 line-length = 100

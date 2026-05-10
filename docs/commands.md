@@ -108,6 +108,45 @@ ruff format --check .           # CI-style check
 mypy service_crm                # type check (strict)
 ```
 
+## Translations (Flask-Babel)
+
+Catalogs live at `locale/<lang>/LC_MESSAGES/messages.po`; `.mo` files are
+build artefacts (never committed). Default locale is `ro`; `en` is the
+secondary locale. See [`docs/v1-implementation-goals.md`](../docs/v1-implementation-goals.md) §3.2.
+
+Initialise catalogs (one-time, already done in 0.1.0):
+
+```powershell
+pybabel extract -F babel.cfg -o locale/messages.pot service_crm
+pybabel init    -i locale/messages.pot -d locale -l ro
+pybabel init    -i locale/messages.pot -d locale -l en
+```
+
+After adding or changing user-facing strings — re-extract and update:
+
+```powershell
+pybabel extract -F babel.cfg -o locale/messages.pot service_crm
+pybabel update  -i locale/messages.pot -d locale
+```
+
+Then translate the new entries in `locale/ro/LC_MESSAGES/messages.po`
+and `locale/en/LC_MESSAGES/messages.po` (text editor or Poedit).
+
+Compile before running the app:
+
+```powershell
+pybabel compile -d locale -f
+```
+
+Or via the project CLI shim (defined in `service_crm/cli.py`):
+
+```powershell
+flask --app service_crm babel-compile
+```
+
+CI fails if `pybabel update` produces an uncommitted diff — that means
+new `_()` calls were merged without re-extraction.
+
 `pre-commit` (recommended once installed):
 
 ```powershell

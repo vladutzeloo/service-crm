@@ -90,6 +90,20 @@ Codifies the "Consistency Pass" checklist from
     threshold, that's a `blocker`.
 18. **Accessibility.** `axe-core` audit (where available) reports zero
     critical/serious violations on new P1 pages.
+19. **i18n hygiene** (per
+    [`docs/v1-implementation-goals.md`](../../../docs/v1-implementation-goals.md) §3.2):
+    - No hardcoded user-facing strings — every visible text node passes
+      through `{% trans %}`, `_()`, or `gettext_lazy`.
+    - WTForms validators use translatable messages (`gettext_lazy` for
+      class-level defaults).
+    - DB enums and lookup `code` columns use stable English; UI labels
+      are translated.
+    - `pybabel update` produces no uncommitted diff — new `_()` calls
+      land with re-extracted catalogs.
+    - Layout audit at 320 px in **both** `ro` and `en` (no horizontal
+      scrollbar).
+    - Date / number formatting goes through Babel helpers, not
+      `strftime` directly.
 
 ## Procedure
 

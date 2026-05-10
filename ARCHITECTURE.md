@@ -35,12 +35,13 @@ templates, and CSS tokens (mapping in [`docs/ui-reference.md`](./docs/ui-referen
 | Layer         | Choice                                  | Why                                                        |
 | ------------- | --------------------------------------- | ---------------------------------------------------------- |
 | Language      | Python 3.11+                            | Project standard                                           |
-| Web framework | Flask                                   | Mandated by AGENTS.md                                      |
+| Web framework | Flask                                   | Mandated by AGENTS.md; confirmed in [ADR-0001](./docs/adr/0001-flask-vs-fastapi.md) |
 | Templating    | Jinja2 (server-rendered)                | Mandated; matches oee-calculator2.0                        |
 | ORM           | SQLAlchemy 2.x + Flask-SQLAlchemy       | Mandated                                                   |
 | Migrations    | Alembic (via Flask-Migrate)             | Mandated; reviewable + reversible                          |
 | Forms         | Flask-WTF + WTForms                     | CSRF + validation in one place                             |
 | Auth          | Flask-Login + Argon2 (`argon2-cffi`)    | Server-rendered sessions, single-tenant                    |
+| i18n          | Flask-Babel + Babel                     | RO + EN from day one; `{% trans %}` in Jinja, `gettext_lazy` in WTForms |
 | DB (prod)     | PostgreSQL 15+                          | Money + audit + FTS                                        |
 | DB (dev/test) | SQLite                                  | Zero-setup, runs in CI                                     |
 | Background    | APScheduler (later: RQ + Redis)         | Start in-process; graduate when justified                  |
@@ -78,26 +79,45 @@ effects. Every test in [`python.tests.md`](./python.tests.md) starts from
 ```
 service_crm/                 # importable package
 ├── __init__.py              # create_app() factory + register_*() helpers
-├── extensions.py            # db, migrate, login_manager, csrf  (all .init_app())
+├── extensions.py            # db, migrate, login_manager, csrf, babel  (all .init_app())
 ├── config.py                # Dev / Test / Prod config classes (12-factor)
 ├── cli.py                   # Flask CLI commands
 ├── auth/                    # blueprint: User, Role, login/logout
-├── clients/                 # blueprint: Client, Contact, Location
-├── equipment/               # blueprint: Equipment / installed base
-├── tickets/                 # blueprint: ServiceTicket, ServiceIntervention, ServicePartUsage
-├── maintenance/             # blueprint: MaintenancePlan + due/overdue surfacing
-├── knowledge/               # blueprint: ChecklistTemplate, ChecklistRun, ProcedureDocument
-├── dashboard/               # blueprint: operational dashboard
-├── shared/                  # cross-cutting (audit, ulid, money, clock, filters)
+├── clients/                 # blueprint: Client, Contact, Location, ServiceContract
+├── equipment/               # blueprint: Equipment, EquipmentModel,
+│                            #   EquipmentControllerType, EquipmentWarranty
+├── tickets/                 # blueprint: ServiceTicket, TicketStatusHistory,
+│                            #   TicketComment, TicketAttachment, TicketType,
+│                            #   TicketPriority, ServiceIntervention,
+│                            #   InterventionAction, InterventionFinding,
+│                            #   PartMaster, ServicePartUsage; state.py state machine
+├── maintenance/             # blueprint: MaintenancePlan, MaintenanceTask,
+│                            #   MaintenanceExecution, MaintenanceTemplate
+├── knowledge/               # blueprint: ChecklistTemplate, ChecklistTemplateItem,
+│                            #   ChecklistRun, ChecklistRunItem,
+│                            #   ProcedureDocument, ProcedureTag
+├── planning/                # blueprint: Technician, TechnicianAssignment,
+│                            #   TechnicianCapacitySlot, TechnicianSkill (v2)
+├── dashboard/               # blueprint: operational dashboard (admin + operator)
+├── shared/                  # cross-cutting (audit, ulid, money, clock, filters, i18n helpers)
 ├── templates/               # Jinja, mirrors oee-calculator2.0 layout
 │   ├── base.html
 │   ├── partials/
-│   ├── auth/  clients/  equipment/  tickets/  maintenance/  knowledge/  dashboard/
+│   ├── _macros/
+│   └── auth/  clients/  equipment/  tickets/  maintenance/
+│        knowledge/  planning/  dashboard/
 └── static/
     ├── css/style.css        # vendored from oee-calculator2.0 + project additions
+    ├── manifest.webmanifest
+    ├── service-worker.js
+    ├── icons/
     └── js/
+locale/                      # gettext catalogs at repo root
+├── ro/LC_MESSAGES/messages.po
+└── en/LC_MESSAGES/messages.po
 migrations/                  # alembic, lives at repo root
 tests/                       # mirrors service_crm/ one-for-one
+babel.cfg                    # extraction config
 ```
 
 Each blueprint owns its own `models.py`, `routes.py`, `forms.py`, and
@@ -143,6 +163,15 @@ the cheapest test in the suite — see [`python.tests.md`](./python.tests.md) §
   results in both).
 - **Config** — 12-factor. `service_crm/config.py` is the only module that
   reads `os.environ`.
+- **i18n** — Flask-Babel from day one. Default locale `ro`, secondary `en`.
+  Locale selector: user pref → `?lang=` query → `Accept-Language` →
+  default. Catalogs at `locale/ro/LC_MESSAGES/messages.po` and
+  `locale/en/LC_MESSAGES/messages.po`; `.mo` files compiled at container
+  build (not committed). Stored DB enums and lookup `code` columns are
+  stable English; UI translates display labels via `_()` /
+  `{% trans %}` / `gettext_lazy`. Date and number formatting via Babel
+  helpers, never hand-rolled. Full bar in
+  [`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §3.2.
 
 ## 5. UI architecture
 
@@ -246,3 +275,6 @@ v0.1 ships:
 - ADR-0006: Audit via SQLAlchemy event listeners on an `Auditable` mixin.
 - ADR-0007: Mobile = PWA-light in v1; full offline write queue deferred
   to v1.2.
+- ADR-0008: Bilingual RO + EN from day one (RO default), via Flask-Babel.
+- [ADR-0001](./docs/adr/0001-flask-vs-fastapi.md) — *accepted* — Flask
+  over FastAPI for v1.

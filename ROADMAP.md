@@ -29,6 +29,17 @@ GitHub Release. See [`.github/RELEASING.md`](./.github/RELEASING.md).
 - Web Push deferred to v1.1; v1.0 notifications are in-app + email only.
 - Self-hosted single-server target (one VPS, one Postgres, one container).
 - Single-tenant.
+- **Bilingual from day one**: Romanian (default) + English (selectable).
+  Flask-Babel + RO/EN catalogs land in 0.1.0; every milestone after has
+  translated UI, statuses, and form errors.
+- **CNC service domain in full** (per
+  [`docs/blueprint.md`](./docs/blueprint.md) §8) — equipment models,
+  controller types, warranties, ticket history/comments/attachments,
+  intervention actions/findings, parts master, maintenance
+  template/plan/task/execution, structured checklists, technician
+  capacity slots.
+- **Stack: Flask + Jinja + SQLAlchemy + Alembic + pytest** — confirmed
+  in [`docs/adr/0001-flask-vs-fastapi.md`](./docs/adr/0001-flask-vs-fastapi.md).
 
 Full rationale and acceptance criteria:
 [`docs/v1-implementation-goals.md` §0](./docs/v1-implementation-goals.md#0-decided-scope-of-v1).
@@ -64,15 +75,22 @@ Mirrors [`docs/tasks.md`](./docs/tasks.md) steps 1–6 (audit + propose + review
 already done; this milestone executes the approved plan).
 
 - [ ] `service_crm/__init__.py` — `create_app()` factory.
-- [ ] `service_crm/extensions.py` — `db`, `migrate`, `login_manager`, `csrf`.
+- [ ] `service_crm/extensions.py` — `db`, `migrate`, `login_manager`,
+      `csrf`, `babel`.
 - [ ] `service_crm/config.py` — Dev / Test / Prod config classes.
-- [ ] `service_crm/cli.py` — `flask reset-db`, `flask seed`.
+- [ ] `service_crm/cli.py` — `flask reset-db`, `flask seed`,
+      `flask babel-compile`.
 - [ ] Alembic wired against Postgres and SQLite (`render_as_batch=True`).
 - [ ] `auth/` blueprint: `User`, `Role`, login/logout, Argon2 hashing.
 - [ ] First migration (`users`, `roles`).
-- [ ] Healthcheck route + version endpoint.
+- [ ] **Flask-Babel scaffold**: `babel.cfg`, `locale/ro/LC_MESSAGES/messages.po`,
+      `locale/en/LC_MESSAGES/messages.po`. Locale selector function set
+      up (user pref → query → header → default `ro`). Topbar language
+      switch present.
+- [ ] Healthcheck route + version endpoint, both translated.
 - [ ] Dockerfile + `docker compose up` runs the app against Postgres.
 - [ ] `tests/` skeleton with the fixtures from [`python.tests.md`](./python.tests.md).
+- [ ] i18n smoke test: `/healthz?lang=ro` returns RO text, `?lang=en` returns EN.
 - [ ] CI green on Python 3.11 and 3.12, both SQLite and Postgres.
 
 ## 0.2.0 — "UI foundation (mobile-first from day one)"
@@ -103,76 +121,110 @@ business logic. Requires the `oee-calculator2.0` source files (per
       native to oee-calculator2.0 on desktop **and** on phone.
 - [ ] Lighthouse mobile run on the smoke page: Performance ≥ 90,
       Accessibility ≥ 95, PWA badge: yes.
+- [ ] Macro labels and tooltips wrapped in `_()` / `{% trans %}`. RO and
+      EN translations of every shipped macro.
 
-## 0.3.0 — "Clients & contacts"
+## 0.3.0 — "Clients, contacts, locations, contracts"
 
 Mirrors [`docs/tasks.md`](./docs/tasks.md) steps 8–11 for the `clients` blueprint.
 
-- [ ] `Client`, `Contact`, `Location` models + Alembic migration.
+- [ ] `Client`, `Contact`, `Location`, `ServiceContract` models + Alembic
+      migration.
 - [ ] CRUD routes, list, detail, edit-modal — all using the 0.2.0 macros.
 - [ ] Search across clients/contacts (Postgres `tsvector` + GIN, SQLite FTS5).
 - [ ] CSV import for clients.
-- [ ] Soft-delete (`is_active = False`) — financial/service history must remain queryable.
+- [ ] Soft-delete (`is_active = False`) — service history must remain queryable.
 - [ ] Tests: relationships, unique constraints, cascade behavior.
+- [ ] All form labels, validators, and flash messages translated (RO + EN).
 
 ## 0.4.0 — "Equipment / installed base"
 
-- [ ] `Equipment` model + migration (FKs to `Client`, `Location`).
-- [ ] Equipment list bound to a client; equipment detail page.
+- [ ] `Equipment`, `EquipmentModel`, `EquipmentControllerType`,
+      `EquipmentWarranty` models + migration (FKs to `Client`, `Location`).
+- [ ] Equipment list bound to a client; equipment detail page (with
+      warranties + tickets + maintenance plans tab).
 - [ ] Constraint: `Equipment.location_id`, when set, must belong to
       `Equipment.client_id`. Service-layer guard + integration test.
-- [ ] CSV import for equipment.
+- [ ] Constraint: `EquipmentWarranty.ends_on > starts_on`. CHECK + test.
+- [ ] CSV import for equipment + bulk-load of `EquipmentModel` / 
+      `EquipmentControllerType` lookups.
+- [ ] All UI strings translated.
 
-## 0.5.0 — "Tickets & interventions"
+## 0.5.0 — "Tickets — header, history, comments, attachments"
 
-The core loop: open a ticket, log interventions, close it. This is the
-phone-first slice — the technician must be able to do their whole job from
-a phone in the field.
-Mirrors [`docs/tasks.md`](./docs/tasks.md) step 12 (workflow tests).
+Core ticket workflow. Splits the ticket domain across two milestones so
+0.5 stays reviewable; interventions land in 0.6.
 
-- [ ] `ServiceTicket` + status state machine
-      (`open → scheduled → in_progress → awaiting_parts → resolved → closed`,
-      with `cancelled` reachable from any pre-closed state).
-- [ ] `ServiceIntervention` (technician, start/stop, notes).
-- [ ] `ServicePartUsage` per intervention.
-- [ ] Tickets list with filters (status, priority, due, technician).
-- [ ] Ticket detail with intervention timeline.
+- [ ] `ServiceTicket` + state machine
+      (`new → qualified → scheduled → in_progress → waiting_parts →
+      monitoring → completed → closed`, `cancelled` from any pre-completed
+      state) — pure-Python `tickets/state.py`.
+- [ ] `TicketStatusHistory` (append-only); `before_flush` hook writes a
+      row on every status change.
+- [ ] `TicketComment`, `TicketAttachment`.
+- [ ] `TicketType`, `TicketPriority` lookup tables seeded with default
+      RO/EN-translated labels.
+- [ ] Tickets list with filters (status, priority, type, due, technician,
+      client) and translated filter chips.
+- [ ] Ticket detail page with status-history timeline.
+- [ ] Idempotency token on every state-changing form (server-rendered
+      UUID, `(user_id, token)` dedupe for 24 h). Tested by forced retry.
+- [ ] Tests: state machine ≥ 95 % line+branch (Hypothesis state machine);
+      integration tests assert no history-less status transitions.
+
+## 0.6.0 — "Interventions, parts, knowledge"
+
+Phone-first slice: the technician must be able to do their whole job
+from a phone in the field.
+
+- [ ] `ServiceIntervention`, `InterventionAction`, `InterventionFinding`.
+- [ ] `PartMaster` lookup, `ServicePartUsage` per intervention.
+- [ ] `ChecklistTemplate`, `ChecklistTemplateItem`, `ChecklistRun`,
+      `ChecklistRunItem` — frozen snapshot pattern; property-based test
+      that historical runs survive template edits.
+- [ ] `ProcedureDocument`, `ProcedureTag`.
 - [ ] Intervention create/edit form built for one-handed phone use:
       ≥ 44 pt taps, mobile keyboards (`type`/`inputmode`/`autocomplete`),
-      camera capture for photos
+      camera capture
       (`<input type="file" accept="image/*" capture="environment">`).
 - [ ] Server-side photo compression (Pillow): long edge ≤ 2048 px, WebP q85.
-- [ ] Idempotency token on every state-changing form (`(user_id, token)`
-      dedupe for 24 h). Tested by a forced-retry test.
-- [ ] Audit log entries for every state transition.
-- [ ] Tests: state machine ≥ 95% line+branch (via Hypothesis state machine).
+- [ ] Procedure search (PG `tsvector` / SQLite FTS5).
+- [ ] All form labels, status labels, intervention-action templates
+      translated.
 
-## 0.6.0 — "Knowledge: checklists & procedures"
+## 0.7.0 — "Maintenance + planning"
 
-- [ ] `ChecklistTemplate` (items as JSON: `{key, label, kind}`).
-- [ ] `ChecklistRun` with frozen template snapshot.
-- [ ] `ProcedureDocument` (Markdown body, tags).
-- [ ] Attach a checklist run to a ticket / intervention / equipment item.
-- [ ] Procedure search.
+- [ ] `MaintenanceTemplate`, `MaintenancePlan`, `MaintenanceTask`,
+      `MaintenanceExecution` models + migration.
+- [ ] APScheduler job: recompute `MaintenancePlan.next_due_at` and
+      generate `MaintenanceTask` rows for the upcoming window.
+- [ ] One-click "open a ticket from this overdue plan" — links the
+      ticket back to the plan via `MaintenanceTask.ticket_id`.
+- [ ] `Technician`, `TechnicianAssignment`, `TechnicianCapacitySlot`
+      models + migration.
+- [ ] Technician capacity view (per-day load) modeled on
+      `oee-calculator2.0/templates/capacity.html`.
+- [ ] All planning labels translated.
 
-## 0.7.0 — "Maintenance planning"
+## 0.8.0 — "Operational dashboard + reporting"
 
-- [ ] `MaintenancePlan` model (cadence_days, last_done_at, next_due_at).
-- [ ] Background job (APScheduler) to recompute `next_due_at`.
-- [ ] "Equipment with due maintenance" surfaced on the dashboard.
-- [ ] Generate a ticket from an overdue maintenance plan.
+Mirrors [`docs/service-domain.md`](./docs/service-domain.md) §"Dashboard V1"
+and [`docs/blueprint.md`](./docs/blueprint.md) §13–§14.
 
-## 0.8.0 — "Operational dashboard"
-
-Mirrors [`docs/service-domain.md`](./docs/service-domain.md) §"Dashboard V1".
-
-- [ ] Manager view (`templates/dashboard/admin.html`) — active clients,
-      active tickets, interventions today, due maintenance, tech capacity,
-      latest interventions. Modeled on
-      `oee-calculator2.0/templates/admin/dashboard.html`.
+- [ ] Manager view (`templates/dashboard/admin.html`) — KPI tiles for
+      active clients, open tickets, overdue tickets, due maintenance
+      this week, tickets waiting parts, technician utilization.
+      Secondary panels: tickets by status, upcoming maintenance, recent
+      interventions, high-risk machines, technician load by week.
+      Modeled on `oee-calculator2.0/templates/admin/dashboard.html`.
 - [ ] Technician view (`templates/dashboard/operator.html`) — no left
       sidebar, today's queue, one-tap "start intervention". Modeled on
       `oee-calculator2.0/templates/operator/dashboard.html`.
+- [ ] Core reports (per [`docs/blueprint.md`](./docs/blueprint.md) §14):
+      tickets by status & period, interventions by machine, parts used,
+      due-vs-completed maintenance, technician workload, repeat-issue
+      report. Translated labels; stable internal codes; locale-aware
+      dates and numbers; CSV export.
 - [ ] Both views meet the P95 budget on the reference dataset
       (see [`docs/v1-implementation-goals.md`](./docs/v1-implementation-goals.md) §1.3).
 - [ ] Lighthouse mobile run on both dashboards: Performance ≥ 90,
@@ -223,9 +275,10 @@ fully ticked.
 | ------- | --------------------------- | -------------------------------------------------------------- |
 | 1.1     | Customer portal + Web Push  | Self-service ticket status, history download, opt-in Web Push  |
 | 1.2     | Field-tech offline writes   | IndexedDB queue + replay-on-reconnect for interventions        |
-| 1.3     | VMES/OEE integration        | Read-only OEE asset/equipment sync via API; no shared DB       |
-| 1.4     | Quoting & invoicing         | Quote → invoice flow, PDF, EU-style VAT                        |
-| 1.5     | Reporting & BI              | Saved reports, CSV/Parquet export, Metabase-friendly views     |
+| 1.3     | CNC depth                   | Controller alarm knowledge base, runtime-based maintenance triggers, `TechnicianSkill` matching (per [`docs/blueprint.md`](./docs/blueprint.md) §21 Phase 5) |
+| 1.4     | VMES/OEE integration        | Read-only OEE asset/equipment sync via API; no shared DB       |
+| 1.5     | Quoting & invoicing         | Quote → invoice flow, PDF, EU-style VAT                        |
+| 1.6     | Reporting & BI              | Saved reports, CSV/Parquet export, Metabase-friendly views     |
 | 2.0     | Multi-location single-tenant| Branches under one tenant; *not* multi-tenant SaaS             |
 
 ## How items get on the roadmap

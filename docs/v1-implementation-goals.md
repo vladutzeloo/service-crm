@@ -12,6 +12,8 @@
 
 Locked decisions that the rest of this document depends on:
 
+- **Stack: Flask + Jinja + SQLAlchemy 2 + Alembic + pytest.** Confirmed
+  in [`docs/adr/0001-flask-vs-fastapi.md`](./adr/0001-flask-vs-fastapi.md).
 - **Single Flask/Jinja codebase**, served from one container. No SPA, no
   React, no Next.js, no native iOS/Android.
 - **Mobile = PWA-light.** Responsive Jinja templates + a Web App Manifest +
@@ -24,6 +26,17 @@ Locked decisions that the rest of this document depends on:
   one Docker image. No multi-region, no CDN required, no managed-platform
   recipe in v1.0 — the Dockerfile is portable and that's the whole story.
 - **Single-tenant.** One business per deployment.
+- **Bilingual from day one: Romanian + English, RO default.** Flask-Babel
+  + RO/EN catalogs land in 0.1.0; every screen / form / status / report
+  shipped from 0.1.0 onwards is translated in both languages.
+- **CNC service domain in full** (per
+  [`docs/blueprint.md`](./blueprint.md) §8 + [`docs/service-domain.md`](./service-domain.md)) —
+  equipment models / controller types / warranties; ticket history /
+  comments / attachments; intervention actions / findings; parts master;
+  maintenance template / plan / task / execution; structured checklist
+  templates / items / runs / run items; technicians + capacity slots.
+  Eight Flask blueprints (`auth`, `clients`, `equipment`, `tickets`,
+  `maintenance`, `knowledge`, `planning`, `dashboard`).
 
 Anything outside this list is post-1.0 and lives in [`ROADMAP.md`](../ROADMAP.md)
 "Beyond 1.0".
@@ -35,13 +48,37 @@ has a concrete check.
 
 ### 1.1 Functional completeness
 
-- [ ] All P1 user journeys from [`docs/service-domain.md`](./service-domain.md)
-      have routes, services, templates, and tests:
-      register a client → register equipment → open a ticket → schedule it →
-      log an intervention with parts → run a checklist → close the ticket →
-      see it in the dashboard and audit log.
-- [ ] Maintenance plans surface overdue equipment on the dashboard.
-- [ ] Procedures (SOPs) are searchable and viewable from a ticket / equipment.
+CNC service journey — every step has routes, services, templates, and tests:
+
+- [ ] **Client setup**: register a client → add contacts → add locations
+      → optionally attach a service contract.
+- [ ] **Equipment setup**: register an `EquipmentModel` and
+      `EquipmentControllerType` lookups → register an `Equipment` for a
+      client/location → optionally add an `EquipmentWarranty`.
+- [ ] **Ticket lifecycle**: open a `new` ticket (type, priority, SLA) →
+      manager `qualifies` → `schedules` to a technician → technician
+      moves to `in_progress` → adds `InterventionAction` /
+      `InterventionFinding` → records `ServicePartUsage` from
+      `PartMaster` → optionally `waiting_parts` → `monitoring` →
+      `completed` → `closed`. Status history visible on the detail page.
+- [ ] **Commissioning**: open a `commissioning` ticket type → attach a
+      `ChecklistTemplate` → fill `ChecklistRun` items → snapshot frozen
+      against future template edits → equipment-history record produced.
+- [ ] **Maintenance**: define a `MaintenancePlan` from a
+      `MaintenanceTemplate` → APScheduler computes `next_due_at` →
+      `MaintenanceTask` rows generated → manager assigns to a
+      `Technician` → execution closed via `MaintenanceExecution` linked
+      to a `ServiceIntervention`.
+- [ ] **Knowledge**: `ProcedureDocument` searchable (PG `tsvector` /
+      SQLite FTS5) and viewable from a ticket / equipment / intervention.
+- [ ] **Manager review**: dashboard surfaces active clients, open
+      tickets, overdue tickets, due maintenance this week, tickets
+      waiting parts, technician utilisation, plus the secondary panels
+      from [`docs/service-domain.md`](./service-domain.md) "Dashboard V1".
+- [ ] **Reports**: tickets by status & period, interventions by machine,
+      parts used by period, due-vs-completed maintenance, technician
+      workload, repeat-issue report — all exportable to CSV with stable
+      codes + translated labels.
 
 ### 1.2 Reliability
 
@@ -247,14 +284,41 @@ These thread through every milestone, not a single one.
 - [ ] Keyboard-only traversal of every P1 flow works without a mouse.
 - [ ] `axe-core` audit in CI; zero critical/serious violations on P1 pages.
 
-### 3.2 Internationalisation
+### 3.2 Internationalisation (RO default + EN, day-one)
 
-- [ ] Flask-Babel in place. Default locale `en`, second locale `ro`
-      (Romanian, given the workspace context).
-- [ ] All user-facing strings extracted (`pybabel extract`); translation
-      catalog committed.
-- [ ] Date/number formats follow the active locale.
-- [ ] `Accept-Language` honored unless the user has set a preference.
+Adopted from [`docs/blueprint.md`](./blueprint.md) §4. i18n is a v1
+foundation concern, not a finishing touch.
+
+- [ ] **Flask-Babel** in place since 0.1.0; `babel.cfg` at repo root.
+- [ ] **Default locale `ro`**, secondary locale `en`. EN serves as the
+      fallback for any string missing from the RO catalog (and a CI
+      check fails the PR if the RO catalog is incomplete at tag time).
+- [ ] Locale selector function: **user profile pref → `?lang=` query →
+      `Accept-Language` header → default `ro`**. Persisted on `User` so
+      the choice survives logout/login.
+- [ ] Topbar language switch present on every page; switching reloads
+      the current path with `?lang=` and writes the preference.
+- [ ] `locale/ro/LC_MESSAGES/messages.po` and `locale/en/LC_MESSAGES/messages.po`
+      committed; `.mo` files compiled on container build (not committed).
+- [ ] **No hardcoded user-facing strings.** Templates use `{% trans %}`
+      / `_()`; backend errors raise translatable messages
+      (`gettext_lazy` for class-level defaults).
+- [ ] WTForms validators emit translatable error messages.
+- [ ] Date / number formats follow the active locale (`format_datetime`,
+      `format_decimal`, `format_currency` from Babel).
+- [ ] **DB stores stable English codes**, UI displays translated labels
+      (applies to `TicketStatus`, `TicketType.code`, `TicketPriority.code`,
+      `EquipmentControllerType.code`, `ProcedureTag.code`).
+- [ ] Layout robust to RO ⇄ EN length disparity (tested at 320 px and
+      1440 px viewports — no overflow, no broken alignment).
+- [ ] CSV / report exports preserve stable internal codes alongside the
+      translated label column.
+- [ ] CI gate: a `tests/i18n/test_no_hardcoded_strings.py` walks every
+      shipped template and asserts every visible text node passes through
+      `_()` or `{% trans %}`.
+- [ ] CI gate: `pybabel extract` + `pybabel update` produces no
+      uncommitted diff; new `_()` calls without a fresh extraction fail
+      the PR.
 
 ### 3.3 Audit log coverage
 
@@ -283,17 +347,21 @@ slice via [`/consistency-pass`](../.claude/skills/consistency-pass/SKILL.md).
 
 ### 0.1.0 — Walking skeleton
 
-**Done when:** the app boots, a user can log in/out, the database is
-migrated, and the test pyramid is in place.
+**Done when:** the app boots in two languages, a user can log in/out,
+the database is migrated, and the test pyramid is in place.
 
 - [ ] `service_crm/__init__.py` exposes `create_app(config)`; no
       module-level side effects.
 - [ ] Flask-Migrate wired; first migration creates `users`, `roles`,
       `audit_event`.
 - [ ] Argon2id login + logout, session cookies hardened, CSRF on by default.
-- [ ] `/healthz`, `/readyz` live.
+- [ ] **Flask-Babel** registered. `babel.cfg` + RO/EN catalogs scaffolded.
+      Locale selector (user pref → `?lang=` → `Accept-Language` → `ro`).
+      Topbar language switch on the login page.
+- [ ] `/healthz`, `/readyz` live and translated.
 - [ ] Dockerfile builds; `docker compose up` reaches `/healthz` in < 60 s.
 - [ ] Test fixtures from [`python.tests.md`](../python.tests.md) §3 in place.
+- [ ] i18n smoke test: `/healthz?lang=ro` returns RO, `?lang=en` returns EN.
 - [ ] CI matrix (3.11/3.12 × SQLite/Postgres) green.
 - [ ] **No business logic.** No client/equipment/ticket models yet.
 
@@ -313,11 +381,14 @@ native to oee-calculator2.0, and behaves on phones.
       Accessibility ≥ 95, PWA badge: yes.
 - [ ] No business logic; macros take placeholder data.
 
-### 0.3.0 — Clients & contacts
+### 0.3.0 — Clients, contacts, locations, contracts
 
-**Done when:** an operator can register a client + contact + location and
-edit/soft-delete them, with full audit and tests.
+**Done when:** an operator can register a client + contact + location +
+optional service contract and edit/soft-delete them, with full audit
+and tests, in both languages.
 
+- [ ] `Client`, `Contact`, `Location`, `ServiceContract` models +
+      migration.
 - [ ] CRUD via routes thin enough that no view function exceeds 25 lines.
 - [ ] Soft-delete (`is_active`) on Client; hard-delete forbidden.
 - [ ] Search across name + contact email/phone, FTS on PG, FTS5 on SQLite.
@@ -325,50 +396,77 @@ edit/soft-delete them, with full audit and tests.
       "all-or-nothing" mode.
 - [ ] axe-core audit clean on client list/detail/edit.
 - [ ] Mobile checklist (§2) clean on every new screen.
+- [ ] Every form label, validator message, and flash translated (RO+EN).
 
 ### 0.4.0 — Equipment / installed base
 
+- [ ] `Equipment`, `EquipmentModel`, `EquipmentControllerType`,
+      `EquipmentWarranty` models + migration.
 - [ ] CRUD with the cross-blueprint guard tested
       (`Equipment.location_id` belongs to `Equipment.client_id`).
-- [ ] Equipment list filters by client, location, status.
-- [ ] CSV import with the same idempotency + error-reporting contract as
-      clients.
+- [ ] `EquipmentWarranty.ends_on > starts_on` CHECK + integration test.
+- [ ] Equipment list filters by client, location, status, controller
+      type. Equipment detail tabs: warranties, tickets, maintenance plans.
+- [ ] CSV import for equipment + bulk-load lookups (model, controller).
 - [ ] First photo-upload screen (intervention-less, sanity check for the
-      pipeline that 0.5 will reuse).
+      pipeline that 0.6 will reuse).
 
-### 0.5.0 — Tickets & interventions
+### 0.5.0 — Tickets — header, history, comments, attachments
 
-**Done when:** the core service loop works on phones for a technician
-walking up to a piece of equipment.
+**Done when:** managers and front-desk can run the ticket book on phones
+and desktops, with the full status lifecycle audited.
 
-- [ ] State machine (`open → scheduled → in_progress → awaiting_parts →
-      resolved → closed`, `cancelled` from any pre-`closed` state) with
-      ≥ 95% line+branch coverage and a Hypothesis state-machine test.
-- [ ] Intervention create/edit form built for one-handed phone use:
-      ≥ 44 pt taps, mobile keyboards, photo upload via camera capture.
+- [ ] State machine (`new → qualified → scheduled → in_progress →
+      waiting_parts → monitoring → completed → closed`, `cancelled` from
+      any pre-`completed` state) with ≥ 95 % line+branch coverage and a
+      Hypothesis state-machine test.
+- [ ] `TicketStatusHistory` written via SQLAlchemy `before_flush` hook;
+      integration test asserts no history-less transitions.
+- [ ] `TicketType`, `TicketPriority` lookup tables seeded with default
+      RO/EN labels.
+- [ ] `TicketComment`, `TicketAttachment` (file uploads validated by MIME
+      + magic bytes; stored under `instance/uploads/`).
+- [ ] Ticket list filters: status, type, priority, due, technician,
+      client. Filter chips translated.
 - [ ] Idempotency token on every state-changing form. Verified by a
       "double-submit" test.
-- [ ] Audit log entry for every state transition (assertable by route).
 - [ ] Ticket number sequence (`Sequence("ticket_number_seq")`) on PG;
       SQLite fallback in service layer + tested.
+- [ ] Every status, type, and priority label translated (RO+EN).
 
-### 0.6.0 — Knowledge: checklists & procedures
+### 0.6.0 — Interventions, parts, knowledge
 
-- [ ] Checklist run snapshot is **frozen** at run time; subsequent template
-      edits do not mutate historical runs (test with a property-based
-      "edit-after-snapshot" check).
-- [ ] Checklist run UI works offline-displayable (data already loaded) but
-      writes still require online (per the v1 PWA-light decision).
-- [ ] Procedures full-text searchable (PG `tsvector` / SQLite FTS5).
+**Done when:** the technician's job — diagnose, act, log parts, run a
+checklist, attach photos — works from a phone in the field.
 
-### 0.7.0 — Maintenance planning
+- [ ] `ServiceIntervention`, `InterventionAction`, `InterventionFinding`
+      models + migration.
+- [ ] `PartMaster` lookup, `ServicePartUsage` linking interventions to
+      parts (catalog or ad-hoc).
+- [ ] `ChecklistTemplate`/`ChecklistTemplateItem`/`ChecklistRun`/`ChecklistRunItem`
+      models. Run snapshot is **frozen** at run time; property-based test
+      that historical runs survive template edits.
+- [ ] `ProcedureDocument`, `ProcedureTag`. Procedures full-text
+      searchable (PG `tsvector` / SQLite FTS5).
+- [ ] Intervention create/edit form built for one-handed phone use:
+      ≥ 44 pt taps, mobile keyboards, photo upload via camera capture.
+- [ ] All checklist labels and procedure UI translated.
 
+### 0.7.0 — Maintenance + planning
+
+- [ ] `MaintenanceTemplate`, `MaintenancePlan`, `MaintenanceTask`,
+      `MaintenanceExecution` models + migration.
 - [ ] APScheduler-driven recompute of `next_due_at`, with the schedule
-      exposed in `/readyz` for ops.
+      exposed in `/readyz` for ops. Generates `MaintenanceTask` rows for
+      the upcoming window.
 - [ ] "Equipment with due maintenance" surfaces on the operational
       dashboard.
 - [ ] One-click "open a ticket from this overdue plan" with audit trail
-      linking ticket ↔ plan.
+      linking ticket ↔ plan via `MaintenanceTask.ticket_id`.
+- [ ] `Technician`, `TechnicianAssignment`, `TechnicianCapacitySlot`
+      models + migration.
+- [ ] Per-day technician capacity view modeled on
+      `oee-calculator2.0/templates/capacity.html`.
 
 ### 0.8.0 — Operational dashboard
 
@@ -383,22 +481,25 @@ walking up to a piece of equipment.
 
 ### 0.9.0 — Hardening for 1.0
 
-Feature freeze. Spend a milestone making §1 and §2 actually true.
+Feature freeze. Spend a milestone making §1, §2, and §3 actually true.
 
-- [ ] §1.1 functional completeness audit by walking the user journeys
-      manually with the runbook.
+- [ ] §1.1 functional completeness — manual walkthrough of every CNC
+      service journey (client → equipment → ticket → intervention →
+      checklist → maintenance → close → dashboard) in both languages.
 - [ ] §1.3 perf budget — load reference dataset and verify; fix offenders.
 - [ ] §1.4 security — pen-test pass on auth + CSRF + RBAC + headers + uploads.
 - [ ] §1.5 observability — log review on a 24-h soak.
 - [ ] §1.6 operability — backup → restore → smoke a full release dry-run.
 - [ ] §1.7 documentation — user guide + operator runbook complete with
-      screenshots.
+      screenshots, in RO **and** EN.
 - [ ] §1.8 compliance — GDPR export + forget endpoints implemented and
       tested.
 - [ ] §2 — Lighthouse mobile run on every P1 page; fix anything < the
       thresholds in §2.6.
 - [ ] §3.1 a11y — `axe-core` clean on every P1 page; manual keyboard pass.
-- [ ] §3.2 i18n — `ro` catalog at 100% coverage of user-facing strings.
+- [ ] §3.2 i18n — RO catalog at 100 % coverage of user-facing strings.
+      EN catalog at 100 % coverage. CI enforces no untranslated string
+      shipped. Layout audit at 320 px in both languages.
 
 ### 1.0.0 — Production-ready single-tenant
 
