@@ -141,6 +141,32 @@ def test_require_equipment_not_found(db_session: Session) -> None:
 
 
 @pytest.mark.integration
+def test_require_equipment_found(db_session: Session) -> None:
+    equip = EquipmentFactory()
+    db_session.flush()
+
+    result = services.require_equipment(db_session, equip.id.hex())
+
+    assert result is equip
+
+
+@pytest.mark.integration
+def test_list_equipment_no_client_filter(db_session: Session) -> None:
+    client_a = ClientFactory()
+    client_b = ClientFactory()
+    EquipmentFactory(_client=client_a, name="MachineA", is_active=True)
+    EquipmentFactory(_client=client_b, name="MachineB", is_active=True)
+    db_session.flush()
+
+    items, total = services.list_equipment(db_session)
+
+    names = [e.name for e in items]
+    assert "MachineA" in names
+    assert "MachineB" in names
+    assert total >= 2
+
+
+@pytest.mark.integration
 def test_list_equipment_active_only(db_session: Session) -> None:
     client = ClientFactory()
     EquipmentFactory(_client=client, name="Active", is_active=True)
@@ -285,6 +311,24 @@ def test_require_warranty_not_found(db_session: Session) -> None:
 
     with pytest.raises(ValueError, match="not found"):
         services.require_warranty(db_session, ulid.new().hex(), equip)
+
+
+@pytest.mark.integration
+def test_require_warranty_found(db_session: Session) -> None:
+    from datetime import date
+
+    equip = EquipmentFactory()
+    db_session.flush()
+    w = services.create_warranty(
+        db_session,
+        equipment_id=equip.id,
+        starts_on=date(2026, 1, 1),
+        ends_on=date(2027, 1, 1),
+    )
+
+    result = services.require_warranty(db_session, w.id.hex(), equip)
+
+    assert result is w
 
 
 @pytest.mark.integration

@@ -130,7 +130,7 @@ def list_equipment(
     if active_only:
         q = q.filter(Equipment.is_active.is_(True))
     total = q.count()
-    items = q.order_by(Equipment.name).offset((page - 1) * per_page).limit(per_page).all()
+    items = q.order_by(Equipment.name).offset(max(0, page - 1) * per_page).limit(per_page).all()
     return items, total
 
 
