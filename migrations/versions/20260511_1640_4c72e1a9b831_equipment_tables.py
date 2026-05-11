@@ -1,4 +1,6 @@
-"""Equipment-domain tables: equipment_model, equipment_controller_type, equipment, equipment_warranty.
+"""Equipment-domain tables.
+
+Tables: equipment_model, equipment_controller_type, equipment, equipment_warranty.
 
 Revision ID: 4c72e1a9b831
 Revises: 8f3a2c1d4e5b
@@ -56,19 +58,12 @@ def upgrade() -> None:
 
     # Seed default controller types.
     conn = op.get_bind()
-    from service_crm.shared import clock
-
-    now = clock.now()
     for code, name in _CONTROLLER_SEEDS:
         uid = _ulid_mod.new()
-        if conn.dialect.name == "postgresql":
-            uid_val = uid.hex()
-        else:
-            uid_val = uid
+        uid_val = uid.hex() if conn.dialect.name == "postgresql" else uid
         conn.execute(
             sa.text(
-                "INSERT INTO equipment_controller_type (id, code, name)"
-                " VALUES (:id, :code, :name)"
+                "INSERT INTO equipment_controller_type (id, code, name) VALUES (:id, :code, :name)"
             ),
             {"id": uid_val, "code": code, "name": name},
         )
@@ -127,9 +122,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("equipment_warranty", schema=None) as batch_op:
-        batch_op.create_index(
-            "ix_equipment_warranty_equipment_id", ["equipment_id"], unique=False
-        )
+        batch_op.create_index("ix_equipment_warranty_equipment_id", ["equipment_id"], unique=False)
         batch_op.create_index("ix_equipment_warranty_ends_on", ["ends_on"], unique=False)
 
 

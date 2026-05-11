@@ -36,7 +36,7 @@ class Client(db.Model, Auditable):  # type: ignore[name-defined,misc]
     contracts: Mapped[list[ServiceContract]] = relationship(
         "ServiceContract", back_populates="client", cascade="all, delete-orphan"
     )
-    equipment: Mapped[list["Equipment"]] = relationship(  # type: ignore[name-defined]
+    equipment: Mapped[list[Equipment]] = relationship(  # type: ignore[name-defined]  # noqa: F821
         "Equipment", back_populates="client", cascade="all, delete-orphan"
     )
 
@@ -76,7 +76,7 @@ class Location(db.Model, Auditable):  # type: ignore[name-defined,misc]
     country: Mapped[str] = mapped_column(String(80), nullable=False, default="")
 
     client: Mapped[Client] = relationship("Client", back_populates="locations")
-    equipment: Mapped[list["Equipment"]] = relationship("Equipment", back_populates="location")  # type: ignore[name-defined]
+    equipment: Mapped[list[Equipment]] = relationship("Equipment", back_populates="location")  # type: ignore[name-defined]  # noqa: F821
 
     def __repr__(self) -> str:
         return f"<Location {self.label!r}>"
