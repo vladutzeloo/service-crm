@@ -21,6 +21,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from service_crm.auth import services as auth_services
 from service_crm.auth.models import Role, User
 from service_crm.clients.models import Client, Contact, Location, ServiceContract
+from service_crm.equipment.models import Equipment, EquipmentControllerType, EquipmentModel
 from service_crm.extensions import db
 
 
@@ -151,3 +152,63 @@ class ContractFactory(SQLAlchemyModelFactory):
     @factory.lazy_attribute
     def client_id(self) -> bytes:
         return self.client.id  # type: ignore[return-value]
+
+
+# ── Equipment ─────────────────────────────────────────────────────────────────
+
+
+class EquipmentModelFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = EquipmentModel
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    manufacturer = factory.Sequence(lambda n: f"Maker {n}")
+    model = factory.Sequence(lambda n: f"Model-{n}")
+    family = ""
+
+
+class EquipmentControllerTypeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = EquipmentControllerType
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    code = factory.Sequence(lambda n: f"ctrl-{n}")
+    name = factory.Sequence(lambda n: f"Controller {n}")
+
+
+class EquipmentFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = Equipment
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+        exclude = ["_client", "_location", "_equipment_model", "_controller_type"]  # noqa: RUF012
+
+    _client = factory.SubFactory(ClientFactory)
+    _location = factory.LazyAttribute(lambda o: None)
+    _equipment_model = factory.LazyAttribute(lambda o: None)
+    _controller_type = factory.LazyAttribute(lambda o: None)
+    name = factory.Sequence(lambda n: f"Machine {n}")
+    serial = None
+    manufacturer = ""
+    model = ""
+    installed_at = None
+    is_active = True
+    notes = ""
+
+    @factory.lazy_attribute
+    def client_id(self) -> bytes:
+        return self._client.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def location_id(self) -> bytes | None:
+        return self._location.id if self._location else None  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def equipment_model_id(self) -> bytes | None:
+        return self._equipment_model.id if self._equipment_model else None  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def controller_type_id(self) -> bytes | None:
+        return self._controller_type.id if self._controller_type else None  # type: ignore[return-value]
