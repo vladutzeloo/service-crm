@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from flask_login import UserMixin
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -38,7 +39,7 @@ class Role(db.Model, Auditable):  # type: ignore[name-defined,misc]
         return f"<Role {self.name!r}>"
 
 
-class User(db.Model, Auditable):  # type: ignore[name-defined,misc]
+class User(db.Model, Auditable, UserMixin):  # type: ignore[name-defined,misc]
     __tablename__ = "user_account"  # ``user`` is reserved in Postgres.
 
     id: Mapped[bytes] = mapped_column(ulid.ULID, primary_key=True, default=ulid.new)
@@ -63,6 +64,10 @@ class User(db.Model, Auditable):  # type: ignore[name-defined,misc]
         # DB-level case-insensitive uniqueness. Works on Postgres and SQLite.
         Index("ix_user_account_email_lower", text("lower(email)"), unique=True),
     )
+
+    def get_id(self) -> str:
+        """Flask-Login expects a string identifier; hex-encode the ULID."""
+        return self.id.hex()
 
     def __repr__(self) -> str:
         return f"<User {self.email!r}>"

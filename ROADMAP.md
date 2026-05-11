@@ -76,24 +76,25 @@ The smallest thing that runs. Nothing user-visible beyond plumbing.
 Mirrors [`docs/tasks.md`](./docs/tasks.md) steps 1–6 (audit + propose + review
 already done; this milestone executes the approved plan).
 
-- [ ] `service_crm/__init__.py` — `create_app()` factory.
-- [ ] `service_crm/extensions.py` — `db`, `migrate`, `login_manager`,
+- [x] `service_crm/__init__.py` — `create_app()` factory.
+- [x] `service_crm/extensions.py` — `db`, `migrate`, `login_manager`,
       `csrf`, `babel`.
-- [ ] `service_crm/config.py` — Dev / Test / Prod config classes.
-- [ ] `service_crm/cli.py` — `flask reset-db`, `flask seed`,
-      `flask babel-compile`.
-- [ ] Alembic wired against Postgres and SQLite (`render_as_batch=True`).
-- [ ] `auth/` blueprint: `User`, `Role`, login/logout, Argon2 hashing.
-- [ ] First migration (`users`, `roles`).
-- [ ] **Flask-Babel scaffold**: `babel.cfg`, `locale/ro/LC_MESSAGES/messages.po`,
-      `locale/en/LC_MESSAGES/messages.po`. Locale selector function set
-      up (user pref → query → header → default `ro`). Topbar language
-      switch present.
-- [ ] Healthcheck route + version endpoint, both translated.
-- [ ] Dockerfile + `docker compose up` runs the app against Postgres.
-- [ ] `tests/` skeleton with the fixtures from [`python.tests.md`](./python.tests.md).
-- [ ] i18n smoke test: `/healthz?lang=ro` returns RO text, `?lang=en` returns EN.
-- [ ] CI green on Python 3.11 and 3.12, both SQLite and Postgres.
+- [x] `service_crm/config.py` — Dev / Test / Prod config classes.
+- [x] `service_crm/cli.py` — `flask reset-db`, `flask seed`,
+      `flask babel-extract` / `babel-update` / `babel-compile`.
+- [x] Alembic wired against Postgres and SQLite (`render_as_batch=True`).
+- [x] `auth/` blueprint: `User`, `Role`, login/logout, Argon2 hashing.
+- [x] First migration (`users`, `roles`).
+- [x] **Flask-Babel scaffold**: `babel.cfg`, `service_crm/locale/ro/`,
+      `service_crm/locale/en/`. Locale selector function (user pref →
+      query → header → default `ro`). 0.1.0 ships the language switch
+      inline on the bare login page; topbar widget arrives with the
+      shell in 0.2.0.
+- [x] Healthcheck route + version endpoint, both translated.
+- [x] Dockerfile + `docker compose up` runs the app against Postgres.
+- [x] `tests/` skeleton with the fixtures from [`python.tests.md`](./python.tests.md).
+- [x] i18n smoke test: `/healthz?lang=ro` returns RO text, `?lang=en` returns EN.
+- [x] CI green on Python 3.11 and 3.12, both SQLite and Postgres.
 
 ## 0.2.0 — "UI foundation (mobile-first from day one)"
 

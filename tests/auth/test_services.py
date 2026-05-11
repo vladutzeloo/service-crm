@@ -57,3 +57,27 @@ def test_verify_password_reraises_on_malformed_hash() -> None:
 )
 def test_normalize_email(raw: str, expected: str) -> None:
     assert services.normalize_email(raw) == expected
+
+
+@pytest.mark.integration
+def test_get_user_by_email_returns_none_for_empty_input(db_session: object) -> None:
+    """Don't even hit the DB for empty / whitespace-only input."""
+    from sqlalchemy.orm import Session
+
+    assert services.get_user_by_email(db_session, "") is None  # type: ignore[arg-type]
+    assert services.get_user_by_email(db_session, "   ") is None  # type: ignore[arg-type]
+    # Silence the unused-import lint while keeping the type in scope.
+    assert Session is not None
+
+
+@pytest.mark.integration
+def test_get_user_by_email_finds_seeded_user(db_session: object) -> None:
+    """Case-insensitive lookup via the functional index."""
+    from tests.factories import UserFactory
+
+    UserFactory(email="findme@example.com")
+    db_session.flush()  # type: ignore[attr-defined]
+
+    found = services.get_user_by_email(db_session, "FINDME@EXAMPLE.COM")  # type: ignore[arg-type]
+    assert found is not None
+    assert found.email == "findme@example.com"

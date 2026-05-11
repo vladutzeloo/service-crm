@@ -28,9 +28,16 @@ def create_app(config: type[BaseConfig] = ProdConfig) -> Flask:
     _register_cli(app)
     _register_error_handlers(app)
     _register_audit_listeners(app)
+    _register_jinja_globals(app)
 
     app.config["VERSION"] = _read_version_file()
     return app
+
+
+def _register_jinja_globals(app: Flask) -> None:
+    from flask_babel import get_locale
+
+    app.jinja_env.globals["get_locale"] = get_locale
 
 
 def _register_blueprints(app: Flask) -> None:
