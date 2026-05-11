@@ -12,6 +12,10 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 ## [Unreleased]
 
+(no changes yet)
+
+## [0.1.0] - 2026-05-11
+
 ### Added
 - **Auth slice — login / logout** (`service_crm/auth/routes.py`,
   `forms.py`, `templates/auth/login.html`). Flask-WTF ``LoginForm`` with
@@ -198,19 +202,5 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
   scaffold lands in 0.1.0 walking skeleton.
 - 2026-05-10: adopt the blueprint's CNC domain in full.
 
-<!--
-Future release sections look like this:
-
-## [0.1.0] - YYYY-MM-DD
-
-### Added
-- ...
-
-### Fixed
-- ...
-
 [Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/vladutzeloo/service-crm/releases/tag/v0.1.0
--->
-
-[Unreleased]: https://github.com/vladutzeloo/service-crm/commits/main
