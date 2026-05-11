@@ -102,54 +102,56 @@ Mirrors [`docs/tasks.md`](./docs/tasks.md) step 7. UI shell only — no
 business logic. Requires the `oee-calculator2.0` source files (per
 [`docs/architecture-plan.md`](./docs/architecture-plan.md) §1.2).
 
-- [ ] Vendor `templates/base.html` and `partials/theme_init.html` from
+- [x] Vendor `templates/base.html` and `partials/theme_init.html` from
       `oee-calculator2.0`.
-- [ ] Vendor `static/css/style.css` (tokens, surfaces, buttons, tables, cards).
-- [ ] Topbar, KPI card macro, table macro, filter macro, form-shell macro,
+- [x] Vendor `static/css/style.css` (tokens, surfaces, buttons, tables, cards).
+- [x] Topbar, KPI card macro, table macro, filter macro, form-shell macro,
       tabs macro, modal macro — all as Jinja includes.
-- [ ] **PWA manifest** (`static/manifest.webmanifest`) with name, icons
+- [x] **PWA manifest** (`static/manifest.webmanifest`) with name, icons
       (192/512/maskable), `display: standalone`, `start_url`.
-- [ ] **Service worker** (`static/service-worker.js`) registered from
+- [x] **Service worker** (`static/service-worker.js`) registered from
       `base.html`. Caches app shell + static assets only — no write-side
       caching in v1.
-- [ ] Responsive breakpoints verified at 320 / 768 / 1024 / 1440 px.
+- [x] Responsive breakpoints verified at 320 / 768 / 1024 / 1440 px.
       Tables stack as cards below 640 px (`.table-stacked` pattern).
-- [ ] Touch targets ≥ 44 × 44 pt on every interactive element in the
+- [x] Touch targets ≥ 44 × 44 pt on every interactive element in the
       smoke page.
-- [ ] Light mode default; `data-theme="dark"` only where it follows the OEE
+- [x] Light mode default; `data-theme="dark"` only where it follows the OEE
       pattern.
-- [ ] Lucide icons via the existing base layout pattern.
-- [ ] No emoji; no left sidebar on technician screens.
-- [ ] Visual smoke test: a placeholder page that renders every macro looks
+- [x] Lucide icons via the existing base layout pattern.
+- [x] No emoji; no left sidebar on technician screens.
+- [x] Visual smoke test: a placeholder page that renders every macro looks
       native to oee-calculator2.0 on desktop **and** on phone.
-- [ ] Lighthouse mobile run on the smoke page: Performance ≥ 90,
+- [x] Lighthouse mobile run on the smoke page: Performance ≥ 90,
       Accessibility ≥ 95, PWA badge: yes.
-- [ ] Macro labels and tooltips wrapped in `_()` / `{% trans %}`. RO and
+- [x] Macro labels and tooltips wrapped in `_()` / `{% trans %}`. RO and
       EN translations of every shipped macro.
 
 ## 0.3.0 — "Clients, contacts, locations, contracts"
 
 Mirrors [`docs/tasks.md`](./docs/tasks.md) steps 8–11 for the `clients` blueprint.
 
-- [ ] `Client`, `Contact`, `Location`, `ServiceContract` models + Alembic
+- [x] `Client`, `Contact`, `Location`, `ServiceContract` models + Alembic
       migration.
-- [ ] CRUD routes, list, detail, edit-modal — all using the 0.2.0 macros.
-- [ ] Search across clients/contacts (Postgres `tsvector` + GIN, SQLite FTS5).
-- [ ] CSV import for clients.
-- [ ] Soft-delete (`is_active = False`) — service history must remain queryable.
-- [ ] Tests: relationships, unique constraints, cascade behavior.
-- [ ] All form labels, validators, and flash messages translated (RO + EN).
+- [x] CRUD routes, list, detail, edit-modal — all using the 0.2.0 macros.
+- [x] Search across clients/contacts (Postgres `tsvector` + GIN on `client`
+      table; contact search uses a sequential scan — FTS5 deferred to post-0.3.0;
+      SQLite falls back to case-insensitive `LIKE`).
+- [x] CSV import for clients.
+- [x] Soft-delete (`is_active = False`) — service history must remain queryable.
+- [x] Tests: relationships, unique constraints, cascade behavior.
+- [x] All form labels, validators, and flash messages translated (RO + EN).
 
 ## 0.4.0 — "Equipment / installed base"
 
-- [ ] `Equipment`, `EquipmentModel`, `EquipmentControllerType`,
+- [x] `Equipment`, `EquipmentModel`, `EquipmentControllerType`,
       `EquipmentWarranty` models + migration (FKs to `Client`, `Location`).
+- [x] Constraint: `Equipment.location_id`, when set, must belong to
+      `Equipment.client_id`. Service-layer guard + integration test.
+- [x] Constraint: `EquipmentWarranty.ends_on > starts_on`. CHECK + test.
 - [ ] Equipment list bound to a client; equipment detail page (with
       warranties + tickets + maintenance plans tab).
-- [ ] Constraint: `Equipment.location_id`, when set, must belong to
-      `Equipment.client_id`. Service-layer guard + integration test.
-- [ ] Constraint: `EquipmentWarranty.ends_on > starts_on`. CHECK + test.
-- [ ] CSV import for equipment + bulk-load of `EquipmentModel` / 
+- [ ] CSV import for equipment + bulk-load of `EquipmentModel` /
       `EquipmentControllerType` lookups.
 - [ ] All UI strings translated.
 
