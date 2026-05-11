@@ -42,7 +42,10 @@ class User(db.Model, Auditable):  # type: ignore[name-defined,misc]
     __tablename__ = "user_account"  # ``user`` is reserved in Postgres.
 
     id: Mapped[bytes] = mapped_column(ulid.ULID, primary_key=True, default=ulid.new)
-    email: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    # No ``index=True`` here: ``ix_user_account_email_lower`` in
+    # ``__table_args__`` already serves exact-match lookups (lower() of a
+    # lowercase string is the value itself) and enforces uniqueness.
+    email: Mapped[str] = mapped_column(String(200), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     role_id: Mapped[bytes] = mapped_column(

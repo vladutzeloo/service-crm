@@ -78,11 +78,12 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("user_account", schema=None) as batch_op:
-        batch_op.create_index(batch_op.f("ix_user_account_email"), ["email"], unique=False)
         batch_op.create_index(batch_op.f("ix_user_account_role_id"), ["role_id"], unique=False)
         # Functional case-insensitive unique index. Autogenerate skips
         # expression-based indexes (SQLite reflection limitation), so we
-        # add it explicitly here. Works on Postgres and SQLite.
+        # add it explicitly here. Works on Postgres and SQLite. This
+        # also covers exact-match lookups, so we don't need a plain
+        # ``ix_user_account_email`` alongside.
         batch_op.create_index(
             "ix_user_account_email_lower",
             [sa.text("lower(email)")],
@@ -119,7 +120,6 @@ def downgrade() -> None:
     with op.batch_alter_table("user_account", schema=None) as batch_op:
         batch_op.drop_index("ix_user_account_email_lower")
         batch_op.drop_index(batch_op.f("ix_user_account_role_id"))
-        batch_op.drop_index(batch_op.f("ix_user_account_email"))
 
     op.drop_table("user_account")
     op.drop_table("role")
@@ -129,3 +129,8 @@ def downgrade() -> None:
         batch_op.drop_index(batch_op.f("ix_audit_event_entity_type"))
 
     op.drop_table("audit_event")
+    # Postgres keeps the enum type around after the table is dropped;
+    # without an explicit DROP the next ``upgrade`` would fail with
+    # ``type "audit_action" already exists``. SQLite has no concept of
+    # named enum types, so this is a no-op there.
+    sa.Enum(name="audit_action").drop(op.get_bind(), checkfirst=False)

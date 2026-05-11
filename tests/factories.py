@@ -33,6 +33,14 @@ class RoleFactory(SQLAlchemyModelFactory):
     description = ""
 
 
+# Argon2 is intentionally expensive (~100 ms per hash); UserFactory would
+# pay that cost for every row otherwise. We hash the default password
+# once at import time and reuse it. Tests that need a non-default
+# password set ``password=...`` and pay the cost only for those rows.
+_DEFAULT_PASSWORD = "test-pass"  # placeholder, not a real secret
+_DEFAULT_PASSWORD_HASH = auth_services.hash_password(_DEFAULT_PASSWORD)
+
+
 class UserFactory(SQLAlchemyModelFactory):
     class Meta:
         model = User
@@ -46,7 +54,7 @@ class UserFactory(SQLAlchemyModelFactory):
 
     # Class-level marker; the post-generation hook below converts it to a
     # password_hash. Tests that don't care just default to "test-pass".
-    password = "test-pass"  # placeholder, not a real secret
+    password = _DEFAULT_PASSWORD
 
     @factory.lazy_attribute
     def role(self) -> Role:
@@ -60,6 +68,10 @@ class UserFactory(SQLAlchemyModelFactory):
 
     @factory.lazy_attribute
     def password_hash(self) -> str:
+        # Reuse the pre-computed hash for the default; only pay Argon2's
+        # cost when a test asks for a different password.
+        if self.password == _DEFAULT_PASSWORD:
+            return _DEFAULT_PASSWORD_HASH
         return auth_services.hash_password(self.password)
 
     @classmethod
