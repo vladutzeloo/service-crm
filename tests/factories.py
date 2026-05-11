@@ -21,6 +21,12 @@ from factory.alchemy import SQLAlchemyModelFactory
 from service_crm.auth import services as auth_services
 from service_crm.auth.models import Role, User
 from service_crm.clients.models import Client, Contact, Location, ServiceContract
+from service_crm.equipment.models import (
+    Equipment,
+    EquipmentControllerType,
+    EquipmentModel,
+    EquipmentWarranty,
+)
 from service_crm.extensions import db
 
 
@@ -151,3 +157,81 @@ class ContractFactory(SQLAlchemyModelFactory):
     @factory.lazy_attribute
     def client_id(self) -> bytes:
         return self.client.id  # type: ignore[return-value]
+
+
+# ── Equipment ─────────────────────────────────────────────────────────────────
+
+
+class ControllerTypeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = EquipmentControllerType
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    code = factory.Sequence(lambda n: f"CTRL-{n}")
+    name = factory.Sequence(lambda n: f"Controller {n}")
+    notes = ""
+
+
+class EquipmentModelFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = EquipmentModel
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    manufacturer = factory.Sequence(lambda n: f"Manuf {n}")
+    model_code = factory.Sequence(lambda n: f"MX-{n}")
+    display_name = ""
+    controller_type_id = None
+    notes = ""
+
+
+class EquipmentFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = Equipment
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    client = factory.SubFactory(ClientFactory)
+    location = None
+    equipment_model = None
+    controller_type = None
+    serial_number = factory.Sequence(lambda n: f"SN-{n:06d}")
+    asset_tag = factory.Sequence(lambda n: f"AT-{n:04d}")
+    install_date = None
+    notes = ""
+    is_active = True
+
+    @factory.lazy_attribute
+    def client_id(self) -> bytes:
+        return self.client.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def location_id(self) -> bytes | None:
+        return self.location.id if self.location else None  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def equipment_model_id(self) -> bytes | None:
+        return self.equipment_model.id if self.equipment_model else None  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def controller_type_id(self) -> bytes | None:
+        return self.controller_type.id if self.controller_type else None  # type: ignore[return-value]
+
+
+class EquipmentWarrantyFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = EquipmentWarranty
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    equipment = factory.SubFactory(EquipmentFactory)
+    reference = factory.Sequence(lambda n: f"W-{n}")
+    provider = ""
+    starts_on = factory.LazyFunction(lambda: __import__("datetime").date(2026, 1, 1))
+    ends_on = factory.LazyFunction(lambda: __import__("datetime").date(2027, 1, 1))
+    notes = ""
+
+    @factory.lazy_attribute
+    def equipment_id(self) -> bytes:
+        return self.equipment.id  # type: ignore[return-value]

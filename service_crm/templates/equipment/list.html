@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/filter_bar.html" import filter_bar %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Equipment") }} — Service-CRM{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    {{ _("Catalogue") }}
+    {% if client %}
+      › <a href="{{ url_for('clients.detail', client_hex=client.id.hex()) }}">{{ client.name }}</a>
+    {% endif %}
+  </div>
+{% endblock %}
+{% block page_title %}
+  {% if client %}{{ _("Equipment for %(name)s", name=client.name) }}{% else %}{{ _("Equipment") }}{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-toolbar">
+  <form method="get" action="{{ url_for('equipment.list_equipment') }}" class="search-form" role="search">
+    <input type="hidden" name="show" value="{{ show }}">
+    {% if client %}<input type="hidden" name="client" value="{{ client.id.hex() }}">{% endif %}
+    <label class="sr-only" for="q">{{ _("Search equipment") }}</label>
+    <input id="q" type="search" name="q" value="{{ q }}"
+           placeholder="{{ _('Search by serial / asset tag…') }}"
+           class="search-input" autocomplete="off">
+    <button type="submit" class="btn btn-primary btn-sm">{{ icon("search") }}</button>
+  </form>
+  <div class="toolbar-actions">
+    <a href="{{ url_for('equipment.list_models') }}" class="btn btn-secondary btn-sm">
+      {{ icon("server") }} {{ _("Models") }}
+    </a>
+    <a href="{{ url_for('equipment.list_controllers') }}" class="btn btn-secondary btn-sm">
+      {{ icon("settings") }} {{ _("Controllers") }}
+    </a>
+    <a href="{{ url_for('equipment.import_equipment') }}" class="btn btn-secondary btn-sm">
+      {{ icon("upload") }} {{ _("Import") }}
+    </a>
+    <a href="{{ url_for('equipment.new_equipment', client=client.id.hex() if client else None) }}"
+       class="btn btn-primary btn-sm">
+      {{ icon("plus") }} {{ _("New equipment") }}
+    </a>
+  </div>
+</div>
+
+{% set all_href    = url_for('equipment.list_equipment', q=q, show='all',    client=client.id.hex() if client else None) %}
+{% set active_href = url_for('equipment.list_equipment', q=q, show='active', client=client.id.hex() if client else None) %}
+{{ filter_bar(
+    label=_("Status"),
+    chips=[
+      {"label": _("Active"), "href": active_href, "count": none, "active": show == "active"},
+      {"label": _("All"),    "href": all_href,    "count": none, "active": show == "all"},
+    ]
+) }}
+
+{% set cols = [_("Asset"), _("Serial"), _("Client"), _("Model"), _("Controller"), _("Status"), _("Actions")] %}
+{% set rows = [] %}
+{% for eq in items %}
+  {% set status_badge %}
+    {% if eq.is_active %}<span class="badge badge-good">{{ _("Active") }}</span>
+    {% else %}<span class="badge badge-muted">{{ _("Inactive") }}</span>{% endif %}
+  {% endset %}
+  {% set actions %}
+    <a href="{{ url_for('equipment.detail', equipment_hex=eq.id.hex()) }}" class="btn btn-sm btn-ghost">
+      {{ icon("eye") }}
+    </a>
+    <a href="{{ url_for('equipment.edit_equipment', equipment_hex=eq.id.hex()) }}" class="btn btn-sm btn-ghost">
+      {{ icon("edit-2") }}
+    </a>
+  {% endset %}
+  {% set _ = rows.append([
+    '<a href="' ~ url_for('equipment.detail', equipment_hex=eq.id.hex()) ~ '" class="link">' ~ (eq.asset_tag or '—')|e ~ '</a>' | safe,
+    eq.serial_number|e,
+    '<a href="' ~ url_for('clients.detail', client_hex=eq.client.id.hex()) ~ '" class="link">' ~ eq.client.name|e ~ '</a>' | safe,
+    eq.equipment_model.label|e if eq.equipment_model else '—',
+    eq.controller_type.name|e if eq.controller_type else '—',
+    status_badge,
+    actions,
+  ]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No equipment found.")) }}
+
+{% if total > 50 %}
+<div class="pagination">
+  {% if page > 1 %}
+    <a href="{{ url_for('equipment.list_equipment', q=q, show=show, page=page-1, client=client.id.hex() if client else None) }}"
+       class="btn btn-sm btn-ghost">&laquo; {{ _("Previous") }}</a>
+  {% endif %}
+  <span class="page-info">{{ _("Page %(p)s", p=page) }}</span>
+  {% if items|length == 50 %}
+    <a href="{{ url_for('equipment.list_equipment', q=q, show=show, page=page+1, client=client.id.hex() if client else None) }}"
+       class="btn btn-sm btn-ghost">{{ _("Next") }} &raquo;</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

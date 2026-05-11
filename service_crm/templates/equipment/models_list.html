@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Equipment models") }} — Service-CRM{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('equipment.list_equipment') }}">{{ _("Equipment") }}</a>
+  </div>
+{% endblock %}
+{% block page_title %}{{ _("Equipment models") }}{% endblock %}
+
+{% block content %}
+<div class="page-toolbar">
+  <div class="toolbar-actions" style="margin-left:auto">
+    <a href="{{ url_for('equipment.import_models') }}" class="btn btn-secondary btn-sm">
+      {{ icon("upload") }} {{ _("Import CSV") }}
+    </a>
+  </div>
+</div>
+
+<form method="post" action="{{ url_for('equipment.model_create') }}"
+      class="form-shell" novalidate style="margin-bottom:1.25rem">
+  {{ form.csrf_token }}
+  <input type="hidden" name="idempotency_token" value="{{ tok }}">
+  <div class="form-grid">
+    <div class="field">
+      {{ form.manufacturer.label }}
+      {{ form.manufacturer(class="input") }}
+    </div>
+    <div class="field">
+      {{ form.model_code.label }}
+      {{ form.model_code(class="input") }}
+    </div>
+    <div class="field">
+      {{ form.display_name.label }}
+      {{ form.display_name(class="input") }}
+    </div>
+    <div class="field">
+      {{ form.controller_type_id.label }}
+      {{ form.controller_type_id(class="input") }}
+    </div>
+    <div class="field field-full">
+      {{ form.notes.label }}
+      {{ form.notes(class="input textarea", rows=2) }}
+    </div>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">
+      {{ icon("plus") }} {{ _("Add equipment model") }}
+    </button>
+  </div>
+</form>
+
+{% set cols = [_("Manufacturer"), _("Model code"), _("Display name"), _("Controller"), _("Actions")] %}
+{% set rows = [] %}
+{% for m in items %}
+  {% set act %}
+    <form method="post" action="{{ url_for('equipment.model_delete', model_hex=m.id.hex()) }}" style="display:inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-sm btn-ghost btn-danger-ghost"
+              onclick="return confirm('{{ _("Delete this equipment model?") }}')" aria-label="{{ _('Delete') }}">
+        {{ icon("trash-2") }}
+      </button>
+    </form>
+  {% endset %}
+  {% set _ = rows.append([
+    m.manufacturer|e,
+    m.model_code|e,
+    m.display_name|e,
+    m.controller_type.name|e if m.controller_type else '—',
+    act,
+  ]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No equipment models yet.")) }}
+{% endblock %}
