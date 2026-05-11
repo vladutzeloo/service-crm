@@ -232,10 +232,14 @@ def contact_create(client_hex: str) -> Any:
 def contact_update(client_hex: str, contact_hex: str) -> Any:
     try:
         client = services.require_client(db.session, client_hex)
-        contact = services.require_contact(db.session, contact_hex, client)
     except ValueError:
         flash(_("Client not found."), "error")
         return redirect(url_for("clients.list_clients"))
+    try:
+        contact = services.require_contact(db.session, contact_hex, client)
+    except ValueError:
+        flash(_("Contact not found."), "error")
+        return redirect(url_for("clients.detail", client_hex=client_hex, tab="contacts"))
     form = forms.ContactForm(prefix="contact")
     if form.validate_on_submit():
         services.update_contact(
@@ -268,10 +272,14 @@ def contact_update(client_hex: str, contact_hex: str) -> Any:
 def contact_delete(client_hex: str, contact_hex: str) -> Any:
     try:
         client = services.require_client(db.session, client_hex)
-        contact = services.require_contact(db.session, contact_hex, client)
     except ValueError:
         flash(_("Client not found."), "error")
         return redirect(url_for("clients.list_clients"))
+    try:
+        contact = services.require_contact(db.session, contact_hex, client)
+    except ValueError:
+        flash(_("Contact not found."), "error")
+        return redirect(url_for("clients.detail", client_hex=client_hex, tab="contacts"))
     services.delete_contact(db.session, contact)
     db.session.commit()
     flash(_("Contact deleted."), "success")
@@ -313,10 +321,14 @@ def location_create(client_hex: str) -> Any:
 def location_update(client_hex: str, location_hex: str) -> Any:
     try:
         client = services.require_client(db.session, client_hex)
-        location = services.require_location(db.session, location_hex, client)
     except ValueError:
         flash(_("Client not found."), "error")
         return redirect(url_for("clients.list_clients"))
+    try:
+        location = services.require_location(db.session, location_hex, client)
+    except ValueError:
+        flash(_("Location not found."), "error")
+        return redirect(url_for("clients.detail", client_hex=client_hex, tab="locations"))
     form = forms.LocationForm(prefix="location")
     if form.validate_on_submit():
         services.update_location(
@@ -348,10 +360,14 @@ def location_update(client_hex: str, location_hex: str) -> Any:
 def location_delete(client_hex: str, location_hex: str) -> Any:
     try:
         client = services.require_client(db.session, client_hex)
-        location = services.require_location(db.session, location_hex, client)
     except ValueError:
         flash(_("Client not found."), "error")
         return redirect(url_for("clients.list_clients"))
+    try:
+        location = services.require_location(db.session, location_hex, client)
+    except ValueError:
+        flash(_("Location not found."), "error")
+        return redirect(url_for("clients.detail", client_hex=client_hex, tab="locations"))
     services.delete_location(db.session, location)
     db.session.commit()
     flash(_("Location deleted."), "success")
@@ -397,10 +413,14 @@ def contract_create(client_hex: str) -> Any:
 def contract_update(client_hex: str, contract_hex: str) -> Any:
     try:
         client = services.require_client(db.session, client_hex)
-        contract = services.require_contract(db.session, contract_hex, client)
     except ValueError:
         flash(_("Client not found."), "error")
         return redirect(url_for("clients.list_clients"))
+    try:
+        contract = services.require_contract(db.session, contract_hex, client)
+    except ValueError:
+        flash(_("Contract not found."), "error")
+        return redirect(url_for("clients.detail", client_hex=client_hex, tab="contracts"))
     form = forms.ContractForm(prefix="contract")
     if form.validate_on_submit():
         try:
@@ -437,10 +457,14 @@ def contract_update(client_hex: str, contract_hex: str) -> Any:
 def contract_delete(client_hex: str, contract_hex: str) -> Any:
     try:
         client = services.require_client(db.session, client_hex)
-        contract = services.require_contract(db.session, contract_hex, client)
     except ValueError:
         flash(_("Client not found."), "error")
         return redirect(url_for("clients.list_clients"))
+    try:
+        contract = services.require_contract(db.session, contract_hex, client)
+    except ValueError:
+        flash(_("Contract not found."), "error")
+        return redirect(url_for("clients.detail", client_hex=client_hex, tab="contracts"))
     services.delete_contract(db.session, contract)
     db.session.commit()
     flash(_("Contract deleted."), "success")

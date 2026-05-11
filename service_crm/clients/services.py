@@ -353,7 +353,8 @@ def import_clients_csv(session: Session, text: str) -> tuple[int, list[str]]:
 
     imported = 0
     errors: list[str] = []
-    for row_num, row in enumerate(reader, start=2):
+    for row_num, raw_row in enumerate(reader, start=2):
+        row = {k.strip().lower(): v for k, v in raw_row.items() if k}
         name = row.get("name", "").strip()
         if not name:
             errors.append(f"Row {row_num}: name is required.")

@@ -379,9 +379,32 @@ def test_contact_update_form_error(client_logged_in: FlaskClient, db_session: Se
 
 
 @pytest.mark.e2e
+def test_contact_update_unknown_contact(client_logged_in: FlaskClient, db_session: Session) -> None:
+    c = ClientFactory()
+    db_session.flush()
+    resp = client_logged_in.post(
+        f"/clients/{c.id.hex()}/contacts/{_unknown_hex()}",
+        data={"contact-name": "X"},
+        follow_redirects=False,
+    )
+    assert resp.status_code == 302
+
+
+@pytest.mark.e2e
 def test_contact_delete_unknown_client(client_logged_in: FlaskClient) -> None:
     resp = client_logged_in.post(
         f"/clients/{_unknown_hex()}/contacts/{_unknown_hex()}/delete",
+        follow_redirects=False,
+    )
+    assert resp.status_code == 302
+
+
+@pytest.mark.e2e
+def test_contact_delete_unknown_contact(client_logged_in: FlaskClient, db_session: Session) -> None:
+    c = ClientFactory()
+    db_session.flush()
+    resp = client_logged_in.post(
+        f"/clients/{c.id.hex()}/contacts/{_unknown_hex()}/delete",
         follow_redirects=False,
     )
     assert resp.status_code == 302
@@ -471,9 +494,36 @@ def test_location_delete(client_logged_in: FlaskClient, db_session: Session) -> 
 
 
 @pytest.mark.e2e
+def test_location_update_unknown_location(
+    client_logged_in: FlaskClient, db_session: Session
+) -> None:
+    c = ClientFactory()
+    db_session.flush()
+    resp = client_logged_in.post(
+        f"/clients/{c.id.hex()}/locations/{_unknown_hex()}",
+        data={"location-label": "X"},
+        follow_redirects=False,
+    )
+    assert resp.status_code == 302
+
+
+@pytest.mark.e2e
 def test_location_delete_unknown(client_logged_in: FlaskClient) -> None:
     resp = client_logged_in.post(
         f"/clients/{_unknown_hex()}/locations/{_unknown_hex()}/delete",
+        follow_redirects=False,
+    )
+    assert resp.status_code == 302
+
+
+@pytest.mark.e2e
+def test_location_delete_unknown_location(
+    client_logged_in: FlaskClient, db_session: Session
+) -> None:
+    c = ClientFactory()
+    db_session.flush()
+    resp = client_logged_in.post(
+        f"/clients/{c.id.hex()}/locations/{_unknown_hex()}/delete",
         follow_redirects=False,
     )
     assert resp.status_code == 302
@@ -596,9 +646,36 @@ def test_contract_delete(client_logged_in: FlaskClient, db_session: Session) -> 
 
 
 @pytest.mark.e2e
+def test_contract_update_unknown_contract(
+    client_logged_in: FlaskClient, db_session: Session
+) -> None:
+    c = ClientFactory()
+    db_session.flush()
+    resp = client_logged_in.post(
+        f"/clients/{c.id.hex()}/contracts/{_unknown_hex()}",
+        data={"contract-title": "X", "contract-starts_on": "2026-01-01"},
+        follow_redirects=False,
+    )
+    assert resp.status_code == 302
+
+
+@pytest.mark.e2e
 def test_contract_delete_unknown(client_logged_in: FlaskClient) -> None:
     resp = client_logged_in.post(
         f"/clients/{_unknown_hex()}/contracts/{_unknown_hex()}/delete",
+        follow_redirects=False,
+    )
+    assert resp.status_code == 302
+
+
+@pytest.mark.e2e
+def test_contract_delete_unknown_contract(
+    client_logged_in: FlaskClient, db_session: Session
+) -> None:
+    c = ClientFactory()
+    db_session.flush()
+    resp = client_logged_in.post(
+        f"/clients/{c.id.hex()}/contracts/{_unknown_hex()}/delete",
         follow_redirects=False,
     )
     assert resp.status_code == 302

@@ -29,7 +29,6 @@
        class="btn btn-sm btn-secondary">{{ icon("edit-2") }} {{ _("Edit") }}</a>
     {% if client.is_active %}
       <form method="post" action="{{ url_for('clients.deactivate', client_hex=client.id.hex()) }}" style="display:inline">
-        {{ _csrf_token() if _csrf_token is defined else '' }}
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-sm btn-danger"
                 onclick="return confirm('{{ _("Deactivate this client?") }}')">

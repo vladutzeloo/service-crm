@@ -128,6 +128,15 @@ def test_client_search_filter_postgres_path(
 
 
 @pytest.mark.integration
+def test_client_search_filter_sqlite_path(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("service_crm.clients.services._dialect", lambda: "sqlite")
+    flt = services._client_search_filter(db_session, "acme")
+    assert flt is not None
+
+
+@pytest.mark.integration
 def test_require_client_raises_on_bad_hex(db_session: Session) -> None:
     with pytest.raises(ValueError, match="invalid"):
         services.require_client(db_session, "not-hex")
