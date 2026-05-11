@@ -13,7 +13,7 @@ import uuid
 from flask import Blueprint, g
 from flask_login import current_user
 
-from ..extensions import login_manager
+from ..extensions import db, login_manager
 from ..shared.audit import ACTOR_CTX, REQUEST_ID_CTX
 
 bp = Blueprint(
@@ -35,7 +35,7 @@ def _load_user(user_id_hex: str) -> models.User | None:
         user_id = bytes.fromhex(user_id_hex)
     except ValueError:
         return None
-    user: models.User | None = models.User.query.get(user_id)
+    user: models.User | None = db.session.get(models.User, user_id)
     return user
 
 

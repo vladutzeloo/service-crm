@@ -11,9 +11,7 @@ from tests.factories import UserFactory
 
 
 @pytest.mark.integration
-def test_user_loader_returns_user_for_valid_hex_id(
-    app: Flask, db_session: Session
-) -> None:
+def test_user_loader_returns_user_for_valid_hex_id(app: Flask, db_session: Session) -> None:
     user = UserFactory(email="loader@example.com")
     db_session.flush()
     hex_id = user.id.hex()
@@ -24,18 +22,14 @@ def test_user_loader_returns_user_for_valid_hex_id(
 
 
 @pytest.mark.integration
-def test_user_loader_returns_none_for_unknown_id(
-    app: Flask, db_session: Session
-) -> None:
+def test_user_loader_returns_none_for_unknown_id(app: Flask, db_session: Session) -> None:
     # 16 random bytes that don't correspond to any user.
     fake_hex = (b"\x00" * 15 + b"\xff").hex()
     assert _load_user(fake_hex) is None
 
 
 @pytest.mark.integration
-def test_user_loader_returns_none_for_malformed_id(
-    app: Flask, db_session: Session
-) -> None:
+def test_user_loader_returns_none_for_malformed_id(app: Flask, db_session: Session) -> None:
     """Anything that's not valid hex must be rejected without raising."""
     assert _load_user("not-hex-at-all") is None
 
