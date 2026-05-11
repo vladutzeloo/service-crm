@@ -102,6 +102,32 @@ def test_list_clients_search_by_contact_name(db_session: Session) -> None:
 
 
 @pytest.mark.integration
+def test_get_client_returns_none_for_missing(db_session: Session) -> None:
+    from service_crm.shared import ulid
+
+    result = services.get_client(db_session, ulid.new())
+    assert result is None
+
+
+@pytest.mark.integration
+def test_get_client_returns_existing(db_session: Session) -> None:
+    client = ClientFactory()
+    db_session.flush()
+
+    result = services.get_client(db_session, client.id)
+    assert result is client
+
+
+@pytest.mark.integration
+def test_client_search_filter_postgres_path(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("service_crm.clients.services._dialect", lambda: "postgresql")
+    flt = services._client_search_filter(db_session, "acme")
+    assert flt is not None
+
+
+@pytest.mark.integration
 def test_require_client_raises_on_bad_hex(db_session: Session) -> None:
     with pytest.raises(ValueError, match="invalid"):
         services.require_client(db_session, "not-hex")
@@ -161,6 +187,14 @@ def test_delete_contact(db_session: Session) -> None:
 
 
 @pytest.mark.integration
+def test_require_contact_invalid_hex(db_session: Session) -> None:
+    client = ClientFactory()
+    db_session.flush()
+    with pytest.raises(ValueError, match="invalid"):
+        services.require_contact(db_session, "not-hex", client)
+
+
+@pytest.mark.integration
 def test_require_contact_wrong_client(db_session: Session) -> None:
     client_a = ClientFactory()
     client_b = ClientFactory()
@@ -172,6 +206,38 @@ def test_require_contact_wrong_client(db_session: Session) -> None:
 
 
 # ── Locations ─────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.integration
+def test_require_location_invalid_hex(db_session: Session) -> None:
+    client = ClientFactory()
+    db_session.flush()
+    with pytest.raises(ValueError, match="invalid"):
+        services.require_location(db_session, "not-hex", client)
+
+
+@pytest.mark.integration
+def test_require_location_not_found(db_session: Session) -> None:
+    from service_crm.shared import ulid
+
+    client = ClientFactory()
+    db_session.flush()
+    with pytest.raises(ValueError, match="not found"):
+        services.require_location(db_session, ulid.new().hex(), client)
+
+
+@pytest.mark.integration
+def test_update_location(db_session: Session) -> None:
+    client = ClientFactory()
+    db_session.flush()
+    loc = services.create_location(db_session, client_id=client.id, label="Old")
+
+    services.update_location(
+        db_session, loc, label="New HQ", address="Str. X", city="Iași", country="RO"
+    )
+
+    assert loc.label == "New HQ"
+    assert loc.city == "Iași"
 
 
 @pytest.mark.integration
@@ -204,6 +270,52 @@ def test_delete_location(db_session: Session) -> None:
 
 
 # ── Contracts ─────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.integration
+def test_require_contract_invalid_hex(db_session: Session) -> None:
+    client = ClientFactory()
+    db_session.flush()
+    with pytest.raises(ValueError, match="invalid"):
+        services.require_contract(db_session, "not-hex", client)
+
+
+@pytest.mark.integration
+def test_require_contract_not_found(db_session: Session) -> None:
+    from service_crm.shared import ulid
+
+    client = ClientFactory()
+    db_session.flush()
+    with pytest.raises(ValueError, match="not found"):
+        services.require_contract(db_session, ulid.new().hex(), client)
+
+
+@pytest.mark.integration
+def test_update_contract_happy_path(db_session: Session) -> None:
+    from datetime import date
+
+    client = ClientFactory()
+    db_session.flush()
+    contract = services.create_contract(
+        db_session,
+        client_id=client.id,
+        title="Original",
+        starts_on=date(2026, 1, 1),
+    )
+
+    services.update_contract(
+        db_session,
+        contract,
+        title="Updated SLA",
+        reference="REF-002",
+        starts_on=date(2026, 2, 1),
+        ends_on=date(2026, 12, 31),
+        notes="renewed",
+    )
+
+    assert contract.title == "Updated SLA"
+    assert contract.reference == "REF-002"
+    assert contract.ends_on == date(2026, 12, 31)
 
 
 @pytest.mark.integration
@@ -314,3 +426,11 @@ def test_csv_import_skips_empty_name_rows(db_session: Session) -> None:
     assert imported == 1
     assert len(errors) == 1
     assert "Row 3" in errors[0]
+
+
+@pytest.mark.integration
+def test_csv_import_empty_file(db_session: Session) -> None:
+    imported, errors = services.import_clients_csv(db_session, "")
+
+    assert imported == 0
+    assert any("empty" in e.lower() or "header" in e.lower() for e in errors)

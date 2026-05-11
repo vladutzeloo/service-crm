@@ -123,6 +123,25 @@ def test_service_contract_null_ends_on_allowed(db_session: Session) -> None:
 
 
 @pytest.mark.integration
+def test_model_reprs(db_session: Session) -> None:
+    from datetime import date
+
+    client = ClientFactory(name="Acme")
+    contact = ContactFactory(client=client, name="Bob")
+    location = LocationFactory(client=client, label="HQ")
+    from service_crm.clients.models import ServiceContract
+
+    contract = ServiceContract(client_id=client.id, title="SLA", starts_on=date(2026, 1, 1))
+    db_session.add(contract)
+    db_session.flush()
+
+    assert "Acme" in repr(client)
+    assert "Bob" in repr(contact)
+    assert "HQ" in repr(location)
+    assert "SLA" in repr(contract)
+
+
+@pytest.mark.integration
 def test_soft_delete_does_not_cascade_contacts_via_is_active(db_session: Session) -> None:
     """Setting is_active=False does NOT delete child rows."""
     client = ClientFactory(is_active=True)
