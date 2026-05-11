@@ -135,8 +135,9 @@ Mirrors [`docs/tasks.md`](./docs/tasks.md) steps 8–11 for the `clients` bluepr
 - [x] `Client`, `Contact`, `Location`, `ServiceContract` models + Alembic
       migration.
 - [x] CRUD routes, list, detail, edit-modal — all using the 0.2.0 macros.
-- [x] Search across clients/contacts (Postgres `tsvector` + GIN; SQLite LIKE
-      with lower() — FTS5 deferred to post-0.3.0).
+- [x] Search across clients/contacts (Postgres `tsvector` + GIN on `client`
+      table; contact search uses a sequential scan — FTS5 deferred to post-0.3.0;
+      SQLite falls back to case-insensitive `LIKE`).
 - [x] CSV import for clients.
 - [x] Soft-delete (`is_active = False`) — service history must remain queryable.
 - [x] Tests: relationships, unique constraints, cascade behavior.

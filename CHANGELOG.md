@@ -52,11 +52,6 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
   `email="admin@example.com"`; uses the factory sequence to avoid
   `UNIQUE` constraint failures across parallel test runs.
 
-[Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.3.0...HEAD
-[0.3.0]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/vladutzeloo/service-crm/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/vladutzeloo/service-crm/releases/tag/v0.1.0
-
 ## [0.2.0] - 2026-05-11
 
 ### Added
@@ -304,3 +299,7 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
   scaffold lands in 0.1.0 walking skeleton.
 - 2026-05-10: adopt the blueprint's CNC domain in full.
 
+[Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/vladutzeloo/service-crm/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/vladutzeloo/service-crm/releases/tag/v0.1.0
