@@ -1,0 +1,103 @@
+name: Auto-tag on VERSION bump
+
+# When a commit on `main` changes the `VERSION` file, this workflow:
+#
+#   1. validates that `VERSION` parses as SemVer and that `CHANGELOG.md`
+#      has a matching `## [X.Y.Z]` section,
+#   2. skips if `vX.Y.Z` already exists on origin (re-running the same
+#      commit is a no-op),
+#   3. creates and pushes the annotated tag `vX.Y.Z`,
+#   4. dispatches `release.yml` for that tag so it runs the test suite,
+#      builds the wheel + sdist, and publishes the GitHub Release.
+#
+# Tags pushed with the workflow's `GITHUB_TOKEN` do **not** automatically
+# fire workflows listening on `push: tags` (GitHub's documented
+# safeguard against infinite loops). That's why step 4 explicitly kicks
+# `release.yml` via `gh workflow run`, which works with `GITHUB_TOKEN`
+# and avoids needing a personal access token.
+#
+# The release flow remains tag-driven end-to-end — this workflow only
+# automates the "remember to push the tag" step.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "VERSION"
+  workflow_dispatch:
+
+permissions:
+  contents: write     # push tags
+  actions: write      # call `gh workflow run release.yml`
+
+concurrency:
+  group: auto-tag
+  cancel-in-progress: false
+
+jobs:
+  tag-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read VERSION
+        id: ver
+        run: |
+          set -euo pipefail
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          if [ -z "$VERSION" ]; then
+            echo "::error::VERSION file is empty."
+            exit 1
+          fi
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'; then
+            echo "::error::VERSION='$VERSION' is not SemVer 2.0.0."
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION"   >> "$GITHUB_OUTPUT"
+          echo "Resolved VERSION=$VERSION tag=v$VERSION"
+
+      - name: CHANGELOG has a section for this version
+        run: |
+          set -euo pipefail
+          if ! grep -qE "^## \[${{ steps.ver.outputs.version }}\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md is missing '## [${{ steps.ver.outputs.version }}]'. Add the section in the same commit that bumps VERSION."
+            exit 1
+          fi
+
+      - name: Skip if tag already exists on origin
+        id: gate
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.ver.outputs.tag }}" >/dev/null 2>&1; then
+            echo "Tag ${{ steps.ver.outputs.tag }} already exists on origin — nothing to do."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure git identity
+        if: steps.gate.outputs.skip != 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create and push tag
+        if: steps.gate.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          git tag -a "${{ steps.ver.outputs.tag }}" -m "${{ steps.ver.outputs.tag }}"
+          git push origin "${{ steps.ver.outputs.tag }}"
+
+      - name: Dispatch release.yml for the new tag
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh workflow run release.yml \
+            --ref "${{ steps.ver.outputs.tag }}" \
+            -f tag="${{ steps.ver.outputs.tag }}"
+          echo "Dispatched release.yml for ${{ steps.ver.outputs.tag }}."
