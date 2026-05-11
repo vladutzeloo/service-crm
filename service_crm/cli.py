@@ -20,6 +20,9 @@ from .extensions import db
 def register(app: Flask) -> None:
     app.cli.add_command(reset_db)
     app.cli.add_command(seed)
+    app.cli.add_command(babel_extract)
+    app.cli.add_command(babel_update)
+    app.cli.add_command(babel_compile)
 
 
 @click.command("reset-db")
@@ -64,3 +67,55 @@ def main() -> None:
 
     cli = FlaskGroup(create_app=lambda: create_app(DevConfig))
     cli()
+
+
+# ---------------------------------------------------------------------------
+# i18n / Flask-Babel commands. Thin wrappers around pybabel so contributors
+# don't have to remember the long invocations. Catalogs live inside the
+# package at ``service_crm/locale/`` so they ship in the wheel.
+# ``babel.cfg`` is at the repo root.
+# ---------------------------------------------------------------------------
+
+
+def _repo_root() -> str:
+    from pathlib import Path
+
+    return str(Path(__file__).resolve().parent.parent)
+
+
+def _run_pybabel(args: list[str]) -> int:
+    import subprocess
+
+    return subprocess.check_call(["pybabel", *args], cwd=_repo_root())
+
+
+@click.command("babel-extract")
+def babel_extract() -> None:
+    """Scan templates / Python sources and refresh ``messages.pot``."""
+    _run_pybabel(
+        [
+            "extract",
+            "-F",
+            "babel.cfg",
+            "-k",
+            "_l",
+            "-o",
+            "service_crm/locale/messages.pot",
+            ".",
+        ]
+    )
+    click.echo("Extracted to service_crm/locale/messages.pot")
+
+
+@click.command("babel-update")
+def babel_update() -> None:
+    """Merge new strings into the ``ro`` and ``en`` catalogs."""
+    _run_pybabel(["update", "-i", "service_crm/locale/messages.pot", "-d", "service_crm/locale"])
+    click.echo("Updated catalogs in service_crm/locale/")
+
+
+@click.command("babel-compile")
+def babel_compile() -> None:
+    """Compile ``.po`` → ``.mo`` so Babel can serve translations."""
+    _run_pybabel(["compile", "-d", "service_crm/locale"])
+    click.echo("Compiled catalogs.")

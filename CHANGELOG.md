@@ -13,6 +13,55 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 ## [Unreleased]
 
 ### Added
+- **Auth slice — login / logout** (`service_crm/auth/routes.py`,
+  `forms.py`, `templates/auth/login.html`). Flask-WTF ``LoginForm`` with
+  email + password, Argon2id verify, ``last_login_at`` stamped on
+  success, audit event for that update carries the actor. Logout via
+  ``GET /auth/logout`` is ``@login_required``. The login page is a
+  bare standalone template with inline CSS and an inline RO/EN
+  language switch — placeholder for v0.1.0; rewritten to extend
+  ``base.html`` in v0.2.0 once the OEE shell is vendored.
+- **Flask-Babel + RO/EN i18n** wired end-to-end:
+  ``service_crm/i18n.py`` selects locale by user pref → ``?lang=`` →
+  ``Accept-Language`` → ``BABEL_DEFAULT_LOCALE`` (default ``ro``).
+  Catalogs at ``service_crm/locale/{ro,en}/LC_MESSAGES/messages.po``,
+  bundled into the wheel via ``hatch.artifacts``. ``babel.cfg`` at the
+  repo root. ``/healthz`` and ``/version`` return a translated
+  ``message`` field that differs per locale; ``?lang=ro`` and
+  ``?lang=en`` smoke-tested.
+- **CLI**: ``flask babel-extract`` / ``babel-update`` / ``babel-compile``
+  thin wrappers around ``pybabel`` so contributors don't memorise the
+  long invocations.
+- **Audit-context middleware**: ``auth.before_app_request`` stashes a
+  per-request id (``uuid4().hex[:12]``) and the acting user's id
+  into the ``ACTOR_CTX`` / ``REQUEST_ID_CTX`` context vars, so every
+  audit event from this point forward carries them. After login the
+  route explicitly refreshes ``ACTOR_CTX`` so the ``last_login_at``
+  write is attributed correctly.
+- **Flask-Login wiring**: ``user_loader`` accepts a hex-encoded ULID
+  and looks up the user; ``UserMixin`` mixed in on ``User`` so
+  ``current_user`` works end-to-end.
+- **Tests**: 32 new tests cover the locale selector, login GET/POST
+  happy + sad paths (wrong password, unknown email, inactive user,
+  empty form, ``?next=``), logout, the ``user_loader`` (valid hex,
+  unknown id, malformed input), the audit-context middleware, the
+  translated ``/healthz``+``/version`` payloads, and the new Babel
+  CLI commands. Suite size: 78 → 110.
+
+### Changed
+- ``service_crm/extensions.py`` gains ``babel = Babel()`` and a locale
+  selector callback.
+- ``service_crm/config.py`` adds ``BABEL_DEFAULT_LOCALE``,
+  ``BABEL_DEFAULT_TIMEZONE``, ``BABEL_TRANSLATION_DIRECTORIES``.
+- ``pyproject.toml`` adds ``email-validator>=2.0`` (required by
+  ``wtforms.validators.Email``).
+- ``tests/conftest.py``: the session-scoped ``app`` fixture no longer
+  keeps an outer ``app_context`` open — Flask binds ``g`` to the app
+  context, so a session-long context shared ``g`` across every
+  ``client.get()`` and silently locked Flask-Babel's per-request
+  locale resolution. ``db_session`` now pushes its own context.
+
+
 - **`auth` blueprint — model layer.** `User` (`user_account` table) and
   `Role` (`role` table), both inheriting `Auditable`. `User` has ULID PK,
   case-insensitive unique email (functional index on `lower(email)`,

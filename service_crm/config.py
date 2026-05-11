@@ -56,6 +56,11 @@ class BaseConfig:
     # Auditable mixin reads this; see service_crm/shared/audit.py.
     AUDIT_LOG_ENABLED: bool = True
 
+    # i18n. Catalogs under ``locale/<code>/LC_MESSAGES/messages.po``.
+    BABEL_DEFAULT_LOCALE: str = "ro"
+    BABEL_DEFAULT_TIMEZONE: str = "Europe/Bucharest"
+    BABEL_TRANSLATION_DIRECTORIES: str = "locale"
+
 
 class DevConfig(BaseConfig):
     DEBUG: bool = True

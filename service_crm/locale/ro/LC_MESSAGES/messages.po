@@ -1,0 +1,55 @@
+# Romanian translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-05-11 07:22+0000\n"
+"PO-Revision-Date: 2026-05-11 07:22+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ro\n"
+"Language-Team: ro <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100"
+" < 20)) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: service_crm/health.py:22
+msgid "Service is healthy."
+msgstr "Serviciul funcționează."
+
+#: service_crm/health.py:28
+msgid "Service version."
+msgstr "Versiunea serviciului."
+
+#: service_crm/auth/forms.py:13
+msgid "Email"
+msgstr "E-mail"
+
+#: service_crm/auth/forms.py:17
+msgid "Password"
+msgstr "Parolă"
+
+#: service_crm/auth/forms.py:20 service_crm/templates/auth/login.html:11
+#: service_crm/templates/auth/login.html:60
+msgid "Sign in"
+msgstr "Autentificare"
+
+#: service_crm/auth/routes.py:29
+msgid "Invalid email or password."
+msgstr "E-mail sau parolă incorectă."
+
+#: service_crm/auth/routes.py:34
+#, python-format
+msgid "Welcome, %(email)s."
+msgstr "Bun venit, %(email)s."
+
+#: service_crm/auth/routes.py:44
+msgid "You have been signed out."
+msgstr "Te-ai deconectat."
+

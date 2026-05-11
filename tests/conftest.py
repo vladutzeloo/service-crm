@@ -47,10 +47,17 @@ def _enable_sqlite_foreign_keys(dbapi_connection: object, _: object) -> None:
 
 @pytest.fixture(scope="session")
 def app() -> Iterator[Flask]:
+    """Build the app once per session, run migrations, then yield without
+    holding an app_context open.
+
+    Holding an outer ``app_context`` for the whole session shares ``g``
+    across every ``client.get()`` (Flask binds ``g`` to the app context,
+    not the request), which silently breaks Flask-Babel's per-request
+    locale resolution. So the fixture pushes a context only for the
+    Alembic upgrade and then pops it before yielding.
+    """
     flask_app = create_app(TestConfig)
     with flask_app.app_context():
-        # Run Alembic upgrade head against TestConfig.SQLALCHEMY_DATABASE_URI
-        # so the suite exercises the migrations we ship.
         from pathlib import Path
 
         from alembic import command
@@ -61,16 +68,17 @@ def app() -> Iterator[Flask]:
         cfg.set_main_option("script_location", str(migrations_dir))
         cfg.set_main_option("sqlalchemy.url", flask_app.config["SQLALCHEMY_DATABASE_URI"])
         command.upgrade(cfg, "head")
-        yield flask_app
+    yield flask_app
 
 
 @pytest.fixture(scope="session")
 def db_engine(app: Flask) -> Engine:
-    return _db.engine
+    with app.app_context():
+        return _db.engine
 
 
 @pytest.fixture
-def db_session(db_engine: Engine) -> Iterator[Session]:
+def db_session(app: Flask, db_engine: Engine) -> Iterator[Session]:
     """Transactional session, rolled back at teardown.
 
     Standard "join an external transaction" recipe adapted for
@@ -79,33 +87,37 @@ def db_session(db_engine: Engine) -> Iterator[Session]:
     test write into our nested transaction. The outer rollback discards
     everything regardless of whether test code called ``commit``.
     """
-    connection = db_engine.connect()
-    transaction = connection.begin()
+    # Push an app context for this test (the session-level fixture
+    # deliberately doesn't keep one open — see ``app`` docstring).
+    with app.app_context():
+        connection = db_engine.connect()
+        transaction = connection.begin()
 
-    # Reconfigure the scoped-session proxy to bind every fresh session
-    # to this connection. ``_db.session`` is a ``scoped_session``; the
-    # ``session_factory`` attribute is the underlying ``sessionmaker``.
-    _db.session.remove()
-    original_bind = _db.session.session_factory.kw.get("bind")
-    _db.session.session_factory.configure(bind=connection)
-
-    session = _db.session()
-    nested = connection.begin_nested()
-
-    @sa_event.listens_for(session, "after_transaction_end")
-    def _restart_savepoint(sess: Session, trans: object) -> None:
-        nonlocal nested
-        if not nested.is_active and connection.in_transaction():
-            nested = connection.begin_nested()
-
-    try:
-        yield session
-    finally:
+        # Reconfigure the scoped-session proxy to bind every fresh
+        # session to this connection. ``_db.session`` is a
+        # ``scoped_session``; ``session_factory`` is the underlying
+        # ``sessionmaker``.
         _db.session.remove()
-        _db.session.session_factory.configure(bind=original_bind)
-        if transaction.is_active:
-            transaction.rollback()
-        connection.close()
+        original_bind = _db.session.session_factory.kw.get("bind")
+        _db.session.session_factory.configure(bind=connection)
+
+        session = _db.session()
+        nested = connection.begin_nested()
+
+        @sa_event.listens_for(session, "after_transaction_end")
+        def _restart_savepoint(sess: Session, trans: object) -> None:
+            nonlocal nested
+            if not nested.is_active and connection.in_transaction():
+                nested = connection.begin_nested()
+
+        try:
+            yield session
+        finally:
+            _db.session.remove()
+            _db.session.session_factory.configure(bind=original_bind)
+            if transaction.is_active:
+                transaction.rollback()
+            connection.close()
 
 
 @pytest.fixture

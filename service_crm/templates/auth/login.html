@@ -1,0 +1,85 @@
+{# v0.1.0 placeholder. Does NOT extend base.html — that template
+   lands in 0.2.0 (see ROADMAP.md). When the OEE-derived shell arrives
+   this file is rewritten to extend ``base.html`` and use the
+   ``form-shell`` macro from ``_macros/``. The inline language switch
+   here also moves into the topbar. #}
+<!DOCTYPE html>
+<html lang="{{ get_locale() }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ _("Sign in") }} · Service-CRM</title>
+  <style>
+    :root { color-scheme: light; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: #f7f7f8;
+      color: #1a1a1a;
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+    }
+    main {
+      width: min(360px, 92vw);
+      background: #fff;
+      padding: 1.75rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    }
+    h1 { font-size: 1.25rem; margin: 0 0 1rem; }
+    label { display: block; font-size: .85rem; margin-bottom: .25rem; color: #444; }
+    input[type=email], input[type=password] {
+      width: 100%; box-sizing: border-box; padding: .55rem .65rem;
+      border: 1px solid #d0d0d4; border-radius: 4px; font-size: .95rem;
+      margin-bottom: .85rem;
+    }
+    button[type=submit] {
+      width: 100%; padding: .6rem; border: 0; border-radius: 4px;
+      background: #1a73e8; color: #fff; font-weight: 500; font-size: .95rem;
+      cursor: pointer;
+    }
+    button[type=submit]:hover { background: #155ab6; }
+    .flash { padding: .55rem .65rem; border-radius: 4px; margin-bottom: .85rem; font-size: .9rem; }
+    .flash-error { background: #fde2e1; color: #8a1a1a; }
+    .flash-success { background: #def5e3; color: #1a5e2a; }
+    .flash-info { background: #e1ecfd; color: #1a3f8a; }
+    .lang { text-align: right; font-size: .8rem; margin-bottom: .5rem; }
+    .lang a { color: #1a73e8; text-decoration: none; margin-left: .35rem; }
+    .lang a.active { color: #1a1a1a; font-weight: 600; pointer-events: none; }
+    ul.errors { margin: -.6rem 0 .8rem; padding-left: 1.2rem; color: #8a1a1a; font-size: .8rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="lang">
+      {# Preserve any other query params (notably ?next=...) when the
+         user switches language. #}
+      {% set current = get_locale()|string %}
+      {% set next_target = request.args.get('next') %}
+      <a href="{{ url_for('auth.login', lang='ro', next=next_target) }}"
+         class="{{ 'active' if current == 'ro' else '' }}">RO</a>
+      <a href="{{ url_for('auth.login', lang='en', next=next_target) }}"
+         class="{{ 'active' if current == 'en' else '' }}">EN</a>
+    </div>
+    <h1>{{ _("Sign in") }}</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    <form method="post" novalidate>
+      {{ form.csrf_token }}
+      <label for="email">{{ form.email.label.text }}</label>
+      {{ form.email(id="email", autocomplete="username", autofocus=True) }}
+      {% if form.email.errors %}<ul class="errors">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+
+      <label for="password">{{ form.password.label.text }}</label>
+      {{ form.password(id="password", autocomplete="current-password") }}
+      {% if form.password.errors %}<ul class="errors">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+
+      <button type="submit">{{ form.submit.label.text }}</button>
+    </form>
+  </main>
+</body>
+</html>

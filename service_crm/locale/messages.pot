@@ -1,0 +1,53 @@
+# Translations template for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-05-11 07:22+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: service_crm/health.py:22
+msgid "Service is healthy."
+msgstr ""
+
+#: service_crm/health.py:28
+msgid "Service version."
+msgstr ""
+
+#: service_crm/auth/forms.py:13
+msgid "Email"
+msgstr ""
+
+#: service_crm/auth/forms.py:17
+msgid "Password"
+msgstr ""
+
+#: service_crm/auth/forms.py:20 service_crm/templates/auth/login.html:11
+#: service_crm/templates/auth/login.html:60
+msgid "Sign in"
+msgstr ""
+
+#: service_crm/auth/routes.py:29
+msgid "Invalid email or password."
+msgstr ""
+
+#: service_crm/auth/routes.py:34
+#, python-format
+msgid "Welcome, %(email)s."
+msgstr ""
+
+#: service_crm/auth/routes.py:44
+msgid "You have been signed out."
+msgstr ""
+

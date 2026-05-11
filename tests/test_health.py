@@ -10,7 +10,9 @@ from flask.testing import FlaskClient
 def test_healthz_returns_ok(client: FlaskClient) -> None:
     response = client.get("/healthz")
     assert response.status_code == 200
-    assert response.get_json() == {"status": "ok"}
+    body = response.get_json()
+    assert body["status"] == "ok"
+    assert "message" in body
 
 
 @pytest.mark.e2e
@@ -28,6 +30,26 @@ def test_unknown_route_returns_json_404(client: FlaskClient) -> None:
     response = client.get("/does-not-exist")
     assert response.status_code == 404
     assert response.get_json() == {"error": "not_found"}
+
+
+@pytest.mark.e2e
+def test_healthz_payload_is_translated(client: FlaskClient) -> None:
+    """``?lang=ro`` and ``?lang=en`` produce different ``message`` text."""
+    ro = client.get("/healthz?lang=ro").get_json()
+    en = client.get("/healthz?lang=en").get_json()
+    assert ro["status"] == "ok"
+    assert en["status"] == "ok"
+    assert ro["message"] != en["message"]
+    assert "Serviciul" in ro["message"]
+    assert "Service" in en["message"]
+
+
+@pytest.mark.e2e
+def test_version_payload_is_translated(client: FlaskClient) -> None:
+    ro = client.get("/version?lang=ro").get_json()
+    en = client.get("/version?lang=en").get_json()
+    assert ro["version"] == en["version"]
+    assert ro["message"] != en["message"]
 
 
 @pytest.mark.unit

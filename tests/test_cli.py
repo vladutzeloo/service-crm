@@ -52,6 +52,46 @@ def test_seed_is_a_no_op(app: Flask) -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "command, expected_args_head",
+    [
+        ("babel_extract", ["extract", "-F", "babel.cfg"]),
+        ("babel_update", ["update"]),
+        ("babel_compile", ["compile"]),
+    ],
+)
+def test_babel_commands_shell_out_to_pybabel(
+    app: Flask,
+    monkeypatch: pytest.MonkeyPatch,
+    command: str,
+    expected_args_head: list[str],
+) -> None:
+    """The Babel CLI commands wrap ``pybabel``. Patch ``subprocess`` so the
+    test doesn't shell out, then assert on the call shape."""
+    from click.testing import CliRunner
+
+    from service_crm import cli as cli_mod
+
+    captured: dict[str, object] = {}
+
+    def _fake_check_call(args: list[str], cwd: str | None = None) -> int:
+        captured["args"] = args
+        captured["cwd"] = cwd
+        return 0
+
+    monkeypatch.setattr("subprocess.check_call", _fake_check_call)
+    runner = CliRunner()
+    with app.app_context():
+        result = runner.invoke(getattr(cli_mod, command), [])
+
+    assert result.exit_code == 0, result.output
+    assert isinstance(captured["args"], list)
+    args_list: list[str] = captured["args"]  # type: ignore[assignment]
+    assert args_list[0] == "pybabel"
+    assert args_list[1 : 1 + len(expected_args_head)] == expected_args_head
+
+
+@pytest.mark.unit
 def test_main_entrypoint_invokes_flask_group(monkeypatch: pytest.MonkeyPatch) -> None:
     """``service_crm.cli:main`` is the ``service-crm-cli`` console-script
     entry. We don't want to invoke the real Flask CLI from the suite, so
