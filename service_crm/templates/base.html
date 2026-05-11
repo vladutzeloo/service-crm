@@ -34,7 +34,7 @@
       <a href="#" class="nav-link">{{ icon("calendar") }} {{ _("Planning") }}</a>
 
       <div class="nav-section-title">{{ _("Catalogue") }}</div>
-      <a href="#" class="nav-link">{{ icon("users") }} {{ _("Clients") }}</a>
+      <a href="{{ url_for('clients.list_clients') }}" class="nav-link">{{ icon("users") }} {{ _("Clients") }}</a>
       <a href="#" class="nav-link">{{ icon("server") }} {{ _("Equipment") }}</a>
       <a href="#" class="nav-link">{{ icon("book-open") }} {{ _("Knowledge") }}</a>
 

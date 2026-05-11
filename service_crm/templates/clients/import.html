@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Import clients") }} — Service-CRM{% endblock %}
+{% block crumb %}
+  <div class="crumb"><a href="{{ url_for('clients.list_clients') }}">{{ _("Clients") }}</a></div>
+{% endblock %}
+{% block page_title %}{{ _("Import clients") }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('clients.import_clients') }}"
+        enctype="multipart/form-data" novalidate>
+    <h2 class="form-title">{{ _("Import clients from CSV") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      <div class="field field-full{% if form.csv_file.errors %} field-error{% endif %}">
+        {{ form.csv_file.label }}
+        {{ form.csv_file(class="input") }}
+        {% for err in form.csv_file.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+        <span class="field-hint">
+          {{ _("Expected columns: name (required), email, phone, notes") }}
+        </span>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('clients.list_clients') }}" class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">
+        {{ icon("upload") }} {{ _("Import") }}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -361,3 +361,306 @@ msgstr "Închide"
 msgid "Section navigation"
 msgstr "Navigare secțiune"
 
+#: service_crm/clients/forms.py service_crm/clients/routes.py
+#: service_crm/templates/clients/list.html service_crm/templates/clients/detail.html
+msgid "Clients"
+msgstr "Clienți"
+
+#: service_crm/templates/clients/list.html
+msgid "Search clients"
+msgstr "Caută clienți"
+
+#: service_crm/templates/clients/list.html
+msgid "Search clients…"
+msgstr "Caută clienți…"
+
+#: service_crm/templates/clients/list.html
+#: service_crm/templates/clients/edit.html
+msgid "New client"
+msgstr "Client nou"
+
+#: service_crm/templates/clients/list.html
+#: service_crm/templates/clients/import.html
+msgid "Import"
+msgstr "Importă"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+#: service_crm/templates/clients/edit.html
+msgid "Name"
+msgstr "Nume"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+#: service_crm/templates/clients/edit.html
+msgid "Phone"
+msgstr "Telefon"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/edit.html
+#: service_crm/templates/clients/detail.html
+msgid "Notes"
+msgstr "Notițe"
+
+#: service_crm/templates/clients/list.html
+#: service_crm/templates/clients/detail.html
+msgid "Status"
+msgstr "Status"
+
+#: service_crm/templates/clients/list.html
+#: service_crm/clients/forms.py
+msgid "Active"
+msgstr "Activ"
+
+#: service_crm/templates/clients/list.html
+msgid "Inactive"
+msgstr "Inactiv"
+
+#: service_crm/templates/clients/list.html
+msgid "All"
+msgstr "Toate"
+
+#: service_crm/templates/clients/list.html
+msgid "Actions"
+msgstr "Acțiuni"
+
+#: service_crm/templates/clients/list.html
+msgid "No clients found."
+msgstr "Nu au fost găsiți clienți."
+
+#: service_crm/templates/clients/list.html
+msgid "Previous"
+msgstr "Anterior"
+
+#: service_crm/templates/clients/list.html
+#, python-format
+msgid "Page %(p)s"
+msgstr "Pagina %(p)s"
+
+#: service_crm/templates/clients/list.html
+msgid "Next"
+msgstr "Următor"
+
+#: service_crm/templates/clients/detail.html
+#: service_crm/templates/clients/edit.html
+msgid "Client details"
+msgstr "Detalii client"
+
+#: service_crm/templates/clients/detail.html
+#: service_crm/templates/clients/edit.html
+msgid "Edit client"
+msgstr "Editează client"
+
+#: service_crm/templates/clients/detail.html
+msgid "Edit"
+msgstr "Editează"
+
+#: service_crm/templates/clients/detail.html
+msgid "Deactivate"
+msgstr "Dezactivează"
+
+#: service_crm/templates/clients/detail.html
+msgid "Reactivate"
+msgstr "Reactivează"
+
+#: service_crm/templates/clients/detail.html
+msgid "Deactivate this client?"
+msgstr "Dezactivezi acest client?"
+
+#: service_crm/templates/clients/detail.html
+msgid "Contacts"
+msgstr "Contacte"
+
+#: service_crm/templates/clients/detail.html
+msgid "Locations"
+msgstr "Locații"
+
+#: service_crm/templates/clients/detail.html
+msgid "Contracts"
+msgstr "Contracte"
+
+#: service_crm/templates/clients/detail.html
+#: service_crm/clients/forms.py
+msgid "Add contact"
+msgstr "Adaugă contact"
+
+#: service_crm/templates/clients/detail.html
+#: service_crm/clients/forms.py
+msgid "Add location"
+msgstr "Adaugă locație"
+
+#: service_crm/templates/clients/detail.html
+#: service_crm/clients/forms.py
+msgid "Add contract"
+msgstr "Adaugă contract"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+msgid "Role"
+msgstr "Rol"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+msgid "Primary contact"
+msgstr "Contact principal"
+
+#: service_crm/templates/clients/detail.html
+msgid "Primary"
+msgstr "Principal"
+
+#: service_crm/templates/clients/detail.html
+msgid "No contacts."
+msgstr "Nu există contacte."
+
+#: service_crm/templates/clients/detail.html
+msgid "No locations."
+msgstr "Nu există locații."
+
+#: service_crm/templates/clients/detail.html
+msgid "No contracts."
+msgstr "Nu există contracte."
+
+#: service_crm/templates/clients/detail.html
+msgid "Delete"
+msgstr "Șterge"
+
+#: service_crm/templates/clients/detail.html
+msgid "Delete this contact?"
+msgstr "Ștergi acest contact?"
+
+#: service_crm/templates/clients/detail.html
+msgid "Delete this location?"
+msgstr "Ștergi această locație?"
+
+#: service_crm/templates/clients/detail.html
+msgid "Delete this contract?"
+msgstr "Ștergi acest contract?"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+msgid "Label"
+msgstr "Etichetă"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+msgid "Address"
+msgstr "Adresă"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+msgid "City"
+msgstr "Oraș"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+msgid "Country"
+msgstr "Țară"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+msgid "Title"
+msgstr "Titlu"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+msgid "Reference"
+msgstr "Referință"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+msgid "Starts on"
+msgstr "Data începerii"
+
+#: service_crm/clients/forms.py service_crm/templates/clients/detail.html
+msgid "Ends on"
+msgstr "Data expirării"
+
+#: service_crm/templates/clients/detail.html
+msgid "Starts"
+msgstr "Începe"
+
+#: service_crm/templates/clients/detail.html
+msgid "Ends"
+msgstr "Expiră"
+
+#: service_crm/clients/forms.py
+msgid "CSV file"
+msgstr "Fișier CSV"
+
+#: service_crm/clients/forms.py
+msgid "CSV files only."
+msgstr "Doar fișiere CSV."
+
+#: service_crm/templates/clients/import.html
+msgid "Import clients"
+msgstr "Importă clienți"
+
+#: service_crm/templates/clients/import.html
+msgid "Import clients from CSV"
+msgstr "Importă clienți din CSV"
+
+#: service_crm/templates/clients/import.html
+msgid "Expected columns: name (required), email, phone, notes"
+msgstr "Coloane așteptate: name (obligatoriu), email, phone, notes"
+
+#: service_crm/clients/routes.py
+msgid "Client created."
+msgstr "Client creat."
+
+#: service_crm/clients/routes.py
+msgid "Client updated."
+msgstr "Client actualizat."
+
+#: service_crm/clients/routes.py
+msgid "Client deactivated."
+msgstr "Client dezactivat."
+
+#: service_crm/clients/routes.py
+msgid "Client reactivated."
+msgstr "Client reactivat."
+
+#: service_crm/clients/routes.py
+msgid "Contact added."
+msgstr "Contact adăugat."
+
+#: service_crm/clients/routes.py
+msgid "Contact updated."
+msgstr "Contact actualizat."
+
+#: service_crm/clients/routes.py
+msgid "Contact deleted."
+msgstr "Contact șters."
+
+#: service_crm/clients/routes.py
+msgid "Location added."
+msgstr "Locație adăugată."
+
+#: service_crm/clients/routes.py
+msgid "Location updated."
+msgstr "Locație actualizată."
+
+#: service_crm/clients/routes.py
+msgid "Location deleted."
+msgstr "Locație ștearsă."
+
+#: service_crm/clients/routes.py
+msgid "Contract added."
+msgstr "Contract adăugat."
+
+#: service_crm/clients/routes.py
+msgid "Contract updated."
+msgstr "Contract actualizat."
+
+#: service_crm/clients/routes.py
+msgid "Contract deleted."
+msgstr "Contract șters."
+
+#: service_crm/clients/routes.py
+#, python-format
+msgid "%(count)s clients imported."
+msgstr "%(count)s clienți importați."
+
+#: service_crm/clients/routes.py
+msgid "Client not found."
+msgstr "Clientul nu a fost găsit."
+
+#: service_crm/templates/clients/detail.html
+msgid "Edit contact"
+msgstr "Editează contact"
+
+#: service_crm/templates/clients/detail.html
+msgid "Edit location"
+msgstr "Editează locație"
+
+#: service_crm/templates/clients/detail.html
+msgid "Edit contract"
+msgstr "Editează contract"
+

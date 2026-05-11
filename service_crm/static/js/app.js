@@ -47,16 +47,33 @@
   }
 
   function wireModals() {
-    // Delegated handler: any element with [data-modal-close="<id>"] hides
-    // the matching modal by setting the ``hidden`` attribute. Real screens
-    // can swap this out for HTMX/Alpine; the macro only needs the close
-    // button to actually close the dialog in the foundation.
+    // Close: any [data-modal-close="<id>"] hides the matching dialog.
     document.addEventListener("click", function (e) {
       var btn = e.target.closest && e.target.closest("[data-modal-close]");
       if (!btn) return;
       var modalId = btn.getAttribute("data-modal-close");
       var modal = document.getElementById(modalId);
       if (modal) modal.setAttribute("hidden", "");
+    });
+
+    // Open: any [data-modal-open="<id>"] removes ``hidden`` and focuses
+    // the first interactive element inside the dialog.
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest && e.target.closest("[data-modal-open]");
+      if (!btn) return;
+      var modalId = btn.getAttribute("data-modal-open");
+      var modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.removeAttribute("hidden");
+      var first = modal.querySelector("input, select, textarea, button");
+      if (first) first.focus();
+    });
+
+    // Dismiss on Escape.
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      var open = document.querySelector(".modal-backdrop:not([hidden])");
+      if (open) open.setAttribute("hidden", "");
     });
   }
 

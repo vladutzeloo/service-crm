@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "macros/icons.html" import icon %}
+
+{% set is_new = client is none %}
+{% block title %}
+  {{ _("New client") if is_new else _("Edit client") }} — Service-CRM
+{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('clients.list_clients') }}">{{ _("Clients") }}</a>
+    {% if not is_new %}
+      › <a href="{{ url_for('clients.detail', client_hex=client.id.hex()) }}">{{ client.name }}</a>
+    {% endif %}
+  </div>
+{% endblock %}
+{% block page_title %}
+  {{ _("New client") if is_new else _("Edit client") }}
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('clients.new_client') if is_new else url_for('clients.edit_client', client_hex=client.id.hex()) }}"
+        novalidate>
+    <h2 class="form-title">{{ _("Client details") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      <div class="field{% if form.name.errors %} field-error{% endif %}">
+        {{ form.name.label }}
+        {{ form.name(class="input", autofocus=true, autocomplete="organization") }}
+        {% for err in form.name.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+      <div class="field{% if form.email.errors %} field-error{% endif %}">
+        {{ form.email.label }}
+        {{ form.email(class="input", type="email", inputmode="email", autocomplete="email") }}
+        {% for err in form.email.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+      <div class="field{% if form.phone.errors %} field-error{% endif %}">
+        {{ form.phone.label }}
+        {{ form.phone(class="input", type="tel", inputmode="tel", autocomplete="tel") }}
+        {% for err in form.phone.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+      <div class="field field-full{% if form.notes.errors %} field-error{% endif %}">
+        {{ form.notes.label }}
+        {{ form.notes(class="input textarea", rows=4) }}
+        {% for err in form.notes.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('clients.list_clients') if is_new else url_for('clients.detail', client_hex=client.id.hex()) }}"
+         class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

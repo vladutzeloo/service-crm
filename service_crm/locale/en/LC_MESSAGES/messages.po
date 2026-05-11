@@ -359,3 +359,222 @@ msgstr "Close"
 msgid "Section navigation"
 msgstr "Section navigation"
 
+#: service_crm/clients/forms.py service_crm/clients/routes.py
+msgid "Clients"
+msgstr "Clients"
+
+msgid "Search clients"
+msgstr "Search clients"
+
+msgid "Search clients…"
+msgstr "Search clients…"
+
+msgid "New client"
+msgstr "New client"
+
+msgid "Import"
+msgstr "Import"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Phone"
+msgstr "Phone"
+
+msgid "Notes"
+msgstr "Notes"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Active"
+msgstr "Active"
+
+msgid "Inactive"
+msgstr "Inactive"
+
+msgid "All"
+msgstr "All"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "No clients found."
+msgstr "No clients found."
+
+msgid "Previous"
+msgstr "Previous"
+
+#, python-format
+msgid "Page %(p)s"
+msgstr "Page %(p)s"
+
+msgid "Next"
+msgstr "Next"
+
+msgid "Client details"
+msgstr "Client details"
+
+msgid "Edit client"
+msgstr "Edit client"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Deactivate"
+msgstr "Deactivate"
+
+msgid "Reactivate"
+msgstr "Reactivate"
+
+msgid "Deactivate this client?"
+msgstr "Deactivate this client?"
+
+msgid "Contacts"
+msgstr "Contacts"
+
+msgid "Locations"
+msgstr "Locations"
+
+msgid "Contracts"
+msgstr "Contracts"
+
+msgid "Add contact"
+msgstr "Add contact"
+
+msgid "Add location"
+msgstr "Add location"
+
+msgid "Add contract"
+msgstr "Add contract"
+
+msgid "Role"
+msgstr "Role"
+
+msgid "Primary contact"
+msgstr "Primary contact"
+
+msgid "Primary"
+msgstr "Primary"
+
+msgid "No contacts."
+msgstr "No contacts."
+
+msgid "No locations."
+msgstr "No locations."
+
+msgid "No contracts."
+msgstr "No contracts."
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Delete this contact?"
+msgstr "Delete this contact?"
+
+msgid "Delete this location?"
+msgstr "Delete this location?"
+
+msgid "Delete this contract?"
+msgstr "Delete this contract?"
+
+msgid "Label"
+msgstr "Label"
+
+msgid "Address"
+msgstr "Address"
+
+msgid "City"
+msgstr "City"
+
+msgid "Country"
+msgstr "Country"
+
+msgid "Title"
+msgstr "Title"
+
+msgid "Reference"
+msgstr "Reference"
+
+msgid "Starts on"
+msgstr "Starts on"
+
+msgid "Ends on"
+msgstr "Ends on"
+
+msgid "Starts"
+msgstr "Starts"
+
+msgid "Ends"
+msgstr "Ends"
+
+msgid "CSV file"
+msgstr "CSV file"
+
+msgid "CSV files only."
+msgstr "CSV files only."
+
+msgid "Import clients"
+msgstr "Import clients"
+
+msgid "Import clients from CSV"
+msgstr "Import clients from CSV"
+
+msgid "Expected columns: name (required), email, phone, notes"
+msgstr "Expected columns: name (required), email, phone, notes"
+
+msgid "Client created."
+msgstr "Client created."
+
+msgid "Client updated."
+msgstr "Client updated."
+
+msgid "Client deactivated."
+msgstr "Client deactivated."
+
+msgid "Client reactivated."
+msgstr "Client reactivated."
+
+msgid "Contact added."
+msgstr "Contact added."
+
+msgid "Contact updated."
+msgstr "Contact updated."
+
+msgid "Contact deleted."
+msgstr "Contact deleted."
+
+msgid "Location added."
+msgstr "Location added."
+
+msgid "Location updated."
+msgstr "Location updated."
+
+msgid "Location deleted."
+msgstr "Location deleted."
+
+msgid "Contract added."
+msgstr "Contract added."
+
+msgid "Contract updated."
+msgstr "Contract updated."
+
+msgid "Contract deleted."
+msgstr "Contract deleted."
+
+#, python-format
+msgid "%(count)s clients imported."
+msgstr "%(count)s clients imported."
+
+msgid "Client not found."
+msgstr "Client not found."
+
+msgid "Edit contact"
+msgstr "Edit contact"
+
+msgid "Edit location"
+msgstr "Edit location"
+
+msgid "Edit contract"
+msgstr "Edit contract"
+

@@ -102,9 +102,10 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "PL", "RUF"]
-# Lazy imports inside the factory and CLI entrypoint are intentional
-# (avoid blueprint-vs-factory import cycles); PLC0415 misreads them.
-ignore = ["PLC0415"]
+# PLC0415: lazy imports in factory/CLI are intentional (import cycles).
+# PLR0913: service-layer functions take (session, *, …) — keyword-only
+#   args make the call site readable; the 5-arg limit is too tight here.
+ignore = ["PLC0415", "PLR0913"]
 
 [tool.ruff.lint.per-file-ignores]
 # HTTP status codes and other in-test literals don't earn names.
