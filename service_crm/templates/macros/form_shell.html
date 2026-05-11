@@ -1,0 +1,52 @@
+{# Form shell. Wraps a <form> with the OEE/service-crm spacing and an
+   idempotency-token hidden input — every state-changing form in v1
+   carries one, generated server-side and deduped (user_id, token)
+   for 24 h per docs/v1-implementation-goals.md §2.5.
+
+   Usage:
+       {% call form_shell(action=url_for('foo'), title=_("Edit X"),
+                          idempotency_token=tok) %}
+           {{ render_field(form.name) }}
+           {{ render_field(form.email) }}
+       {% endcall %}
+
+   The macro renders the surrounding card, title, CSRF token, the
+   idempotency hidden input, and submit/cancel actions. The caller
+   supplies the fields between {% call %} and {% endcall %}.
+
+   Args
+   ----
+   action : str           — form action URL.
+   title  : str           — translated form heading.
+   idempotency_token : str — UUID hex string, required for POSTs.
+   method : str           — HTTP method (default 'post').
+   submit_label : str     — translated submit label.
+   cancel_href : str      — optional cancel link URL.
+   csrf_token : str | None — pre-rendered CSRF token Markup. The auth
+                             blueprint already exposes this via
+                             ``form.csrf_token`` on WTForms forms;
+                             callers can pass it explicitly when not
+                             using a WTForms instance.
+   enctype : str | None   — optional override for file uploads.
+#}
+{% macro form_shell(action, title, idempotency_token, method="post",
+                    submit_label=None, cancel_href=None, csrf_token=None,
+                    enctype=None) %}
+  <form class="form-shell" method="{{ method }}" action="{{ action }}"
+        {% if enctype %}enctype="{{ enctype }}"{% endif %} novalidate>
+    <h2 class="form-title">{{ title }}</h2>
+    {% if csrf_token %}{{ csrf_token }}{% endif %}
+    <input type="hidden" name="idempotency_token" value="{{ idempotency_token }}">
+    <div class="form-grid">
+      {{ caller() }}
+    </div>
+    <div class="form-actions">
+      {% if cancel_href %}
+        <a href="{{ cancel_href }}" class="btn btn-secondary">{{ _("Cancel") }}</a>
+      {% endif %}
+      <button type="submit" class="btn btn-primary">
+        {{ submit_label or _("Save") }}
+      </button>
+    </div>
+  </form>
+{% endmacro %}

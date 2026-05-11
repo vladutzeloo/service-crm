@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-11 07:22+0000\n"
+"POT-Creation-Date: 2026-05-11 11:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "Service is healthy."
 msgstr ""
 
-#: service_crm/health.py:28
+#: service_crm/health.py:27
 msgid "Service version."
 msgstr ""
 
@@ -34,20 +34,315 @@ msgid "Password"
 msgstr ""
 
 #: service_crm/auth/forms.py:20 service_crm/templates/auth/login.html:11
-#: service_crm/templates/auth/login.html:60
+#: service_crm/templates/auth/login.html:65
 msgid "Sign in"
 msgstr ""
 
-#: service_crm/auth/routes.py:29
+#: service_crm/auth/routes.py:51
 msgid "Invalid email or password."
 msgstr ""
 
-#: service_crm/auth/routes.py:34
+#: service_crm/auth/routes.py:60
 #, python-format
 msgid "Welcome, %(email)s."
 msgstr ""
 
-#: service_crm/auth/routes.py:44
+#: service_crm/auth/routes.py:72
 msgid "You have been signed out."
+msgstr ""
+
+#: service_crm/templates/base.html:23
+msgid "Primary navigation"
+msgstr ""
+
+#: service_crm/templates/base.html:24
+msgid "Service-CRM"
+msgstr ""
+
+#: service_crm/templates/base.html:26 service_crm/templates/base.html:76
+#: service_crm/templates/dev/macro_smoke.html:55
+msgid "Overview"
+msgstr ""
+
+#: service_crm/templates/base.html:28 service_crm/templates/base.html:77
+msgid "Dashboard"
+msgstr ""
+
+#: service_crm/templates/base.html:31
+msgid "Operations"
+msgstr ""
+
+#: service_crm/templates/base.html:32
+#: service_crm/templates/dev/macro_smoke.html:56
+msgid "Tickets"
+msgstr ""
+
+#: service_crm/templates/base.html:33
+msgid "Maintenance"
+msgstr ""
+
+#: service_crm/templates/base.html:34
+msgid "Planning"
+msgstr ""
+
+#: service_crm/templates/base.html:36
+msgid "Catalogue"
+msgstr ""
+
+#: service_crm/templates/base.html:37
+msgid "Clients"
+msgstr ""
+
+#: service_crm/templates/base.html:38
+#: service_crm/templates/dev/macro_smoke.html:75
+msgid "Equipment"
+msgstr ""
+
+#: service_crm/templates/base.html:39
+msgid "Knowledge"
+msgstr ""
+
+#: service_crm/templates/base.html:41
+msgid "Admin"
+msgstr ""
+
+#: service_crm/templates/base.html:42
+msgid "Users"
+msgstr ""
+
+#: service_crm/templates/base.html:43
+msgid "Audit Log"
+msgstr ""
+
+#: service_crm/templates/base.html:44
+msgid "Settings"
+msgstr ""
+
+#: service_crm/templates/base.html:59
+msgid "Guest"
+msgstr ""
+
+#: service_crm/templates/base.html:62
+msgid "Operator"
+msgstr ""
+
+#: service_crm/templates/base.html:71
+msgid "Toggle navigation"
+msgstr ""
+
+#: service_crm/templates/base.html:83
+msgid "Notifications"
+msgstr ""
+
+#: service_crm/templates/base.html:87
+msgid "Help"
+msgstr ""
+
+#: service_crm/templates/base.html:91
+msgid "Toggle theme"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:10
+#: service_crm/templates/dev/macro_smoke.html:12
+msgid "Macro smoke"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:11
+msgid "Dev"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:18
+msgid "Live"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:19
+msgid "Reference render — every shared 0.2.0 macro."
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:23
+msgid "Primary action"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:29
+msgid "Active clients"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:29
+msgid "Clients with open tickets."
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:30
+msgid "Open tickets"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:30
+msgid "In progress or scheduled."
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:31
+msgid "Technicians on shift"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:31
+msgid "Logged in this shift."
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:32
+msgid "Due maintenance"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:32
+msgid "Within the next 14 days."
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:40
+msgid "Faster than target"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:42
+msgid ""
+"Two interventions consistently beat the planned cycle time. Review and "
+"approve to update the routing."
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:45
+msgid "Update routing"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:46
+msgid "Dismiss"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:52
+msgid "Detail tabs"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:57
+msgid "Warranties"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:58
+msgid "History"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:59
+msgid "Equipment sections"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:63
+msgid "Filter by status"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:65
+msgid "All"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:66
+msgid "In progress"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:67
+msgid "Waiting parts"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:68
+msgid "Closed"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:75
+msgid "Ticket"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:75
+msgid "Client"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:75
+msgid "Status"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:75
+msgid "Updated"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:104
+msgid "Form shell"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:108
+msgid "Edit client"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:110
+msgid "Save client"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:114
+msgid "Client name"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:119
+msgid "Primary email"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:124
+msgid "Primary phone"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:129
+msgid "Notes"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:136
+msgid "Modal"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:139
+msgid ""
+"The modal below is shown statically so the smoke page can assert its "
+"anchor. Real screens render it hidden and toggle via the close control."
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:141
+msgid "Confirm cancellation"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:142
+msgid ""
+"This action will close the ticket without an intervention record. "
+"Continue?"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:145
+#: service_crm/templates/macros/form_shell.html:45
+msgid "Cancel"
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:147
+msgid "Close ticket"
+msgstr ""
+
+#: service_crm/templates/macros/data_table.html:33
+msgid "No records to display."
+msgstr ""
+
+#: service_crm/templates/macros/filter_bar.html:26
+msgid "From"
+msgstr ""
+
+#: service_crm/templates/macros/filter_bar.html:30
+msgid "To"
+msgstr ""
+
+#: service_crm/templates/macros/form_shell.html:48
+msgid "Save"
+msgstr ""
+
+#: service_crm/templates/macros/modal.html:23
+msgid "Close"
+msgstr ""
+
+#: service_crm/templates/macros/tabs.html:11
+msgid "Section navigation"
 msgstr ""
 

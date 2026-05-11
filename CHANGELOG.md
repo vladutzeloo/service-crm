@@ -12,7 +12,62 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 ## [Unreleased]
 
-(no changes yet)
+### Added
+- **UI foundation (mobile-first, light-default)** — ROADMAP 0.2.0 step 7.
+  - `service_crm/templates/base.html` shell: left sidebar grouped by
+    section (Overview / Operations / Catalogue / Admin), topbar with
+    breadcrumb + page title, clock, notifications, theme toggle, RO/EN
+    switch. Collapses to a slide-over drawer below 900 px.
+  - `service_crm/templates/partials/theme_init.html` — pre-paint theme
+    bootstrap (localStorage → `prefers-color-scheme` → `light`).
+  - `service_crm/static/css/style.css` — tokens (`--bg`, `--surface`,
+    `--surface-2`, `--border`, `--text`, `--text-muted`, `--accent`,
+    `--good`, `--fair`, `--poor`, `--first-off`, `--font-body`,
+    `--font-mono`, `--tap-min`), component classes (`.btn`,
+    `.oee-card`, `.data-table`, `.table-scroll`, `.table-stacked`,
+    `.filter-bar`, `.chip`, `.form-shell`, `.tabs`, `.modal-*`,
+    `.status-pill`, `.live-pill`, `.alert-first-off`). Every
+    interactive class declares ≥ 44 pt tap targets via `--tap-min`.
+  - Jinja macros under `service_crm/templates/macros/`: `kpi_card`,
+    `data_table` (with stacked-card fallback below 640 px), `filter_bar`,
+    `form_shell` (carries the idempotency-token hidden input),
+    `tabs`, `modal`, plus an inline Lucide `icon()` macro. The
+    directory is *not* underscore-prefixed because Babel skips
+    `_*` directories at extract time.
+  - `service_crm/static/js/app.js` — tiny shell behaviours (clock,
+    theme toggle, mobile nav drawer, service-worker registration with
+    skip-waiting + reload path).
+- **PWA-light scaffolding** — ROADMAP 0.2.0:
+  - `service_crm/static/manifest.webmanifest` — `name`, `short_name`,
+    `start_url`, `scope`, `display: standalone`, `orientation`,
+    `theme_color` `#dc2626`, `background_color` `#f5f5f4`, three icons
+    (192, 512, maskable-512).
+  - `service_crm/static/service-worker.js` — versioned cache key tied
+    to `VERSION`, app-shell precache, cache-first for `/static/`,
+    network-first for navigations with offline-shell fallback, **no
+    write-side caching** (writes pass straight through). Skip-waiting
+    message handler so a bad SW can't pin users on stale assets.
+  - `service_crm/static/icons/` — placeholder SVG + 192/512/maskable
+    PNGs (replace before tagging `v1.0.0`).
+- **Dev-only `/dev/macro-smoke` page** — renders every macro with
+  placeholder data so consistency passes and visual reviews have a
+  single anchor. Blueprint mounts only under `DEBUG` or `TESTING`.
+- **Tests** — 23 new e2e tests:
+  - `tests/e2e/test_macro_smoke.py` — base shell, PWA links, each
+    macro's anchor element, manifest + service-worker + icons served.
+  - `tests/e2e/test_touch_targets.py` — static CSS audit of the
+    `--tap-min` token contract on every interactive class.
+  - `tests/e2e/test_dev_blueprint.py` — dev blueprint mounted under
+    `DEBUG`/`TESTING`, skipped otherwise.
+
+### Changed
+- `service_crm/__init__.py` registers the dev blueprint conditionally.
+- `docs/ui-reference.md` records that the 0.2.0 foundation is a
+  reconstruction from the design tokens, OLSTRAL guidelines, and a
+  screenshot — not a verbatim vendor copy. The OEE source repository
+  was not reachable from CI / the sandboxed session at implementation
+  time; if it becomes reachable, a follow-up pass should diff the
+  vendored shell against the current files and reconcile.
 
 ## [0.1.0] - 2026-05-11
 

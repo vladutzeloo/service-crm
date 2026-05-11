@@ -1,0 +1,31 @@
+{# Accessible modal pattern. Server-rendered: the modal is HTML that
+   sits on the page; show/hide is handled by adding/removing the
+   ``hidden`` attribute, or by an HTMX/Alpine swap in later slices.
+   No JS dependency in this macro itself.
+
+   Args
+   ----
+   id          : str — DOM id, required.
+   title       : str — translated title.
+   describedby : str — optional id of the descriptive content for ARIA.
+   hidden      : bool — render with the ``hidden`` attribute.
+#}
+{% from "macros/icons.html" import icon %}
+{% macro modal(id, title, describedby=None, hidden=True) %}
+  <div id="{{ id }}" class="modal-backdrop"
+       role="dialog" aria-modal="true"
+       aria-labelledby="{{ id }}-title"
+       {% if describedby %}aria-describedby="{{ describedby }}"{% endif %}
+       {% if hidden %}hidden{% endif %}>
+    <div class="modal-card">
+      <header class="modal-header">
+        <h2 id="{{ id }}-title" class="modal-title">{{ title }}</h2>
+        <button type="button" class="icon-btn" aria-label="{{ _('Close') }}"
+                data-modal-close="{{ id }}">
+          {{ icon("x") }}
+        </button>
+      </header>
+      <div class="modal-body">{{ caller() }}</div>
+    </div>
+  </div>
+{% endmacro %}

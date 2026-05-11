@@ -41,10 +41,11 @@ def _register_jinja_globals(app: Flask) -> None:
 
 
 def _register_blueprints(app: Flask) -> None:
-    from . import auth, health
+    from . import auth, dev, health
 
     app.register_blueprint(health.bp)
     app.register_blueprint(auth.bp)
+    dev.register(app)
 
 
 def _register_cli(app: Flask) -> None:

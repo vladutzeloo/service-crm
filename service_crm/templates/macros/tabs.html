@@ -1,0 +1,23 @@
+{# Tab strip for detail pages. Server-rendered — each tab is a link to
+   the relevant URL. Detail pages then render only the active tab's
+   content under the strip. No client-side tab logic in v1.
+
+   Args
+   ----
+   tabs   : list[dict] — [{label, href, count, active}].
+   label  : str        — translated aria-label for the nav element.
+#}
+{% macro tabs(tabs, label=None) %}
+  <nav class="tabs" aria-label="{{ label or _('Section navigation') }}">
+    {% for t in tabs %}
+      <a href="{{ t.href or '#' }}"
+         class="tab{% if t.active %} is-active{% endif %}"
+         {% if t.active %}aria-current="page"{% endif %}>
+        <span>{{ t.label }}</span>
+        {% if t.count is not none %}
+          <span class="tab-count">{{ t.count }}</span>
+        {% endif %}
+      </a>
+    {% endfor %}
+  </nav>
+{% endmacro %}

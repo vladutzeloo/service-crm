@@ -1,0 +1,30 @@
+{# KPI tile. Mirrors the OEE admin dashboard cards: red top accent,
+   uppercase label, large bold value, optional help-line, optional
+   icon. Caller passes already-formatted strings — locale-aware
+   number formatting is done at the call site with Babel filters,
+   not here.
+
+   Args
+   ----
+   label : str    — uppercase label.
+   value : str    — primary value (any pre-formatted display string).
+   help  : str    — optional help line / secondary value.
+   icon_name : str — optional Lucide icon name (see macros/icons.html).
+   accent_top : bool — show the red top stripe (default True).
+   anchor_class : str — extra class for testability (default 'oee-card').
+#}
+{% from "macros/icons.html" import icon %}
+{% macro kpi_card(label, value, help=None, icon_name=None, accent_top=True, anchor_class="oee-card") %}
+  <article class="{{ anchor_class }}{% if accent_top %} accent-top{% endif %}">
+    <div class="kpi-row">
+      <div>
+        <div class="kpi-label">{{ label }}</div>
+        <div class="kpi-value">{{ value }}</div>
+        {% if help %}<div class="kpi-help">{{ help }}</div>{% endif %}
+      </div>
+      {% if icon_name %}
+        <div class="kpi-icon" aria-hidden="true">{{ icon(icon_name, size=16) }}</div>
+      {% endif %}
+    </div>
+  </article>
+{% endmacro %}

@@ -10,6 +10,27 @@ Use this file as the source map between `oee-calculator2.0` and `service-crm`.
 - GitHub repository: `https://github.com/vladutzeloo/oee-calculator2.0`
 - Branch/ref: `main`
 
+### v0.2.0 note — reconstruction, not vendor copy
+
+The 0.2.0 UI foundation in this repository is a **reconstruction** of the
+OEE design language, not a verbatim vendor copy. The source repository
+above was not reachable from CI / sandboxed sessions at the time
+(GitHub returns 404 unauthenticated; local sibling path absent). The
+reconstruction was approved on 2026-05-11 against three references:
+
+1. The design tokens listed in this file (§"Design Tokens To Preserve").
+2. The OLSTRAL MES UI/UX guidelines: accent `#dc2626`, semantic
+   `#00ff88` / `#f59e0b` / `#ff4455`, First Off amber, no purple/indigo
+   primary, no Tailwind in service-crm.
+3. A screenshot of the OEE admin dashboard supplied by the project
+   owner.
+
+If the OEE source becomes reachable, a follow-up pass should diff the
+vendored shell against `service_crm/templates/base.html` and
+`service_crm/static/css/style.css` and reconcile any divergence — the
+reconstruction prioritised the token + screenshot fidelity, not literal
+class-by-class parity.
+
 ## Exact Source Files
 
 - Base layout:

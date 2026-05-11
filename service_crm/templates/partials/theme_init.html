@@ -1,0 +1,23 @@
+{# Inline pre-paint theme bootstrap. Runs before <body> renders so the
+   initial paint already has the correct ``data-theme`` attribute — no
+   flash of the wrong theme on cold loads.
+
+   Resolution: localStorage("scrm-theme") → prefers-color-scheme → "light".
+#}
+<script>
+  (function () {
+    try {
+      var stored = window.localStorage.getItem("scrm-theme");
+      var theme = stored;
+      if (theme !== "light" && theme !== "dark") {
+        theme = window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      }
+      document.documentElement.setAttribute("data-theme", theme);
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  })();
+</script>
