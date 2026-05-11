@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-11 07:22+0000\n"
+"POT-Creation-Date: 2026-05-11 11:15+0000\n"
 "PO-Revision-Date: 2026-05-11 07:22+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ro\n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Service is healthy."
 msgstr "Serviciul funcționează."
 
-#: service_crm/health.py:28
+#: service_crm/health.py:27
 msgid "Service version."
 msgstr "Versiunea serviciului."
 
@@ -36,20 +36,328 @@ msgid "Password"
 msgstr "Parolă"
 
 #: service_crm/auth/forms.py:20 service_crm/templates/auth/login.html:11
-#: service_crm/templates/auth/login.html:60
+#: service_crm/templates/auth/login.html:65
 msgid "Sign in"
 msgstr "Autentificare"
 
-#: service_crm/auth/routes.py:29
+#: service_crm/auth/routes.py:51
 msgid "Invalid email or password."
 msgstr "E-mail sau parolă incorectă."
 
-#: service_crm/auth/routes.py:34
+#: service_crm/auth/routes.py:60
 #, python-format
 msgid "Welcome, %(email)s."
 msgstr "Bun venit, %(email)s."
 
-#: service_crm/auth/routes.py:44
+#: service_crm/auth/routes.py:72
 msgid "You have been signed out."
 msgstr "Te-ai deconectat."
+
+#: service_crm/templates/base.html:23
+msgid "Primary navigation"
+msgstr "Navigare principală"
+
+#: service_crm/templates/base.html:24
+msgid "Service-CRM"
+msgstr "Service-CRM"
+
+#: service_crm/templates/base.html:26 service_crm/templates/base.html:76
+#: service_crm/templates/dev/macro_smoke.html:55
+msgid "Overview"
+msgstr "Prezentare"
+
+#: service_crm/templates/base.html:28 service_crm/templates/base.html:77
+msgid "Dashboard"
+msgstr "Tablou de bord"
+
+#: service_crm/templates/base.html:31
+msgid "Operations"
+msgstr "Operațiuni"
+
+#: service_crm/templates/base.html:32
+#: service_crm/templates/dev/macro_smoke.html:56
+msgid "Tickets"
+msgstr "Tichete"
+
+#: service_crm/templates/base.html:33
+msgid "Maintenance"
+msgstr "Mentenanță"
+
+#: service_crm/templates/base.html:34
+msgid "Planning"
+msgstr "Planificare"
+
+#: service_crm/templates/base.html:36
+msgid "Catalogue"
+msgstr "Catalog"
+
+#: service_crm/templates/base.html:37
+msgid "Clients"
+msgstr "Clienți"
+
+#: service_crm/templates/base.html:38
+#: service_crm/templates/dev/macro_smoke.html:76
+msgid "Equipment"
+msgstr "Echipamente"
+
+#: service_crm/templates/base.html:39
+msgid "Knowledge"
+msgstr "Cunoștințe"
+
+#: service_crm/templates/base.html:41
+msgid "Admin"
+msgstr "Administrare"
+
+#: service_crm/templates/base.html:42
+msgid "Users"
+msgstr "Utilizatori"
+
+#: service_crm/templates/base.html:43
+msgid "Audit Log"
+msgstr "Jurnal de audit"
+
+#: service_crm/templates/base.html:44
+msgid "Settings"
+msgstr "Setări"
+
+#: service_crm/templates/base.html:59
+msgid "Guest"
+msgstr "Invitat"
+
+#: service_crm/templates/base.html:62
+msgid "Operator"
+msgstr "Operator"
+
+#: service_crm/templates/base.html:71
+msgid "Toggle navigation"
+msgstr "Comută navigarea"
+
+#: service_crm/templates/base.html:83
+msgid "Notifications"
+msgstr "Notificări"
+
+#: service_crm/templates/base.html:87
+msgid "Help"
+msgstr "Ajutor"
+
+#: service_crm/templates/base.html:91
+msgid "Toggle theme"
+msgstr "Comută tema"
+
+#: service_crm/templates/dev/macro_smoke.html:10
+#: service_crm/templates/dev/macro_smoke.html:12
+msgid "Macro smoke"
+msgstr "Test macro"
+
+#: service_crm/templates/dev/macro_smoke.html:11
+msgid "Dev"
+msgstr "Dev"
+
+#: service_crm/templates/dev/macro_smoke.html:18
+msgid "Live"
+msgstr "Live"
+
+#: service_crm/templates/dev/macro_smoke.html:19
+msgid "Reference render — every shared 0.2.0 macro."
+msgstr ""
+
+#: service_crm/templates/dev/macro_smoke.html:23
+msgid "Primary action"
+msgstr "Acțiune principală"
+
+#: service_crm/templates/dev/macro_smoke.html:29
+msgid "Active clients"
+msgstr "Clienți activi"
+
+#: service_crm/templates/dev/macro_smoke.html:29
+msgid "Clients with open tickets."
+msgstr "Clienți cu tichete deschise."
+
+#: service_crm/templates/dev/macro_smoke.html:30
+msgid "Open tickets"
+msgstr "Tichete deschise"
+
+#: service_crm/templates/dev/macro_smoke.html:30
+msgid "In progress or scheduled."
+msgstr "În lucru sau programate."
+
+#: service_crm/templates/dev/macro_smoke.html:31
+msgid "Technicians on shift"
+msgstr "Tehnicieni în tură"
+
+#: service_crm/templates/dev/macro_smoke.html:31
+msgid "Logged in this shift."
+msgstr "Conectați în această tură."
+
+#: service_crm/templates/dev/macro_smoke.html:32
+msgid "Due maintenance"
+msgstr "Mentenanță scadentă"
+
+#: service_crm/templates/dev/macro_smoke.html:32
+msgid "Within the next 14 days."
+msgstr "În următoarele 14 zile."
+
+#: service_crm/templates/dev/macro_smoke.html:40
+msgid "Faster than target"
+msgstr "Mai rapid decât ținta"
+
+#: service_crm/templates/dev/macro_smoke.html:42
+msgid ""
+"Two interventions consistently beat the planned cycle time. Review and "
+"approve to update the routing."
+msgstr ""
+"Două intervenții bat constant timpul de ciclu planificat. Verifică și "
+"aprobă pentru a actualiza rutarea."
+
+#: service_crm/templates/dev/macro_smoke.html:45
+msgid "Update routing"
+msgstr "Actualizează rutarea"
+
+#: service_crm/templates/dev/macro_smoke.html:46
+msgid "Dismiss"
+msgstr "Respinge"
+
+#: service_crm/templates/dev/macro_smoke.html:52
+msgid "Detail tabs"
+msgstr "File de detalii"
+
+#: service_crm/templates/dev/macro_smoke.html:57
+msgid "Warranties"
+msgstr "Garanții"
+
+#: service_crm/templates/dev/macro_smoke.html:58
+msgid "History"
+msgstr "Istoric"
+
+#: service_crm/templates/dev/macro_smoke.html:59
+msgid "Equipment sections"
+msgstr "Secțiuni echipament"
+
+#: service_crm/templates/dev/macro_smoke.html:63
+msgid "Filter by status"
+msgstr "Filtrează după stare"
+
+#: service_crm/templates/dev/macro_smoke.html:65
+msgid "All"
+msgstr "Toate"
+
+#: service_crm/templates/dev/macro_smoke.html:66
+msgid "In progress"
+msgstr "În lucru"
+
+#: service_crm/templates/dev/macro_smoke.html:67
+msgid "Waiting parts"
+msgstr "Așteaptă piese"
+
+#: service_crm/templates/dev/macro_smoke.html:68
+msgid "Closed"
+msgstr "Închise"
+
+#: service_crm/templates/dev/macro_smoke.html:76
+msgid "Ticket"
+msgstr "Tichet"
+
+#: service_crm/templates/dev/macro_smoke.html:76
+msgid "Client"
+msgstr "Client"
+
+#: service_crm/templates/dev/macro_smoke.html:76
+msgid "Status"
+msgstr "Stare"
+
+#: service_crm/templates/dev/macro_smoke.html:76
+msgid "Updated"
+msgstr "Actualizat"
+
+#: service_crm/templates/dev/macro_smoke.html:105
+msgid "Form shell"
+msgstr "Cadru formular"
+
+#: service_crm/templates/dev/macro_smoke.html:109
+msgid "Edit client"
+msgstr "Editează clientul"
+
+#: service_crm/templates/dev/macro_smoke.html:111
+msgid "Save client"
+msgstr "Salvează clientul"
+
+#: service_crm/templates/dev/macro_smoke.html:115
+msgid "Client name"
+msgstr "Nume client"
+
+#: service_crm/templates/dev/macro_smoke.html:120
+msgid "Primary email"
+msgstr "E-mail principal"
+
+#: service_crm/templates/dev/macro_smoke.html:125
+msgid "Primary phone"
+msgstr "Telefon principal"
+
+#: service_crm/templates/dev/macro_smoke.html:130
+msgid "Notes"
+msgstr "Notițe"
+
+#: service_crm/templates/dev/macro_smoke.html:137
+msgid "Modal"
+msgstr "Fereastră modală"
+
+#: service_crm/templates/dev/macro_smoke.html:140
+msgid ""
+"The modal below is shown statically so the smoke page can assert its "
+"anchor. Real screens render it hidden and toggle via the close control."
+msgstr ""
+"Fereastra de mai jos este afișată static pentru ca pagina de test să-i "
+"poată verifica ancora. Ecranele reale o redau ascunsă și o comută prin "
+"controlul de închidere."
+
+#: service_crm/templates/dev/macro_smoke.html:142
+msgid "Confirm cancellation"
+msgstr "Confirmă anularea"
+
+#: service_crm/templates/dev/macro_smoke.html:143
+msgid ""
+"This action will close the ticket without an intervention record. "
+"Continue?"
+msgstr ""
+"Această acțiune va închide tichetul fără înregistrarea unei intervenții. "
+"Continui?"
+
+#: service_crm/templates/dev/macro_smoke.html:146
+#: service_crm/templates/macros/form_shell.html:45
+msgid "Cancel"
+msgstr "Anulează"
+
+#: service_crm/templates/dev/macro_smoke.html:148
+msgid "Close ticket"
+msgstr "Închide tichetul"
+
+#: service_crm/templates/macros/data_table.html:33
+msgid "No records to display."
+msgstr "Nu există înregistrări de afișat."
+
+#: service_crm/templates/macros/filter_bar.html:39
+#: service_crm/templates/macros/filter_bar.html:50
+msgid "From"
+msgstr "De la"
+
+#: service_crm/templates/macros/filter_bar.html:43
+#: service_crm/templates/macros/filter_bar.html:54
+msgid "To"
+msgstr "Până la"
+
+#: service_crm/templates/macros/filter_bar.html:46
+msgid "Apply"
+msgstr "Aplică"
+
+#: service_crm/templates/macros/form_shell.html:48
+msgid "Save"
+msgstr "Salvează"
+
+#: service_crm/templates/macros/modal.html:23
+msgid "Close"
+msgstr "Închide"
+
+#: service_crm/templates/macros/tabs.html:11
+msgid "Section navigation"
+msgstr "Navigare secțiune"
 

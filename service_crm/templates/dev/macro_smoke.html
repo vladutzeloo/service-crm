@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% from "macros/icons.html" import icon %}
+{% from "macros/kpi_card.html" import kpi_card %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/filter_bar.html" import filter_bar %}
+{% from "macros/form_shell.html" import form_shell %}
+{% from "macros/tabs.html" import tabs %}
+{% from "macros/modal.html" import modal %}
+
+{% block title %}{{ _("Macro smoke") }} · {{ super() }}{% endblock %}
+{% block crumb %}<div class="crumb">{{ _("Dev") }}</div>{% endblock %}
+{% block page_title %}{{ _("Macro smoke") }}{% endblock %}
+
+{% block content %}
+  <section class="page-header">
+    <div>
+      <div class="meta-row">
+        <span class="live-pill">{{ _("Live") }}</span>
+        <span>{{ _("Reference render — every shared 0.2.0 macro.") }}</span>
+      </div>
+    </div>
+    <div>
+      <a href="#" class="btn btn-primary">{{ icon("zap", 16) }} {{ _("Primary action") }}</a>
+    </div>
+  </section>
+
+  {# KPI cards #}
+  <div class="kpi-grid" data-smoke="kpi-grid">
+    {{ kpi_card(_("Active clients"), "23", help=_("Clients with open tickets."), icon_name="users") }}
+    {{ kpi_card(_("Open tickets"), "7", help=_("In progress or scheduled."), icon_name="wrench") }}
+    {{ kpi_card(_("Technicians on shift"), "2", help=_("Logged in this shift."), icon_name="user-cog") }}
+    {{ kpi_card(_("Due maintenance"), "5", help=_("Within the next 14 days."), icon_name="calendar-check") }}
+  </div>
+
+  {# First Off-style alert #}
+  <div style="margin-top: 16px;">
+    <div class="alert alert-first-off" data-smoke="alert">
+      <span class="alert-icon">{{ icon("alert-triangle", 16) }}</span>
+      <div class="alert-body">
+        <h3 class="alert-title">{{ _("Faster than target") }}</h3>
+        <p class="alert-text">
+          {{ _("Two interventions consistently beat the planned cycle time. Review and approve to update the routing.") }}
+        </p>
+      </div>
+      <a href="#" class="btn btn-primary btn-sm">{{ _("Update routing") }}</a>
+      <a href="#" class="btn btn-ghost btn-sm">{{ _("Dismiss") }}</a>
+    </div>
+  </div>
+
+  {# Tabs #}
+  <h2 style="margin-top: 28px; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted);">
+    {{ _("Detail tabs") }}
+  </h2>
+  {{ tabs([
+    {"label": _("Overview"), "href": "#", "active": True,  "count": None},
+    {"label": _("Tickets"),  "href": "#", "active": False, "count": 12},
+    {"label": _("Warranties"),"href": "#", "active": False, "count": 3},
+    {"label": _("History"),  "href": "#", "active": False, "count": 48},
+  ], label=_("Equipment sections")) }}
+
+  {# Filters #}
+  {{ filter_bar(
+       _("Filter by status"),
+       [
+         {"label": _("All"),         "href": "#", "active": True,  "count": 23},
+         {"label": _("In progress"), "href": "#", "active": False, "count": 7},
+         {"label": _("Waiting parts"),"href": "#","active": False, "count": 2},
+         {"label": _("Closed"),      "href": "#", "active": False, "count": 14},
+       ],
+       date_range={"from": "2026-05-01", "to": "2026-05-11"},
+       action=request.path,
+  ) }}
+
+  {# Data table #}
+  {{ data_table(
+       [_("Ticket"), _("Client"), _("Equipment"), _("Status"), _("Updated")],
+       [
+         [
+           '<a href="#">SRV-001</a>'|safe,
+           "ACME GmbH",
+           "DMG HSC 55",
+           '<span class="status-pill is-good">In progress</span>'|safe,
+           "2026-05-11 13:44",
+         ],
+         [
+           '<a href="#">SRV-002</a>'|safe,
+           "Beta Mech",
+           "SW BA322 5-axis",
+           '<span class="status-pill is-fair">Waiting parts</span>'|safe,
+           "2026-05-11 10:21",
+         ],
+         [
+           '<a href="#">SRV-003</a>'|safe,
+           "Gamma S.A.",
+           "Neway VM740S",
+           '<span class="status-pill is-poor">Escalated</span>'|safe,
+           "2026-05-10 17:09",
+         ],
+       ],
+       stacked=True,
+  ) }}
+
+  {# Form shell #}
+  <h2 style="margin-top: 28px; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted);">
+    {{ _("Form shell") }}
+  </h2>
+  {% call form_shell(
+       action="#",
+       title=_("Edit client"),
+       idempotency_token=idempotency_token,
+       submit_label=_("Save client"),
+       cancel_href="#",
+  ) %}
+    <div class="field">
+      <label for="smoke-name">{{ _("Client name") }}</label>
+      <input id="smoke-name" type="text" name="name" autocomplete="organization"
+             value="ACME GmbH" required>
+    </div>
+    <div class="field">
+      <label for="smoke-email">{{ _("Primary email") }}</label>
+      <input id="smoke-email" type="email" name="email" autocomplete="email"
+             inputmode="email" value="ops@example.com">
+    </div>
+    <div class="field">
+      <label for="smoke-phone">{{ _("Primary phone") }}</label>
+      <input id="smoke-phone" type="tel" name="phone" autocomplete="tel"
+             inputmode="tel" value="+40 711 222 333">
+    </div>
+    <div class="field">
+      <label for="smoke-notes">{{ _("Notes") }}</label>
+      <textarea id="smoke-notes" name="notes" rows="3"></textarea>
+    </div>
+  {% endcall %}
+
+  {# Modal (rendered visible so the smoke page exercises its anchor) #}
+  <h2 style="margin-top: 28px; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted);">
+    {{ _("Modal") }}
+  </h2>
+  <p class="kpi-help">
+    {{ _("The modal below is shown statically so the smoke page can assert its anchor. Real screens render it hidden and toggle via the close control.") }}
+  </p>
+  {% call modal(id="smoke-modal", title=_("Confirm cancellation"), hidden=False) %}
+    <p>{{ _("This action will close the ticket without an intervention record. Continue?") }}</p>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" data-modal-close="smoke-modal">
+        {{ _("Cancel") }}
+      </button>
+      <button type="button" class="btn btn-danger">{{ _("Close ticket") }}</button>
+    </div>
+  {% endcall %}
+{% endblock %}

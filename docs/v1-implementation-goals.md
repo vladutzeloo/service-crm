@@ -373,7 +373,10 @@ native to oee-calculator2.0, and behaves on phones.
 - [ ] `templates/base.html` and `partials/theme_init.html` vendored.
 - [ ] `static/css/style.css` vendored; service-crm-specific additions in a
       single appended block.
-- [ ] `_macros/` (kpi_card, data_table, filter_bar, form_shell, tabs, modal).
+- [ ] `macros/` (kpi_card, data_table, filter_bar, form_shell, tabs, modal).
+      *(Directory is not `_macros/`: Babel skips `_*` directories at
+      extract time, so translatable strings inside the macros wouldn't
+      be picked up by `pybabel extract`.)*
 - [ ] **PWA manifest** + **service worker** registered. App shell cached.
 - [ ] Responsive breakpoints verified at 320 / 768 / 1024 / 1440 px.
 - [ ] Touch-target audit clean on the smoke page.

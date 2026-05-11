@@ -46,7 +46,7 @@ For the chosen blueprint `<bp>`:
 - `service_crm/<bp>/services.py` — all DB access for this blueprint.
 - `service_crm/<bp>/forms.py` — Flask-WTF forms.
 - `service_crm/templates/<bp>/list.html`, `detail.html`, `edit.html` —
-  built from the macros in `service_crm/templates/_macros/`.
+  built from the macros in `service_crm/templates/macros/`.
 - `tests/<bp>/test_routes.py` — e2e via `client_logged_in`.
 - `tests/<bp>/test_services.py` — integration with `db_session`.
 - A registration line in `service_crm/__init__.py`'s
@@ -67,7 +67,7 @@ For the chosen blueprint `<bp>`:
    `(session, ...)` as the first arg. Document any guard rules.
 4. **Templates** under `service_crm/templates/<bp>/`. Always:
    - extend `base.html`,
-   - use macros from `_macros/`,
+   - use macros from `macros/`,
    - keep dense, scannable, light-mode layout (per
      [`docs/ui-reference.md`](../../../docs/ui-reference.md)),
    - link list → detail → edit using existing `oee-card` and

@@ -41,8 +41,10 @@ Only the shared UI foundation. Concretely:
   `VERSION` so a deploy invalidates old caches. **No write-side
   caching in v1.0.**
 - `service_crm/static/icons/` — PWA icons (192, 512, maskable variants).
-- `service_crm/templates/_macros/` — small Jinja macros for the patterns
-  the rest of the app will reuse:
+- `service_crm/templates/macros/` — small Jinja macros for the patterns
+  the rest of the app will reuse. (Directory name is **not**
+  underscore-prefixed because Babel skips `_*` directories during
+  ``pybabel extract``.)
   - `kpi_card.html` — KPI tile (matches `templates/admin/dashboard.html`).
   - `data_table.html` — list table (matches `templates/admin/orders.html`).
     Collapses to stacked cards below 640 px.

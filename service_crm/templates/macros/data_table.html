@@ -1,0 +1,40 @@
+{# Data table. Renders a header row from ``columns`` and one row per
+   item in ``rows``. Each row is a sequence of strings/Markup that
+   line up with ``columns`` by position. Below 640 px the table
+   collapses to stacked cards via ``.table-stacked``.
+
+   Args
+   ----
+   columns : list[str]            — translated column labels.
+   rows    : list[list[Markup]]   — pre-rendered cell content.
+   stacked : bool                 — opt into the stacked-card pattern.
+   empty   : str                  — message when ``rows`` is empty.
+#}
+{% macro data_table(columns, rows, stacked=True, empty=None) %}
+  <div class="table-scroll">
+    <table class="data-table{% if stacked %} table-stacked{% endif %}">
+      <thead>
+        <tr>
+          {% for label in columns %}<th scope="col">{{ label }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% if rows %}
+          {% for row in rows %}
+            <tr>
+              {% for cell in row %}
+                <td data-label="{{ columns[loop.index0] }}">{{ cell }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td class="empty" colspan="{{ columns|length }}">
+              {{ empty if empty else _("No records to display.") }}
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+{% endmacro %}
