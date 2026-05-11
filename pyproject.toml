@@ -137,7 +137,7 @@ ignore_missing_imports = true
 # the auth blueprint uses the same approach with inline ignores on its 2 sites.
 # DateField.data is date | None; the required validator ensures it's non-None
 # by the time validate_on_submit() passes, but mypy can't know that.
-module = "service_crm.clients.routes"
+module = ["service_crm.clients.routes", "service_crm.equipment.routes"]
 disable_error_code = ["arg-type"]
 
 [tool.pytest.ini_options]
