@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/filter_bar.html" import filter_bar %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Clients") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb">{{ _("Catalogue") }}</div>{% endblock %}
+{% block page_title %}{{ _("Clients") }}{% endblock %}
+
+{% block content %}
+<div class="page-toolbar">
+  <form method="get" action="{{ url_for('clients.list_clients') }}" class="search-form" role="search">
+    <input type="hidden" name="show" value="{{ show }}">
+    <label class="sr-only" for="q">{{ _("Search clients") }}</label>
+    <input id="q" type="search" name="q" value="{{ q }}"
+           placeholder="{{ _('Search clients…') }}"
+           class="search-input" autocomplete="off">
+    <button type="submit" class="btn btn-primary btn-sm">{{ icon("search") }}</button>
+  </form>
+  <div class="toolbar-actions">
+    <a href="{{ url_for('clients.import_clients') }}" class="btn btn-secondary btn-sm">
+      {{ icon("upload") }} {{ _("Import") }}
+    </a>
+    <a href="{{ url_for('clients.new_client') }}" class="btn btn-primary btn-sm">
+      {{ icon("plus") }} {{ _("New client") }}
+    </a>
+  </div>
+</div>
+
+{% set all_href = url_for('clients.list_clients', q=q, show='all') %}
+{% set active_href = url_for('clients.list_clients', q=q, show='active') %}
+{{ filter_bar(
+    label=_("Status"),
+    chips=[
+      {"label": _("Active"), "href": active_href, "count": none, "active": show == "active"},
+      {"label": _("All"),    "href": all_href,    "count": none, "active": show == "all"},
+    ]
+) }}
+
+{% set cols = [_("Name"), _("Email"), _("Phone"), _("Status"), _("Actions")] %}
+{% set rows = [] %}
+{% for c in clients %}
+  {% set status_badge %}
+    {% if c.is_active %}
+      <span class="badge badge-good">{{ _("Active") }}</span>
+    {% else %}
+      <span class="badge badge-muted">{{ _("Inactive") }}</span>
+    {% endif %}
+  {% endset %}
+  {% set actions %}
+    <a href="{{ url_for('clients.detail', client_hex=c.id.hex()) }}" class="btn btn-sm btn-ghost">
+      {{ icon("eye") }}
+    </a>
+    <a href="{{ url_for('clients.edit_client', client_hex=c.id.hex()) }}" class="btn btn-sm btn-ghost">
+      {{ icon("edit-2") }}
+    </a>
+  {% endset %}
+  {% set _ = rows.append([
+    '<a href="' ~ url_for('clients.detail', client_hex=c.id.hex()) ~ '" class="link">' ~ c.name|e ~ '</a>' | safe,
+    c.email|e,
+    c.phone|e,
+    status_badge,
+    actions,
+  ]) %}
+{% endfor %}
+
+{{ data_table(cols, rows, empty=_("No clients found.")) }}
+
+{% if total > 50 %}
+<div class="pagination">
+  {% if page > 1 %}
+    <a href="{{ url_for('clients.list_clients', q=q, show=show, page=page-1) }}"
+       class="btn btn-sm btn-ghost">&laquo; {{ _("Previous") }}</a>
+  {% endif %}
+  <span class="page-info">{{ _("Page %(p)s", p=page) }}</span>
+  {% if clients|length == 50 %}
+    <a href="{{ url_for('clients.list_clients', q=q, show=show, page=page+1) }}"
+       class="btn btn-sm btn-ghost">{{ _("Next") }} &raquo;</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -20,6 +20,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 
 from service_crm.auth import services as auth_services
 from service_crm.auth.models import Role, User
+from service_crm.clients.models import Client, Contact, Location, ServiceContract
 from service_crm.extensions import db
 
 
@@ -80,3 +81,73 @@ class UserFactory(SQLAlchemyModelFactory):
         kwargs.pop("password", None)
         kwargs["email"] = auth_services.normalize_email(str(kwargs.get("email", "")))
         return super()._create(model_class, *args, **kwargs)  # type: ignore[no-any-return]
+
+
+# ── Clients ───────────────────────────────────────────────────────────────────
+
+
+class ClientFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = Client
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    name = factory.Sequence(lambda n: f"Client {n}")
+    email = factory.Sequence(lambda n: f"client{n}@example.com")
+    phone = ""
+    notes = ""
+    is_active = True
+
+
+class ContactFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = Contact
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    client = factory.SubFactory(ClientFactory)
+    name = factory.Sequence(lambda n: f"Contact {n}")
+    role = ""
+    email = factory.Sequence(lambda n: f"contact{n}@example.com")
+    phone = ""
+    is_primary = False
+
+    @factory.lazy_attribute
+    def client_id(self) -> bytes:
+        return self.client.id  # type: ignore[return-value]
+
+
+class LocationFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = Location
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    client = factory.SubFactory(ClientFactory)
+    label = factory.Sequence(lambda n: f"Location {n}")
+    address = ""
+    city = ""
+    country = ""
+
+    @factory.lazy_attribute
+    def client_id(self) -> bytes:
+        return self.client.id  # type: ignore[return-value]
+
+
+class ContractFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = ServiceContract
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    client = factory.SubFactory(ClientFactory)
+    title = factory.Sequence(lambda n: f"Contract {n}")
+    reference = ""
+    starts_on = factory.LazyFunction(lambda: __import__("datetime").date(2026, 1, 1))
+    ends_on = None
+    is_active = True
+    notes = ""
+
+    @factory.lazy_attribute
+    def client_id(self) -> bytes:
+        return self.client.id  # type: ignore[return-value]

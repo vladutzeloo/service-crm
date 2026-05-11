@@ -127,20 +127,25 @@ def client(app: Flask) -> FlaskClient:
 
 @pytest.fixture
 def client_logged_in(client: FlaskClient, db_session: Session) -> FlaskClient:
-    """``client`` with a default admin user persisted in the test DB.
+    """``client`` with a live admin session cookie.
 
-    The auth slice (next PR) wires the ``/auth/login`` route; until
-    then this fixture only guarantees the user row exists. Once login
-    lands, this fixture will POST to ``/auth/login`` so the returned
-    client carries the session cookie.
+    Creates a test admin user then injects the Flask-Login session directly
+    (no login-route POST) so the fixture never triggers a commit that would
+    perturb the ``db_session`` savepoint.
     """
     from tests.factories import RoleFactory, UserFactory
 
     admin_role = db_session.query(_admin_role_model()).filter_by(name="admin").one_or_none()
     if admin_role is None:
         admin_role = RoleFactory(name="admin")
-    UserFactory(email="admin@example.com", role=admin_role)
+    user = UserFactory(password="test-pass", role=admin_role)
     db_session.flush()
+
+    # Inject Flask-Login's session directly — avoids a commit that would
+    # break the SAVEPOINT rollback used for test isolation.
+    with client.session_transaction() as sess:
+        sess["_user_id"] = user.get_id()
+        sess["_fresh"] = True
     return client
 
 

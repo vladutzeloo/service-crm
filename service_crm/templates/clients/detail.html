@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/tabs.html" import tabs %}
+{% from "macros/modal.html" import modal %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ client.name }} — Service-CRM{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('clients.list_clients') }}">{{ _("Clients") }}</a>
+  </div>
+{% endblock %}
+{% block page_title %}{{ client.name }}{% endblock %}
+
+{% block content %}
+{# ── Header bar ────────────────────────────────────────────────────── #}
+<div class="detail-header">
+  <div class="detail-meta">
+    <span class="meta-item">{{ icon("mail") }} {{ client.email or '—' }}</span>
+    <span class="meta-item">{{ icon("phone") }} {{ client.phone or '—' }}</span>
+    {% if client.is_active %}
+      <span class="badge badge-good">{{ _("Active") }}</span>
+    {% else %}
+      <span class="badge badge-muted">{{ _("Inactive") }}</span>
+    {% endif %}
+  </div>
+  <div class="detail-actions">
+    <a href="{{ url_for('clients.edit_client', client_hex=client.id.hex()) }}"
+       class="btn btn-sm btn-secondary">{{ icon("edit-2") }} {{ _("Edit") }}</a>
+    {% if client.is_active %}
+      <form method="post" action="{{ url_for('clients.deactivate', client_hex=client.id.hex()) }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-danger"
+                onclick="return confirm('{{ _("Deactivate this client?") }}')">
+          {{ icon("archive") }} {{ _("Deactivate") }}
+        </button>
+      </form>
+    {% else %}
+      <form method="post" action="{{ url_for('clients.reactivate', client_hex=client.id.hex()) }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-success">
+          {{ icon("refresh-cw") }} {{ _("Reactivate") }}
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if client.notes %}
+<div class="detail-notes">{{ client.notes }}</div>
+{% endif %}
+
+{# ── Tabs ──────────────────────────────────────────────────────────── #}
+{% set tab_items = [
+  {"label": _("Contacts"),  "href": url_for("clients.detail", client_hex=client.id.hex(), tab="contacts"),
+   "count": client.contacts|length, "active": tab == "contacts"},
+  {"label": _("Locations"), "href": url_for("clients.detail", client_hex=client.id.hex(), tab="locations"),
+   "count": client.locations|length, "active": tab == "locations"},
+  {"label": _("Contracts"), "href": url_for("clients.detail", client_hex=client.id.hex(), tab="contracts"),
+   "count": client.contracts|length, "active": tab == "contracts"},
+] %}
+{{ tabs(tab_items) }}
+
+{# ══════════════════════════════════════════════════════════════════════
+   CONTACTS TAB
+═══════════════════════════════════════════════════════════════════════ #}
+{% if tab == "contacts" %}
+<div class="tab-panel">
+  <div class="tab-toolbar">
+    <button type="button" class="btn btn-sm btn-primary" data-modal-open="modal-contact-new">
+      {{ icon("plus") }} {{ _("Add contact") }}
+    </button>
+  </div>
+
+  {% set contact_cols = [_("Name"), _("Role"), _("Email"), _("Phone"), _("Primary"), _("Actions")] %}
+  {% set contact_rows = [] %}
+  {% for c in client.contacts %}
+    {% set edit_url = url_for('clients.detail', client_hex=client.id.hex(), tab='contacts', edit_contact=c.id.hex()) %}
+    {% set actions_cell %}
+      <a href="{{ edit_url }}" class="btn btn-sm btn-ghost" aria-label="{{ _('Edit') }}">{{ icon("edit-2") }}</a>
+      <form method="post" action="{{ url_for('clients.contact_delete', client_hex=client.id.hex(), contact_hex=c.id.hex()) }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-ghost btn-danger-ghost"
+                onclick="return confirm('{{ _("Delete this contact?") }}')" aria-label="{{ _('Delete') }}">
+          {{ icon("trash-2") }}
+        </button>
+      </form>
+    {% endset %}
+    {% set primary_cell %}{% if c.is_primary %}<span class="badge badge-good">{{ _("Primary") }}</span>{% endif %}{% endset %}
+    {% set _ = contact_rows.append([c.name|e, c.role|e, c.email|e, c.phone|e, primary_cell, actions_cell]) %}
+  {% endfor %}
+  {{ data_table(contact_cols, contact_rows, empty=_("No contacts.")) }}
+</div>
+
+{# Add contact modal #}
+{% call modal("modal-contact-new", _("Add contact"), hidden=true) %}
+  <form method="post" action="{{ url_for('clients.contact_create', client_hex=client.id.hex()) }}" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <div class="form-grid">
+      <div class="field"><label>{{ _("Name") }}</label><input type="text" name="contact-name" class="input" required></div>
+      <div class="field"><label>{{ _("Role") }}</label><input type="text" name="contact-role" class="input"></div>
+      <div class="field"><label>{{ _("Email") }}</label><input type="email" name="contact-email" class="input" inputmode="email"></div>
+      <div class="field"><label>{{ _("Phone") }}</label><input type="tel" name="contact-phone" class="input" inputmode="tel"></div>
+      <div class="field field-check">
+        <input type="checkbox" name="contact-is_primary" id="contact-is_primary-new">
+        <label for="contact-is_primary-new">{{ _("Primary contact") }}</label>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" data-modal-close="modal-contact-new">{{ _("Cancel") }}</button>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+{% endcall %}
+
+{# Edit contact modals (one per contact; shown when edit_contact matches) #}
+{% for c in client.contacts %}
+  {% set modal_id = "modal-contact-" ~ c.id.hex() %}
+  {% set is_open = edit_contact == c.id.hex() %}
+  {% call modal(modal_id, _("Edit contact"), hidden=not is_open) %}
+    <form method="post" action="{{ url_for('clients.contact_update', client_hex=client.id.hex(), contact_hex=c.id.hex()) }}" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="idempotency_token" value="{{ tok }}">
+      <div class="form-grid">
+        {# Use the current edit_contact_obj when open, otherwise fill from c directly #}
+        {% if is_open and edit_contact_obj %}
+          {% set _cf = contact_form %}
+        {% else %}
+          {% set _cf = forms.ContactForm(prefix="contact", obj=c) if forms is defined else contact_form %}
+        {% endif %}
+        <div class="field">
+          <label>{{ _("Name") }}</label>
+          <input type="text" name="contact-name" value="{{ c.name|e }}" class="input" required>
+        </div>
+        <div class="field">
+          <label>{{ _("Role") }}</label>
+          <input type="text" name="contact-role" value="{{ c.role|e }}" class="input">
+        </div>
+        <div class="field">
+          <label>{{ _("Email") }}</label>
+          <input type="email" name="contact-email" value="{{ c.email|e }}" class="input" inputmode="email">
+        </div>
+        <div class="field">
+          <label>{{ _("Phone") }}</label>
+          <input type="tel" name="contact-phone" value="{{ c.phone|e }}" class="input" inputmode="tel">
+        </div>
+        <div class="field field-check">
+          <input type="checkbox" name="contact-is_primary" id="contact-is_primary-{{ c.id.hex() }}"
+                 {% if c.is_primary %}checked{% endif %}>
+          <label for="contact-is_primary-{{ c.id.hex() }}">{{ _("Primary contact") }}</label>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" data-modal-close="{{ modal_id }}">{{ _("Cancel") }}</button>
+        <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+      </div>
+    </form>
+  {% endcall %}
+{% endfor %}
+
+{# ══════════════════════════════════════════════════════════════════════
+   LOCATIONS TAB
+═══════════════════════════════════════════════════════════════════════ #}
+{% elif tab == "locations" %}
+<div class="tab-panel">
+  <div class="tab-toolbar">
+    <button type="button" class="btn btn-sm btn-primary" data-modal-open="modal-location-new">
+      {{ icon("plus") }} {{ _("Add location") }}
+    </button>
+  </div>
+
+  {% set loc_cols = [_("Label"), _("City"), _("Country"), _("Actions")] %}
+  {% set loc_rows = [] %}
+  {% for l in client.locations %}
+    {% set edit_url = url_for('clients.detail', client_hex=client.id.hex(), tab='locations', edit_location=l.id.hex()) %}
+    {% set loc_actions %}
+      <a href="{{ edit_url }}" class="btn btn-sm btn-ghost" aria-label="{{ _('Edit') }}">{{ icon("edit-2") }}</a>
+      <form method="post" action="{{ url_for('clients.location_delete', client_hex=client.id.hex(), location_hex=l.id.hex()) }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-ghost btn-danger-ghost"
+                onclick="return confirm('{{ _("Delete this location?") }}')" aria-label="{{ _('Delete') }}">
+          {{ icon("trash-2") }}
+        </button>
+      </form>
+    {% endset %}
+    {% set _ = loc_rows.append([l.label|e, l.city|e, l.country|e, loc_actions]) %}
+  {% endfor %}
+  {{ data_table(loc_cols, loc_rows, empty=_("No locations.")) }}
+</div>
+
+{% call modal("modal-location-new", _("Add location"), hidden=true) %}
+  <form method="post" action="{{ url_for('clients.location_create', client_hex=client.id.hex()) }}" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <div class="form-grid">
+      <div class="field"><label>{{ _("Label") }}</label><input type="text" name="location-label" class="input" required></div>
+      <div class="field field-full"><label>{{ _("Address") }}</label><textarea name="location-address" class="input textarea" rows="2"></textarea></div>
+      <div class="field"><label>{{ _("City") }}</label><input type="text" name="location-city" class="input"></div>
+      <div class="field"><label>{{ _("Country") }}</label><input type="text" name="location-country" class="input"></div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" data-modal-close="modal-location-new">{{ _("Cancel") }}</button>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+{% endcall %}
+
+{% for l in client.locations %}
+  {% set modal_id = "modal-location-" ~ l.id.hex() %}
+  {% set is_open = edit_location == l.id.hex() %}
+  {% call modal(modal_id, _("Edit location"), hidden=not is_open) %}
+    <form method="post" action="{{ url_for('clients.location_update', client_hex=client.id.hex(), location_hex=l.id.hex()) }}" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="idempotency_token" value="{{ tok }}">
+      <div class="form-grid">
+        <div class="field"><label>{{ _("Label") }}</label><input type="text" name="location-label" value="{{ l.label|e }}" class="input" required></div>
+        <div class="field field-full"><label>{{ _("Address") }}</label><textarea name="location-address" class="input textarea" rows="2">{{ l.address|e }}</textarea></div>
+        <div class="field"><label>{{ _("City") }}</label><input type="text" name="location-city" value="{{ l.city|e }}" class="input"></div>
+        <div class="field"><label>{{ _("Country") }}</label><input type="text" name="location-country" value="{{ l.country|e }}" class="input"></div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" data-modal-close="{{ modal_id }}">{{ _("Cancel") }}</button>
+        <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+      </div>
+    </form>
+  {% endcall %}
+{% endfor %}
+
+{# ══════════════════════════════════════════════════════════════════════
+   CONTRACTS TAB
+═══════════════════════════════════════════════════════════════════════ #}
+{% elif tab == "contracts" %}
+<div class="tab-panel">
+  <div class="tab-toolbar">
+    <button type="button" class="btn btn-sm btn-primary" data-modal-open="modal-contract-new">
+      {{ icon("plus") }} {{ _("Add contract") }}
+    </button>
+  </div>
+
+  {% set ctr_cols = [_("Title"), _("Reference"), _("Starts"), _("Ends"), _("Status"), _("Actions")] %}
+  {% set ctr_rows = [] %}
+  {% for ct in client.contracts %}
+    {% set edit_url = url_for('clients.detail', client_hex=client.id.hex(), tab='contracts', edit_contract=ct.id.hex()) %}
+    {% set ctr_actions %}
+      <a href="{{ edit_url }}" class="btn btn-sm btn-ghost" aria-label="{{ _('Edit') }}">{{ icon("edit-2") }}</a>
+      <form method="post" action="{{ url_for('clients.contract_delete', client_hex=client.id.hex(), contract_hex=ct.id.hex()) }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-ghost btn-danger-ghost"
+                onclick="return confirm('{{ _("Delete this contract?") }}')" aria-label="{{ _('Delete') }}">
+          {{ icon("trash-2") }}
+        </button>
+      </form>
+    {% endset %}
+    {% set status_cell %}{% if ct.is_active %}<span class="badge badge-good">{{ _("Active") }}</span>{% else %}<span class="badge badge-muted">{{ _("Inactive") }}</span>{% endif %}{% endset %}
+    {% set _ = ctr_rows.append([ct.title|e, ct.reference|e, ct.starts_on|string, ct.ends_on|string if ct.ends_on else '—', status_cell, ctr_actions]) %}
+  {% endfor %}
+  {{ data_table(ctr_cols, ctr_rows, empty=_("No contracts.")) }}
+</div>
+
+{% call modal("modal-contract-new", _("Add contract"), hidden=true) %}
+  <form method="post" action="{{ url_for('clients.contract_create', client_hex=client.id.hex()) }}" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <div class="form-grid">
+      <div class="field field-full"><label>{{ _("Title") }}</label><input type="text" name="contract-title" class="input" required></div>
+      <div class="field"><label>{{ _("Reference") }}</label><input type="text" name="contract-reference" class="input"></div>
+      <div class="field"><label>{{ _("Starts on") }}</label><input type="date" name="contract-starts_on" class="input" inputmode="numeric" required></div>
+      <div class="field"><label>{{ _("Ends on") }}</label><input type="date" name="contract-ends_on" class="input" inputmode="numeric"></div>
+      <div class="field field-full"><label>{{ _("Notes") }}</label><textarea name="contract-notes" class="input textarea" rows="2"></textarea></div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" data-modal-close="modal-contract-new">{{ _("Cancel") }}</button>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+{% endcall %}
+
+{% for ct in client.contracts %}
+  {% set modal_id = "modal-contract-" ~ ct.id.hex() %}
+  {% set is_open = edit_contract == ct.id.hex() %}
+  {% call modal(modal_id, _("Edit contract"), hidden=not is_open) %}
+    <form method="post" action="{{ url_for('clients.contract_update', client_hex=client.id.hex(), contract_hex=ct.id.hex()) }}" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="idempotency_token" value="{{ tok }}">
+      <div class="form-grid">
+        <div class="field field-full"><label>{{ _("Title") }}</label><input type="text" name="contract-title" value="{{ ct.title|e }}" class="input" required></div>
+        <div class="field"><label>{{ _("Reference") }}</label><input type="text" name="contract-reference" value="{{ ct.reference|e }}" class="input"></div>
+        <div class="field"><label>{{ _("Starts on") }}</label><input type="date" name="contract-starts_on" value="{{ ct.starts_on }}" class="input" inputmode="numeric" required></div>
+        <div class="field"><label>{{ _("Ends on") }}</label><input type="date" name="contract-ends_on" value="{{ ct.ends_on or '' }}" class="input" inputmode="numeric"></div>
+        <div class="field field-full"><label>{{ _("Notes") }}</label><textarea name="contract-notes" class="input textarea" rows="2">{{ ct.notes|e }}</textarea></div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" data-modal-close="{{ modal_id }}">{{ _("Cancel") }}</button>
+        <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+      </div>
+    </form>
+  {% endcall %}
+{% endfor %}
+
+{% endif %}{# end tab switch #}
+
+{% endblock %}
+
+{% block body_extra %}
+<script>
+  // Open any modal whose id is in the query string ?open=<modal-id>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    ["edit_contact", "edit_location", "edit_contract"].forEach(function (key) {
+      var val = params.get(key);
+      if (val) {
+        var el = document.getElementById("modal-" + key.replace("edit_", "") + "-" + val);
+        if (el) el.removeAttribute("hidden");
+      }
+    });
+  })();
+</script>
+{% endblock %}
