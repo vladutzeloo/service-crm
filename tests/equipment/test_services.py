@@ -305,6 +305,17 @@ def test_equipment_search_filter_postgres_path(
 
 
 @pytest.mark.integration
+def test_equipment_search_filter_sqlite_path(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Exercise the LIKE fallback even when running against Postgres so
+    coverage doesn't dip on the dual-DB CI matrix."""
+    monkeypatch.setattr("service_crm.equipment.services._dialect", lambda: "sqlite")
+    flt = services._equipment_search_filter("xyz")
+    assert flt is not None
+
+
+@pytest.mark.integration
 def test_equipment_search_filter_empty_returns_none(db_session: Session) -> None:
     assert services._equipment_search_filter("   ") is None
 

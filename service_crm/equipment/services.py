@@ -552,8 +552,9 @@ def _resolve_equipment_row(
 ) -> tuple[dict[str, Any] | None, str | None]:
     """Resolve every FK reference in ``row``; return create-kwargs or an error."""
     client, err = _resolve_client(session, row.get("client_name", "").strip())
-    if err is not None or client is None:
+    if err is not None:
         return None, err
+    assert client is not None
     location_id, err = _resolve_location(session, client, row.get("location_label", "").strip())
     if err is not None:
         return None, err
@@ -582,8 +583,9 @@ def _resolve_equipment_row(
 
 def _import_equipment_row(session: Session, row: dict[str, str]) -> tuple[bool, str | None]:
     kwargs, err = _resolve_equipment_row(session, row)
-    if err is not None or kwargs is None:
+    if err is not None:
         return False, err
+    assert kwargs is not None
     # The resolvers above already verified the client / location / model /
     # controller exist and that the location belongs to the chosen client,
     # so ``create_equipment`` is guaranteed to succeed here.

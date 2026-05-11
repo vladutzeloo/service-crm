@@ -26,10 +26,27 @@ def _tok() -> str:
 
 
 def _hex_or_none(value: str | None) -> bytes | None:
+    """Strict hex → bytes converter.
+
+    Returns ``None`` only for genuinely empty input. Malformed hex raises
+    ``ValueError`` so the calling route can flash it as a form error
+    rather than silently dropping it. Use :func:`_safe_query_hex` for
+    query-string parsing where an invalid id should fall back to "no
+    filter" instead of bubbling up as an exception.
+    """
     if not value:
         return None
+    return bytes.fromhex(value)
+
+
+def _safe_query_hex(value: str | None) -> bytes | None:
+    """Permissive hex → bytes converter for URL query parameters.
+
+    ``?client=garbage`` from a bookmark or stale link shouldn't 500;
+    fall back to "no filter applied" instead.
+    """
     try:
-        return bytes.fromhex(value)
+        return _hex_or_none(value)
     except ValueError:
         return None
 
@@ -81,7 +98,7 @@ def list_equipment() -> Any:
     show = request.args.get("show", "active")
     active_only = show != "all"
     page = max(1, int(request.args.get("page", 1)))
-    client_id = _hex_or_none(request.args.get("client"))
+    client_id = _safe_query_hex(request.args.get("client"))
 
     items, total = services.list_equipment(
         db.session,
@@ -105,7 +122,7 @@ def list_equipment() -> Any:
 @bp.route("/new", methods=["GET", "POST"])
 @login_required  # type: ignore[untyped-decorator]
 def new_equipment() -> Any:
-    pre_client_id = _hex_or_none(request.args.get("client"))
+    pre_client_id = _safe_query_hex(request.args.get("client"))
     form = forms.EquipmentForm()
 
     # Re-bind ``selected_client_id`` from posted data so the location
@@ -113,7 +130,10 @@ def new_equipment() -> Any:
     selected_client_hex = request.form.get("client_id") or (
         pre_client_id.hex() if pre_client_id else ""
     )
-    selected_client_id = _hex_or_none(selected_client_hex)
+    # Best-effort here — we're only narrowing the location dropdown; the
+    # authoritative validation happens via ``services.create_equipment``
+    # (or ``update_equipment``) below.
+    selected_client_id = _safe_query_hex(selected_client_hex)
     _populate_equipment_choices(form, selected_client_id=selected_client_id)
 
     if pre_client_id is not None and request.method == "GET":
@@ -182,7 +202,10 @@ def edit_equipment(equipment_hex: str) -> Any:
 
     form = forms.EquipmentForm(obj=_form_data_for_equipment(eq))
     selected_client_hex = request.form.get("client_id") or eq.client_id.hex()
-    selected_client_id = _hex_or_none(selected_client_hex)
+    # Best-effort here — we're only narrowing the location dropdown; the
+    # authoritative validation happens via ``services.create_equipment``
+    # (or ``update_equipment``) below.
+    selected_client_id = _safe_query_hex(selected_client_hex)
     _populate_equipment_choices(form, selected_client_id=selected_client_id)
 
     if request.method == "GET":
