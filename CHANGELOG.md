@@ -12,6 +12,10 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 ## [Unreleased]
 
+(no changes yet)
+
+## [0.2.0] - 2026-05-11
+
 ### Added
 - **UI foundation (mobile-first, light-default)** — ROADMAP 0.2.0 step 7.
   - `service_crm/templates/base.html` shell: left sidebar grouped by
@@ -257,5 +261,6 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
   scaffold lands in 0.1.0 walking skeleton.
 - 2026-05-10: adopt the blueprint's CNC domain in full.
 
-[Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/vladutzeloo/service-crm/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/vladutzeloo/service-crm/releases/tag/v0.1.0
