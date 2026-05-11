@@ -27,6 +27,26 @@ def test_base_shell_is_rendered(client: FlaskClient) -> None:
     assert 'class="main"' in body
     assert "data-theme-toggle" in body
     assert "data-nav-toggle" in body
+    # The app version is exposed to JS so the service-worker registration
+    # can derive its cache key (see js/app.js::registerServiceWorker).
+    assert "data-version=" in body
+
+
+def test_language_switch_preserves_query_args(client: FlaskClient) -> None:
+    """Switching language must not drop existing ``?`` parameters
+    (search, filters, pagination)."""
+    response = client.get("/dev/macro-smoke?search=foo&page=3")
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    # The lang switch renders a GET form, not bare anchors with ?lang=.
+    assert 'name="lang" value="ro"' in body
+    assert 'name="lang" value="en"' in body
+    # Other args round-trip as hidden inputs.
+    assert 'type="hidden" name="search" value="foo"' in body
+    assert 'type="hidden" name="page" value="3"' in body
+    # The literal ``?lang=ro`` href that used to drop siblings is gone.
+    assert 'href="?lang=ro"' not in body
+    assert 'href="?lang=en"' not in body
 
 
 def test_pwa_links_are_present(client: FlaskClient) -> None:
@@ -55,6 +75,17 @@ def test_filter_bar_macro_renders_anchor(client: FlaskClient) -> None:
     assert '<section class="filter-bar"' in body
     assert 'class="chip is-active"' in body
     assert 'type="date"' in body
+
+
+def test_filter_bar_date_range_can_be_submitted(client: FlaskClient) -> None:
+    """When ``action`` is supplied the date-range must render as a real
+    GET form with an Apply submit button — without it the user has no
+    way to commit a date change."""
+    body = _get_smoke(client)
+    assert '<form method="get" action="/dev/macro-smoke" class="date-range">' in body
+    assert 'name="from"' in body
+    assert 'name="to"' in body
+    assert 'type="submit"' in body
 
 
 def test_form_shell_macro_carries_idempotency_token(client: FlaskClient) -> None:

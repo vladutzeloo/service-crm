@@ -19,7 +19,7 @@
   {% block head_extra %}{% endblock %}
 </head>
 <body>
-  <div class="app" data-nav="closed">
+  <div class="app" data-nav="closed" data-version="{{ config.VERSION }}">
     <aside class="sidebar" aria-label="{{ _('Primary navigation') }}">
       <a href="#" class="brand">{{ _("Service-CRM") }}</a>
 
@@ -92,11 +92,19 @@
           {{ icon("moon", extra_class="theme-icon-dark") }}
           {{ icon("sun", extra_class="theme-icon-light") }}
         </button>
-        <form method="get" action="" class="lang-switch">
-          {# Preserves the current path; ``?lang=`` is the documented hand-off. #}
+        {# GET form so the language switch preserves the current path AND
+           every other query argument (search, filters, pagination). The
+           submit buttons each carry the ``lang=`` value, replacing any
+           previous lang= without dropping siblings. #}
+        <form method="get" action="{{ request.path }}" class="lang-switch">
+          {% for key, value in request.args.items() if key != 'lang' %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+          {% endfor %}
           {% set current = get_locale()|string %}
-          <a href="?lang=ro" class="btn btn-sm btn-ghost {{ 'is-active' if current == 'ro' else '' }}">RO</a>
-          <a href="?lang=en" class="btn btn-sm btn-ghost {{ 'is-active' if current == 'en' else '' }}">EN</a>
+          <button type="submit" name="lang" value="ro"
+                  class="btn btn-sm btn-ghost {{ 'is-active' if current == 'ro' else '' }}">RO</button>
+          <button type="submit" name="lang" value="en"
+                  class="btn btn-sm btn-ghost {{ 'is-active' if current == 'en' else '' }}">EN</button>
         </form>
       </div>
     </header>

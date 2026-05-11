@@ -46,6 +46,20 @@
     });
   }
 
+  function wireModals() {
+    // Delegated handler: any element with [data-modal-close="<id>"] hides
+    // the matching modal by setting the ``hidden`` attribute. Real screens
+    // can swap this out for HTMX/Alpine; the macro only needs the close
+    // button to actually close the dialog in the foundation.
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest && e.target.closest("[data-modal-close]");
+      if (!btn) return;
+      var modalId = btn.getAttribute("data-modal-close");
+      var modal = document.getElementById(modalId);
+      if (modal) modal.setAttribute("hidden", "");
+    });
+  }
+
   function wireNavDrawer() {
     var app = document.querySelector(".app");
     var toggle = document.querySelector("[data-nav-toggle]");
@@ -71,9 +85,15 @@
 
   function registerServiceWorker() {
     if (!("serviceWorker" in navigator)) return;
-    // Same-origin only — manifest path is resolved by the browser.
+    // The version is exposed on .app[data-version] by base.html so we can
+    // pass it as ``?v=`` at registration. service-worker.js reads that
+    // value to derive its CACHE_NAME, so a deploy with a new VERSION
+    // invalidates every old cache.
+    var app = document.querySelector(".app");
+    var version = (app && app.getAttribute("data-version")) || "0.0.0";
+    var swUrl = "/static/service-worker.js?v=" + encodeURIComponent(version);
     navigator.serviceWorker
-      .register("/static/service-worker.js", { scope: "/" })
+      .register(swUrl, { scope: "/" })
       .then(function (reg) {
         // Skip-waiting + reload path so a bad SW can't pin users on stale
         // assets. We trigger this when the page detects a waiting worker.
@@ -106,6 +126,7 @@
     startClock();
     wireThemeToggle();
     wireNavDrawer();
+    wireModals();
     registerServiceWorker();
   });
 })();

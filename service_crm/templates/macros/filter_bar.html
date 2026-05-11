@@ -8,8 +8,17 @@
    label  : str             — translated heading shown left of the chips.
    chips  : list[dict]      — [{label, href, count, active}].
    date_range : dict | None — {from, to} pre-formatted strings.
+   action : str | None      — when set, the date-range is wrapped in a
+                              GET form pointing at this URL with an
+                              "Apply" submit button. Other existing query
+                              args (chip state, search) are preserved as
+                              hidden inputs so submission only mutates
+                              ``from`` / ``to``. When omitted, the bare
+                              ``<input>``s are rendered (the caller is
+                              then responsible for placing them inside a
+                              form of its own).
 #}
-{% macro filter_bar(label, chips, date_range=None) %}
+{% macro filter_bar(label, chips, date_range=None, action=None) %}
   <section class="filter-bar" aria-label="{{ label }}">
     <span class="filter-label">{{ label }}</span>
     {% for chip in chips %}
@@ -22,15 +31,31 @@
       </a>
     {% endfor %}
     {% if date_range %}
-      <span class="date-range">
-        <label class="sr-only" for="filter-from">{{ _("From") }}</label>
-        <input id="filter-from" type="date" name="from" value="{{ date_range.from }}"
-               inputmode="numeric" autocomplete="off">
-        <span aria-hidden="true">→</span>
-        <label class="sr-only" for="filter-to">{{ _("To") }}</label>
-        <input id="filter-to" type="date" name="to" value="{{ date_range.to }}"
-               inputmode="numeric" autocomplete="off">
-      </span>
+      {% if action %}
+        <form method="get" action="{{ action }}" class="date-range">
+          {% for key, value in request.args.items() if key not in ('from', 'to') %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+          {% endfor %}
+          <label class="sr-only" for="filter-from">{{ _("From") }}</label>
+          <input id="filter-from" type="date" name="from" value="{{ date_range.from }}"
+                 inputmode="numeric" autocomplete="off">
+          <span aria-hidden="true">→</span>
+          <label class="sr-only" for="filter-to">{{ _("To") }}</label>
+          <input id="filter-to" type="date" name="to" value="{{ date_range.to }}"
+                 inputmode="numeric" autocomplete="off">
+          <button type="submit" class="btn btn-sm btn-primary">{{ _("Apply") }}</button>
+        </form>
+      {% else %}
+        <span class="date-range">
+          <label class="sr-only" for="filter-from">{{ _("From") }}</label>
+          <input id="filter-from" type="date" name="from" value="{{ date_range.from }}"
+                 inputmode="numeric" autocomplete="off">
+          <span aria-hidden="true">→</span>
+          <label class="sr-only" for="filter-to">{{ _("To") }}</label>
+          <input id="filter-to" type="date" name="to" value="{{ date_range.to }}"
+                 inputmode="numeric" autocomplete="off">
+        </span>
+      {% endif %}
     {% endif %}
   </section>
 {% endmacro %}
