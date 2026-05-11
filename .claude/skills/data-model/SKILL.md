@@ -86,8 +86,14 @@ For the requested module(s):
   history, add an `is_active` flag, not a hard `DELETE`.
 - **Audit by inheritance.** Inherit `Auditable` so `after_*` listeners
   produce audit events automatically. Don't call an `audit(...)` helper
-  by hand. *Exception: `TicketStatusHistory` is the audit; it does not
-  inherit `Auditable`.*
+  by hand.
+  *Excluded from `Auditable`*:
+  - `TicketStatusHistory` — *is* the audit log; mixing in would cause
+    feedback loops.
+  - **Lookup tables** (`TicketType`, `TicketPriority`,
+    `EquipmentControllerType`, `ProcedureTag`, etc.). They're
+    admin-managed reference data; auditing them generates noise.
+  - Any append-only history table.
 - **No business logic in `models.py`.** Validation that needs the DB
   goes into `services.py`. Models hold structure, relationships, and
   cheap computed properties.

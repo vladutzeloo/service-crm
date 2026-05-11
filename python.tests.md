@@ -478,19 +478,24 @@ notes; any P1 regression blocks the tag.
 
 ### 13.4 Service-worker tests
 
-The service worker is plain JS, not Python — but we still test it:
+The service worker is plain JS, not Python. v1 deliberately **does not
+introduce a JS test framework** — adding Vitest + a `package.json` + a
+Node CI step is overhead the single-VPS, single-tenant target doesn't
+earn. Instead we cover the SW with **two Playwright e2e tests**:
 
-- A unit test (Vitest, not pytest) over the cache-naming and stale-cache
-  invalidation logic.
-- An e2e Playwright test that:
-  1. loads `/` with the SW active,
-  2. goes offline,
-  3. reloads,
-  4. asserts the app shell still renders (the dashboard placeholder, not
-     a blank page).
+1. *Offline shell loads.* Load `/` with the SW active, go offline,
+   reload — assert the app shell still renders (dashboard placeholder,
+   not a blank page).
+2. *Cache key advances on release.* Bump `VERSION`, rebuild the
+   container, request `/static/service-worker.js` — assert the cached
+   constant matches the new `VERSION`. A version-key mismatch on a
+   release is a **release blocker** (a bad SW can pin users on a broken
+   build).
 
-A bad SW can pin users on a broken build, so the test that the
-versioned cache key advances on every release is a **release blocker**.
+Cache-naming and stale-cache invalidation logic are unit-testable in
+isolation, but the surface is small enough that the two e2e checks
+above cover the failure modes that matter. Revisit if the SW grows
+beyond ~150 lines or starts caching writes (post-1.2).
 
 ## 14. i18n testing (RO + EN)
 
