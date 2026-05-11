@@ -152,3 +152,62 @@ def test_login_form_validation_keeps_user_on_page(client: FlaskClient) -> None:
     # Form fails validation → 200 with the form re-rendered.
     assert response.status_code == 200
     assert b"<form" in response.data
+
+
+@pytest.mark.e2e
+def test_already_authenticated_user_skips_login_page(
+    client: FlaskClient, db_session: Session
+) -> None:
+    """A logged-in user hitting /auth/login is redirected away."""
+    UserFactory(email="loggedin@example.com", password="hunter2")
+    db_session.flush()
+    client.post(
+        "/auth/login",
+        data={"email": "loggedin@example.com", "password": "hunter2"},
+    )
+
+    response = client.get("/auth/login", follow_redirects=False)
+    assert response.status_code == 302
+    # Should land on the configured post-login destination, not stay on login.
+    assert "/auth/login" not in response.headers["Location"]
+
+
+@pytest.mark.e2e
+def test_login_rejects_open_redirect_to_external_host(
+    client: FlaskClient, db_session: Session
+) -> None:
+    """An attacker can't smuggle a same-domain login into a redirect to evil.com."""
+    UserFactory(email="harry@example.com", password="hunter2")
+    db_session.flush()
+
+    response = client.post(
+        "/auth/login?next=https://evil.example.org/steal",
+        data={"email": "harry@example.com", "password": "hunter2"},
+    )
+    assert response.status_code == 302
+    assert "evil.example.org" not in response.headers["Location"]
+
+
+@pytest.mark.e2e
+def test_login_rejects_protocol_relative_open_redirect(
+    client: FlaskClient, db_session: Session
+) -> None:
+    """``//evil.com/path`` is a protocol-relative external URL; reject it."""
+    UserFactory(email="ian@example.com", password="hunter2")
+    db_session.flush()
+    response = client.post(
+        "/auth/login?next=//evil.example.org/steal",
+        data={"email": "ian@example.com", "password": "hunter2"},
+    )
+    assert response.status_code == 302
+    assert "evil.example.org" not in response.headers["Location"]
+
+
+@pytest.mark.e2e
+def test_login_page_lang_switch_preserves_next(client: FlaskClient) -> None:
+    """The RO/EN buttons on the login page must keep ?next=... intact."""
+    response = client.get("/auth/login?next=/version")
+    assert response.status_code == 200
+    body = response.data.decode()
+    # Both language-switch anchors must include the next target.
+    assert "next=%2Fversion" in body or "next=/version" in body

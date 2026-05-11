@@ -9,18 +9,36 @@ to set them here.
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import urljoin, urlparse
 
 from flask import flash, redirect, render_template, request, url_for
 from flask_babel import gettext as _
-from flask_login import login_required, login_user, logout_user
+from flask_login import current_user, login_required, login_user, logout_user
 
 from ..extensions import db
 from ..shared.audit import ACTOR_CTX
 from . import bp, forms, services
 
 
+def _is_safe_next_url(target: str) -> bool:
+    """Reject open-redirect attempts on ``?next=``.
+
+    Only allow targets that resolve to the same host as the current
+    request and use an http(s) scheme. Canonical pattern from the
+    Flask-Login docs. Caller is expected to have already rejected
+    empty / ``None`` values.
+    """
+    ref = urlparse(request.host_url)
+    test = urlparse(urljoin(request.host_url, target))
+    return test.scheme in {"http", "https"} and ref.netloc == test.netloc
+
+
 @bp.route("/login", methods=["GET", "POST"])
 def login() -> Any:
+    # Already-authenticated users skip the login form entirely.
+    if current_user.is_authenticated:
+        return redirect(url_for("health.version"))
+
     form = forms.LoginForm()
     if form.validate_on_submit():
         user = services.get_user_by_email(db.session, form.email.data or "")  # type: ignore[arg-type]
@@ -40,8 +58,10 @@ def login() -> Any:
         services.record_login(db.session, user)  # type: ignore[arg-type]
         db.session.commit()
         flash(_("Welcome, %(email)s.", email=user.email), "success")
-        next_url = request.args.get("next") or url_for("health.version")
-        return redirect(next_url)
+        next_target = request.args.get("next")
+        if next_target and _is_safe_next_url(next_target):
+            return redirect(next_target)
+        return redirect(url_for("health.version"))
     return render_template("auth/login.html", form=form)
 
 

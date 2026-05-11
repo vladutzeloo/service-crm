@@ -53,9 +53,14 @@
 <body>
   <main>
     <div class="lang">
+      {# Preserve any other query params (notably ?next=...) when the
+         user switches language. #}
       {% set current = get_locale()|string %}
-      <a href="?lang=ro" class="{{ 'active' if current == 'ro' else '' }}">RO</a>
-      <a href="?lang=en" class="{{ 'active' if current == 'en' else '' }}">EN</a>
+      {% set next_target = request.args.get('next') %}
+      <a href="{{ url_for('auth.login', lang='ro', next=next_target) }}"
+         class="{{ 'active' if current == 'ro' else '' }}">RO</a>
+      <a href="{{ url_for('auth.login', lang='en', next=next_target) }}"
+         class="{{ 'active' if current == 'en' else '' }}">EN</a>
     </div>
     <h1>{{ _("Sign in") }}</h1>
     {% with messages = get_flashed_messages(with_categories=true) %}
