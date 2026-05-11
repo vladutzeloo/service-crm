@@ -13,6 +13,38 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 ## [Unreleased]
 
 ### Added
+- **`auth` blueprint — model layer.** `User` (`user_account` table) and
+  `Role` (`role` table), both inheriting `Auditable`. `User` has ULID PK,
+  case-insensitive unique email (functional index on `lower(email)`,
+  works on Postgres and SQLite), Argon2 password hash column, FK to
+  `Role` with `ON DELETE RESTRICT`, optional `preferred_language`
+  (RO/EN — wired in the auth-slice PR), optional `last_login_at`.
+- **First Alembic revision** (`40b50949771c`) — creates `user_account`,
+  `role`, `audit_event`, plus the three seeded roles (`admin`,
+  `manager`, `technician`). Round-trips cleanly on SQLite.
+- **`service_crm/auth/services.py`** — pure helpers: Argon2id
+  `hash_password` / `verify_password` and `normalize_email`. Routes,
+  forms and login template land with `/module-slice auth`.
+- **DB-aware test fixtures** in `tests/conftest.py`: `db_engine`,
+  `db_session` (SAVEPOINT-and-rollback, rebinds the global
+  `db.session` so factory writes share the transaction),
+  `client_logged_in` (seeds an admin row; full login wiring lands with
+  the slice). SQLite connections auto-enable `PRAGMA foreign_keys = ON`
+  so `ON DELETE RESTRICT` actually fires in tests.
+- **`tests/factories.py`** — `UserFactory` (defaults to the seeded
+  `technician` role, hashes a default `"test-pass"` password) and
+  `RoleFactory`. Email normalised on construction.
+- **End-to-end audit-listener tests** now that real models exist:
+  create / update / delete events recorded, before/after captured from
+  `state.get_history`, actor + request id read from `contextvars` when
+  set.
+
+### Changed
+- `migrations/env.py` — drop the `render_as_batch=` duplicate kwarg
+  (Flask-Migrate already injects it via `init_app`), and switch the
+  `get_engine()` helper to the `.engine` attribute that Flask-SQLAlchemy
+  3.x prefers (the legacy method is removed in 3.2).
+
 - `docs/blueprint.md` — user-pasted CNC Service & Maintenance App
   blueprint, saved verbatim as the long-form product source-of-truth.
 - `docs/adr/0001-flask-vs-fastapi.md` — accepted: Flask wins for v1.

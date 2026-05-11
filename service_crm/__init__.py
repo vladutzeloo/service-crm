@@ -34,10 +34,10 @@ def create_app(config: type[BaseConfig] = ProdConfig) -> Flask:
 
 
 def _register_blueprints(app: Flask) -> None:
-    from . import health
+    from . import auth, health
 
     app.register_blueprint(health.bp)
-    # auth, clients, equipment, ... land in subsequent slices.
+    app.register_blueprint(auth.bp)
 
 
 def _register_cli(app: Flask) -> None:

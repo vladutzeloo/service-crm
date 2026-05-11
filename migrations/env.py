@@ -23,10 +23,9 @@ logger = logging.getLogger("alembic.env")
 
 
 def get_engine():  # type: ignore[no-untyped-def]
-    try:
-        return current_app.extensions["migrate"].db.get_engine()
-    except (TypeError, AttributeError):
-        return current_app.extensions["migrate"].db.engine
+    # Flask-SQLAlchemy 3.x exposes ``.engine``; the ``.get_engine()``
+    # callable is deprecated and slated for removal in 3.2.
+    return current_app.extensions["migrate"].db.engine
 
 
 def get_engine_url() -> str:
@@ -73,11 +72,12 @@ def run_migrations_online() -> None:
     connectable = get_engine()
 
     with connectable.connect() as connection:
-        is_sqlite = connection.dialect.name == "sqlite"
+        # ``render_as_batch`` is configured globally via Flask-Migrate's
+        # ``init_app(render_as_batch=True)``, so it's already in
+        # ``conf_args``. Don't pass it again.
         context.configure(
             connection=connection,
             target_metadata=get_metadata(),
-            render_as_batch=is_sqlite,
             **conf_args,
         )
 
