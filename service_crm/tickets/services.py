@@ -74,9 +74,9 @@ def _next_ticket_number(session: Session) -> int:
     if _dialect() == "postgresql":
         from sqlalchemy import text
 
-        # The sequence is created lazily; create on first use so the
-        # migration stays simple and SQLite doesn't see it at all.
-        session.execute(text("CREATE SEQUENCE IF NOT EXISTS ticket_number_seq START 1"))
+        # Sequence is created in the migration so we don't need DDL
+        # permission at request time, and so production connections that
+        # are restricted to DML continue to work.
         result = session.execute(text("SELECT nextval('ticket_number_seq')")).scalar_one()
         return int(result)
 

@@ -402,7 +402,8 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 [Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.5.0...HEAD
 [0.5.0]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...v0.5.0
-[0.4.0]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...v0.5.0
-[0.3.0]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...v0.5.0
 [0.2.0]: https://github.com/vladutzeloo/service-crm/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/vladutzeloo/service-crm/releases/tag/v0.1.0
+
+[//]: # (v0.3.0 [clients] and v0.4.0 [equipment] were merged to ``main`` but)
+[//]: # (never tagged; their work is rolled into the v0.5.0 release range.)

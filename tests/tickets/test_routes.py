@@ -33,11 +33,19 @@ from tests.factories import (
 
 @pytest.fixture
 def uploads_root(tmp_path: Path, app: Flask) -> Iterator[Path]:
-    with app.app_context():
-        app.config["UPLOADS_ROOT"] = str(tmp_path)
-        uploads.reset_uploads_root()
-        yield tmp_path
-        app.config.pop("UPLOADS_ROOT", None)
+    """Point ``UPLOADS_ROOT`` at ``tmp_path`` for the test body.
+
+    Does NOT push an ``app.app_context()`` — the ``db_session`` fixture
+    already pushes one, and stacking a second context creates a fresh
+    Flask-SQLAlchemy scoped session whose visibility of the test
+    transaction's data differs between SQLite and Postgres (and breaks
+    ``@login_required`` under PG by hiding the test user from the
+    user_loader).
+    """
+    app.config["UPLOADS_ROOT"] = str(tmp_path)
+    uploads.reset_uploads_root()
+    yield tmp_path
+    app.config.pop("UPLOADS_ROOT", None)
 
 
 def _tok() -> str:

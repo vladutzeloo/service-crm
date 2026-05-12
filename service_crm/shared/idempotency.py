@@ -81,10 +81,17 @@ def record(session: Session, *, user_id: bytes, token: str, route: str = "") -> 
 
 
 def sweep(session: Session) -> int:
-    """Delete expired rows. Returns the count removed."""
+    """Delete expired rows. Returns the count removed.
+
+    Uses a single bulk DELETE rather than fetching rows into Python — the
+    rows have no relationships to cascade and there's no ORM-level side
+    effect we care about preserving.
+    """
     now = clock.now()
-    rows = session.query(IdempotencyKey).filter(IdempotencyKey.expires_at <= now).all()
-    for row in rows:
-        session.delete(row)
+    count: int = (
+        session.query(IdempotencyKey)
+        .filter(IdempotencyKey.expires_at <= now)
+        .delete(synchronize_session=False)
+    )
     session.flush()
-    return len(rows)
+    return count

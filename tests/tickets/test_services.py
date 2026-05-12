@@ -642,19 +642,17 @@ def test_next_ticket_number_postgres_path(
     db_session: Session, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """When ``_dialect`` reports Postgres, ``_next_ticket_number`` reads
-    from a sequence. We can't create the sequence on SQLite, so we patch
-    ``session.execute`` to fake the ``nextval`` return value and assert
-    we follow the Postgres branch."""
+    from ``ticket_number_seq``. The sequence is owned by the migration,
+    so the service layer no longer issues DDL — we fake ``nextval`` to
+    exercise the branch without a real Postgres backend.
+    """
     monkeypatch.setattr("service_crm.tickets.services._dialect", lambda: "postgresql")
 
     calls: list[str] = []
-    real_execute = db_session.execute
 
     def fake_execute(stmt, *args, **kwargs):  # type: ignore[no-untyped-def]
         text = str(stmt)
         calls.append(text)
-        if "CREATE SEQUENCE" in text:
-            return real_execute.__self__.execute  # type: ignore[attr-defined]
         if "nextval" in text:
 
             class _R:
@@ -662,10 +660,10 @@ def test_next_ticket_number_postgres_path(
                     return 4242
 
             return _R()
-        return real_execute(stmt, *args, **kwargs)  # pragma: no cover
+        raise AssertionError(f"unexpected SQL: {text}")  # pragma: no cover
 
     monkeypatch.setattr(db_session, "execute", fake_execute)
     n = services._next_ticket_number(db_session)
     assert n == 4242
-    assert any("CREATE SEQUENCE" in c for c in calls)
     assert any("nextval" in c for c in calls)
+    assert not any("CREATE SEQUENCE" in c for c in calls)

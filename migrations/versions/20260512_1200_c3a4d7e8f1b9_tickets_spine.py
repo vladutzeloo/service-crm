@@ -212,7 +212,9 @@ def upgrade() -> None:
         )
 
     # Postgres-only: GIN expression-index on title + description for the
-    # tickets list search box. Mirrors the equipment / clients pattern.
+    # tickets list search box, plus the sequence that feeds
+    # ``ServiceTicket.number``. SQLite uses ``MAX(number) + 1`` instead
+    # (see ``service_crm.tickets.services._next_ticket_number``).
     conn = op.get_bind()
     if conn.dialect.name == "postgresql":
         op.execute(
@@ -225,6 +227,7 @@ def upgrade() -> None:
             )
             """
         )
+        op.execute("CREATE SEQUENCE IF NOT EXISTS ticket_number_seq START 1")
 
     # Seed ticket_type and ticket_priority lookups. ULIDs generated in
     # Python and bound via the parameter API so the bytes payload is
@@ -306,6 +309,7 @@ def downgrade() -> None:
     conn = op.get_bind()
     if conn.dialect.name == "postgresql":
         op.execute("DROP INDEX IF EXISTS ix_service_ticket_search_vector")
+        op.execute("DROP SEQUENCE IF EXISTS ticket_number_seq")
 
     with op.batch_alter_table("idempotency_key", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_idempotency_key_expires_at"))

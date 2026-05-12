@@ -20,7 +20,12 @@ from service_crm.shared import ulid, uploads
 
 @pytest.fixture
 def uploads_root(tmp_path: Path, app: Flask) -> Iterator[Path]:
-    """Point uploads at a temp directory for the duration of one test."""
+    """Point uploads at a temp directory for the duration of one test.
+
+    These tests don't use ``db_session``, so they don't enter an
+    app_context themselves — we push one here so
+    ``uploads._instance_uploads_root`` can read ``current_app.config``.
+    """
     with app.app_context():
         app.config["UPLOADS_ROOT"] = str(tmp_path)
         uploads.reset_uploads_root()

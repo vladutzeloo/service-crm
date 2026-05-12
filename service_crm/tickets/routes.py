@@ -156,7 +156,10 @@ def list_tickets() -> Any:
         assignee_id = _safe_query_hex(assigned)
     show = request.args.get("show", "open")
     open_only = show == "open" and not statuses
-    page = max(1, int(request.args.get("page", 1)))
+    try:
+        page = max(1, int(request.args.get("page", 1)))
+    except (TypeError, ValueError):
+        page = 1
 
     items, total = services.list_tickets(
         db.session,
