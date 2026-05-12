@@ -378,7 +378,9 @@ If `N` is exceeded for any P1 flow the slice doesn't merge.
       (no framework).
 - [ ] Manager: per-user saved filters persisted across sessions
       (`user_<entity>_filter` lookup tables); recall on next visit;
-      cap 8 per user per entity, oldest evicted.
+      hard cap 8 per user per entity (the "save as" button is disabled
+      with a tooltip once full — silent eviction would lose user work
+      and conflict with the *forgiving workflow* dimension below).
 - [ ] Technician: "My queue" link in the topbar visible to users with
       the `technician` role, linking to the role-relevant filtered
       list (e.g., `/tickets/?assigned_to=me&status=in_progress,scheduled,waiting_parts`).
