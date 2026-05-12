@@ -147,6 +147,13 @@ def test_list_bad_query_hex_ignored(client_logged_in: FlaskClient, db_session: S
     assert resp.status_code == 200
 
 
+@pytest.mark.e2e
+def test_list_bad_page_param_falls_back_to_one(client_logged_in: FlaskClient) -> None:
+    """A non-numeric ``?page=`` (from a stale bookmark) must not 500."""
+    resp = client_logged_in.get("/tickets/?page=not-a-number")
+    assert resp.status_code == 200
+
+
 # ── New / Edit ──────────────────────────────────────────────────────────────
 
 
