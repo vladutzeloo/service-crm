@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-11 20:01+0000\n"
+"POT-Creation-Date: 2026-05-12 15:15+0000\n"
 "PO-Revision-Date: 2026-05-11 07:22+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ro\n"
@@ -104,6 +104,9 @@ msgstr "Notițe"
 #: service_crm/templates/equipment/detail.html:138
 #: service_crm/templates/equipment/edit.html:73
 #: service_crm/templates/macros/form_shell.html:48
+#: service_crm/templates/tickets/edit.html:88
+#: service_crm/templates/tickets/lookup_edit.html:32
+#: service_crm/tickets/forms.py:50 service_crm/tickets/forms.py:133
 msgid "Save"
 msgstr "Salvează"
 
@@ -123,6 +126,9 @@ msgstr "Contact principal"
 #: service_crm/templates/clients/detail.html:173
 #: service_crm/templates/clients/detail.html:197
 #: service_crm/templates/clients/detail.html:217
+#: service_crm/templates/tickets/priorities_list.html:16
+#: service_crm/templates/tickets/types_list.html:16
+#: service_crm/tickets/forms.py:127
 msgid "Label"
 msgstr "Etichetă"
 
@@ -150,6 +156,8 @@ msgstr "Țară"
 #: service_crm/templates/clients/detail.html:241
 #: service_crm/templates/clients/detail.html:266
 #: service_crm/templates/clients/detail.html:287
+#: service_crm/templates/equipment/detail.html:150
+#: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:42
 msgid "Title"
 msgstr "Titlu"
 
@@ -277,6 +285,8 @@ msgstr "%(count)s clienți importați."
 #: service_crm/equipment/forms.py:24
 #: service_crm/templates/equipment/controllers_list.html:28
 #: service_crm/templates/equipment/controllers_list.html:47
+#: service_crm/templates/tickets/priorities_list.html:16
+#: service_crm/templates/tickets/types_list.html:16
 msgid "Code"
 msgstr "Cod"
 
@@ -302,6 +312,7 @@ msgstr "Tip controler"
 #: service_crm/equipment/forms.py:48
 #: service_crm/templates/dev/macro_smoke.html:76
 #: service_crm/templates/equipment/list.html:57
+#: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:28
 msgid "Client"
 msgstr "Client"
 
@@ -333,125 +344,132 @@ msgstr "Dată instalare"
 msgid "Provider"
 msgstr "Furnizor"
 
-#: service_crm/equipment/routes.py:48 service_crm/equipment/routes.py:59
-#: service_crm/equipment/routes.py:63 service_crm/equipment/routes.py:69
+#: service_crm/equipment/routes.py:65 service_crm/equipment/routes.py:76
+#: service_crm/equipment/routes.py:80 service_crm/equipment/routes.py:86
+#: service_crm/tickets/forms.py:67 service_crm/tickets/routes.py:99
+#: service_crm/tickets/routes.py:113 service_crm/tickets/routes.py:120
 msgid "— none —"
 msgstr "— niciuna —"
 
-#: service_crm/equipment/routes.py:136
+#: service_crm/equipment/routes.py:156
 msgid "Equipment created."
 msgstr "Echipament creat."
 
-#: service_crm/equipment/routes.py:149 service_crm/equipment/routes.py:180
-#: service_crm/equipment/routes.py:242 service_crm/equipment/routes.py:256
-#: service_crm/equipment/routes.py:273 service_crm/equipment/routes.py:304
-#: service_crm/equipment/routes.py:350
+#: service_crm/equipment/routes.py:169 service_crm/equipment/routes.py:204
+#: service_crm/equipment/routes.py:269 service_crm/equipment/routes.py:283
+#: service_crm/equipment/routes.py:300 service_crm/equipment/routes.py:331
+#: service_crm/equipment/routes.py:377
 msgid "Equipment not found."
 msgstr "Echipament inexistent."
 
-#: service_crm/equipment/routes.py:209
+#: service_crm/equipment/routes.py:236
 msgid "Equipment updated."
 msgstr "Echipament actualizat."
 
-#: service_crm/equipment/routes.py:246
+#: service_crm/equipment/routes.py:273
 msgid "Equipment deactivated."
 msgstr "Echipament dezactivat."
 
-#: service_crm/equipment/routes.py:260
+#: service_crm/equipment/routes.py:287
 msgid "Equipment reactivated."
 msgstr "Echipament reactivat."
 
-#: service_crm/equipment/routes.py:288
+#: service_crm/equipment/routes.py:315
 msgid "Warranty added."
 msgstr "Garanție adăugată."
 
-#: service_crm/equipment/routes.py:309 service_crm/equipment/routes.py:355
+#: service_crm/equipment/routes.py:336 service_crm/equipment/routes.py:382
 msgid "Warranty not found."
 msgstr "Garanție inexistentă."
 
-#: service_crm/equipment/routes.py:324
+#: service_crm/equipment/routes.py:351
 msgid "Warranty updated."
 msgstr "Garanție actualizată."
 
-#: service_crm/equipment/routes.py:359
+#: service_crm/equipment/routes.py:386
 msgid "Warranty deleted."
 msgstr "Garanție ștearsă."
 
-#: service_crm/equipment/routes.py:391
+#: service_crm/equipment/routes.py:418
 msgid "Controller type added."
 msgstr "Tip controler adăugat."
 
-#: service_crm/equipment/routes.py:393
+#: service_crm/equipment/routes.py:420
 msgid "A controller type with that code already exists."
 msgstr "Un tip de controler cu acest cod există deja."
 
-#: service_crm/equipment/routes.py:407
+#: service_crm/equipment/routes.py:434
 msgid "Controller type not found."
 msgstr "Tip controler inexistent."
 
-#: service_crm/equipment/routes.py:411
+#: service_crm/equipment/routes.py:438
 msgid "Controller type deleted."
 msgstr "Tip controler șters."
 
-#: service_crm/equipment/routes.py:444
+#: service_crm/equipment/routes.py:471
 msgid "Equipment model added."
 msgstr "Model echipament adăugat."
 
-#: service_crm/equipment/routes.py:447
+#: service_crm/equipment/routes.py:474
 msgid "An equipment model with that manufacturer + code already exists."
 msgstr "Un model de echipament cu acest producător + cod există deja."
 
-#: service_crm/equipment/routes.py:463
+#: service_crm/equipment/routes.py:490
 msgid "Equipment model not found."
 msgstr "Model echipament inexistent."
 
-#: service_crm/equipment/routes.py:467
+#: service_crm/equipment/routes.py:494
 msgid "Equipment model deleted."
 msgstr "Model echipament șters."
 
-#: service_crm/equipment/routes.py:482
+#: service_crm/equipment/routes.py:509
 #, python-format
 msgid "%(count)s equipment imported."
 msgstr "%(count)s echipamente importate."
 
-#: service_crm/equipment/routes.py:492
+#: service_crm/equipment/routes.py:519
 msgid "Import equipment"
 msgstr "Importă echipamente"
 
-#: service_crm/equipment/routes.py:494
+#: service_crm/equipment/routes.py:521
 msgid ""
 "Expected columns: client_name (required), location_label, manufacturer, "
 "model_code, controller_code, serial_number, asset_tag, install_date "
 "(YYYY-MM-DD), notes"
-msgstr "Coloane așteptate: client_name (obligatoriu), location_label, manufacturer, model_code, controller_code, serial_number, asset_tag, install_date (AAAA-LL-ZZ), notes"
+msgstr ""
+"Coloane așteptate: client_name (obligatoriu), location_label, "
+"manufacturer, model_code, controller_code, serial_number, asset_tag, "
+"install_date (AAAA-LL-ZZ), notes"
 
-#: service_crm/equipment/routes.py:510
+#: service_crm/equipment/routes.py:537
 #, python-format
 msgid "%(count)s controller types imported."
 msgstr "%(count)s tipuri de controler importate."
 
-#: service_crm/equipment/routes.py:520
+#: service_crm/equipment/routes.py:547
 msgid "Import controller types"
 msgstr "Importă tipuri controler"
 
-#: service_crm/equipment/routes.py:521
+#: service_crm/equipment/routes.py:548
 msgid "Expected columns: code (required), name (required), notes"
 msgstr "Coloane așteptate: code (obligatoriu), name (obligatoriu), notes"
 
-#: service_crm/equipment/routes.py:534
+#: service_crm/equipment/routes.py:561
 #, python-format
 msgid "%(count)s equipment models imported."
 msgstr "%(count)s modele de echipament importate."
 
-#: service_crm/equipment/routes.py:544
+#: service_crm/equipment/routes.py:571
 msgid "Import equipment models"
 msgstr "Importă modele de echipament"
 
-#: service_crm/equipment/routes.py:546
+#: service_crm/equipment/routes.py:573
 msgid ""
 "Expected columns: manufacturer (required), model_code (required), "
 "display_name, controller_code, notes"
-msgstr "Coloane așteptate: manufacturer (obligatoriu), model_code (obligatoriu), display_name, controller_code, notes"
+msgstr ""
+"Coloane așteptate: manufacturer (obligatoriu), model_code (obligatoriu), "
+"display_name, controller_code, notes"
 
 #: service_crm/templates/base.html:23
 msgid "Primary navigation"
@@ -470,13 +488,20 @@ msgstr "Prezentare"
 msgid "Dashboard"
 msgstr "Tablou de bord"
 
-#: service_crm/templates/base.html:31
+#: service_crm/templates/base.html:31 service_crm/templates/tickets/list.html:9
 msgid "Operations"
 msgstr "Operațiuni"
 
 #: service_crm/templates/base.html:32
 #: service_crm/templates/dev/macro_smoke.html:56
 #: service_crm/templates/equipment/detail.html:70
+#: service_crm/templates/tickets/detail.html:9
+#: service_crm/templates/tickets/edit.html:10
+#: service_crm/templates/tickets/list.html:6
+#: service_crm/templates/tickets/list.html:16
+#: service_crm/templates/tickets/lookup_edit.html:6
+#: service_crm/templates/tickets/priorities_list.html:8
+#: service_crm/templates/tickets/types_list.html:8
 msgid "Tickets"
 msgstr "Tichete"
 
@@ -512,6 +537,7 @@ msgstr "Clienți"
 #: service_crm/templates/equipment/list.html:6
 #: service_crm/templates/equipment/list.html:16
 #: service_crm/templates/equipment/models_list.html:8
+#: service_crm/tickets/forms.py:31
 msgid "Equipment"
 msgstr "Echipamente"
 
@@ -566,6 +592,9 @@ msgstr "Comută tema"
 #: service_crm/templates/equipment/detail.html:36
 #: service_crm/templates/equipment/list.html:52
 #: service_crm/templates/equipment/list.html:61
+#: service_crm/templates/tickets/priorities_list.html:16
+#: service_crm/templates/tickets/types_list.html:16
+#: service_crm/tickets/forms.py:129 service_crm/tickets/forms.py:131
 msgid "Active"
 msgstr "Activ"
 
@@ -574,6 +603,7 @@ msgstr "Activ"
 #: service_crm/templates/clients/list.html:47
 #: service_crm/templates/equipment/detail.html:38
 #: service_crm/templates/equipment/list.html:62
+#: service_crm/tickets/forms.py:131
 msgid "Inactive"
 msgstr "Inactiv"
 
@@ -583,6 +613,7 @@ msgstr "Inactiv"
 #: service_crm/templates/clients/detail.html:246
 #: service_crm/templates/equipment/detail.html:43
 #: service_crm/templates/equipment/detail.html:90
+#: service_crm/templates/tickets/detail.html:45
 msgid "Edit"
 msgstr "Editează"
 
@@ -630,6 +661,9 @@ msgstr "Principal"
 #: service_crm/templates/equipment/detail.html:85
 #: service_crm/templates/equipment/list.html:57
 #: service_crm/templates/equipment/models_list.html:55
+#: service_crm/templates/tickets/detail.html:144
+#: service_crm/templates/tickets/priorities_list.html:16
+#: service_crm/templates/tickets/types_list.html:16
 msgid "Actions"
 msgstr "Acțiuni"
 
@@ -643,6 +677,7 @@ msgstr "Ștergi acest contact?"
 #: service_crm/templates/equipment/controllers_list.html:54
 #: service_crm/templates/equipment/detail.html:94
 #: service_crm/templates/equipment/models_list.html:62
+#: service_crm/tickets/forms.py:123
 msgid "Delete"
 msgstr "Șterge"
 
@@ -664,6 +699,8 @@ msgstr "Nu există contacte."
 #: service_crm/templates/equipment/edit.html:72
 #: service_crm/templates/equipment/import.html:28
 #: service_crm/templates/macros/form_shell.html:45
+#: service_crm/templates/tickets/edit.html:87
+#: service_crm/templates/tickets/lookup_edit.html:31
 msgid "Cancel"
 msgstr "Anulează"
 
@@ -707,8 +744,11 @@ msgstr "Expiră"
 #: service_crm/templates/clients/list.html:33
 #: service_crm/templates/clients/list.html:40
 #: service_crm/templates/dev/macro_smoke.html:76
+#: service_crm/templates/equipment/detail.html:150
 #: service_crm/templates/equipment/list.html:50
 #: service_crm/templates/equipment/list.html:57
+#: service_crm/templates/tickets/list.html:54
+#: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:89
 msgid "Status"
 msgstr "Stare"
 
@@ -764,6 +804,7 @@ msgstr "Caută clienți…"
 #: service_crm/templates/clients/list.html:36
 #: service_crm/templates/dev/macro_smoke.html:65
 #: service_crm/templates/equipment/list.html:53
+#: service_crm/templates/tickets/list.html:48
 msgid "All"
 msgstr "Toate"
 
@@ -773,17 +814,20 @@ msgstr "Nu au fost găsiți clienți."
 
 #: service_crm/templates/clients/list.html:73
 #: service_crm/templates/equipment/list.html:88
+#: service_crm/templates/tickets/list.html:78
 msgid "Previous"
 msgstr "Anterior"
 
 #: service_crm/templates/clients/list.html:75
 #: service_crm/templates/equipment/list.html:90
+#: service_crm/templates/tickets/list.html:80
 #, python-format
 msgid "Page %(p)s"
 msgstr "Pagina %(p)s"
 
 #: service_crm/templates/clients/list.html:78
 #: service_crm/templates/equipment/list.html:93
+#: service_crm/templates/tickets/list.html:83
 msgid "Next"
 msgstr "Următor"
 
@@ -802,7 +846,7 @@ msgstr "Live"
 
 #: service_crm/templates/dev/macro_smoke.html:19
 msgid "Reference render — every shared 0.2.0 macro."
-msgstr ""
+msgstr "Render de referință — toate macrourile partajate 0.2.0."
 
 #: service_crm/templates/dev/macro_smoke.html:23
 msgid "Primary action"
@@ -870,6 +914,7 @@ msgid "Warranties"
 msgstr "Garanții"
 
 #: service_crm/templates/dev/macro_smoke.html:58
+#: service_crm/templates/tickets/detail.html:82
 msgid "History"
 msgstr "Istoric"
 
@@ -882,22 +927,29 @@ msgid "Filter by status"
 msgstr "Filtrează după stare"
 
 #: service_crm/templates/dev/macro_smoke.html:66
+#: service_crm/tickets/_translations.py:27
 msgid "In progress"
 msgstr "În lucru"
 
 #: service_crm/templates/dev/macro_smoke.html:67
+#: service_crm/tickets/_translations.py:28
 msgid "Waiting parts"
 msgstr "Așteaptă piese"
 
 #: service_crm/templates/dev/macro_smoke.html:68
+#: service_crm/tickets/_translations.py:31
 msgid "Closed"
 msgstr "Închise"
 
 #: service_crm/templates/dev/macro_smoke.html:76
+#: service_crm/templates/equipment/detail.html:150
+#: service_crm/templates/tickets/list.html:56
 msgid "Ticket"
 msgstr "Tichet"
 
 #: service_crm/templates/dev/macro_smoke.html:76
+#: service_crm/templates/equipment/detail.html:150
+#: service_crm/templates/tickets/list.html:56
 msgid "Updated"
 msgstr "Actualizat"
 
@@ -997,11 +1049,20 @@ msgstr "Fără garanții."
 msgid "Edit warranty"
 msgstr "Editează garanție"
 
-#: service_crm/templates/equipment/detail.html:146
-msgid "Tickets land in v0.5."
-msgstr "Tichetele apar în v0.5."
+#: service_crm/templates/equipment/detail.html:148
+#: service_crm/templates/tickets/edit.html:6
+#: service_crm/templates/tickets/edit.html:17
+#: service_crm/templates/tickets/list.html:39
+#, fuzzy
+msgid "New ticket"
+msgstr "Tichet"
 
-#: service_crm/templates/equipment/detail.html:150
+#: service_crm/templates/equipment/detail.html:160
+#, fuzzy
+msgid "No tickets for this equipment yet."
+msgstr "Ștergi acest model de echipament?"
+
+#: service_crm/templates/equipment/detail.html:164
 msgid "Maintenance plans land in v0.7."
 msgstr "Planurile de mentenanță apar în v0.7."
 
@@ -1021,6 +1082,7 @@ msgid "Equipment details"
 msgstr "Detalii echipament"
 
 #: service_crm/templates/equipment/edit.html:38
+#: service_crm/templates/tickets/edit.html:50
 msgid "Must belong to the chosen client."
 msgstr "Trebuie să aparțină clientului selectat."
 
@@ -1085,15 +1147,18 @@ msgstr "Nu există înregistrări de afișat."
 
 #: service_crm/templates/macros/filter_bar.html:39
 #: service_crm/templates/macros/filter_bar.html:50
+#: service_crm/templates/tickets/detail.html:93
 msgid "From"
 msgstr "De la"
 
 #: service_crm/templates/macros/filter_bar.html:43
 #: service_crm/templates/macros/filter_bar.html:54
+#: service_crm/templates/tickets/detail.html:93
 msgid "To"
 msgstr "Până la"
 
 #: service_crm/templates/macros/filter_bar.html:46
+#: service_crm/templates/tickets/detail.html:76 service_crm/tickets/forms.py:78
 msgid "Apply"
 msgstr "Aplică"
 
@@ -1104,4 +1169,452 @@ msgstr "Închide"
 #: service_crm/templates/macros/tabs.html:11
 msgid "Section navigation"
 msgstr "Navigare secțiune"
+
+#: service_crm/templates/tickets/detail.html:40
+#, fuzzy
+msgid "Due"
+msgstr "Dev"
+
+#: service_crm/templates/tickets/detail.html:58 service_crm/tickets/forms.py:61
+msgid "Move to"
+msgstr "Trecere la"
+
+#: service_crm/templates/tickets/detail.html:64 service_crm/tickets/forms.py:64
+msgid "Reason code"
+msgstr "Cod motiv"
+
+#: service_crm/templates/tickets/detail.html:66
+#, fuzzy
+msgid "— reason —"
+msgstr "— niciuna —"
+
+#: service_crm/templates/tickets/detail.html:67 service_crm/tickets/forms.py:68
+msgid "Resolved remotely"
+msgstr "Rezolvat la distanță"
+
+#: service_crm/templates/tickets/detail.html:68 service_crm/tickets/forms.py:69
+#, fuzzy
+msgid "Client request"
+msgstr "Client creat."
+
+#: service_crm/templates/tickets/detail.html:69 service_crm/tickets/forms.py:70
+#, fuzzy
+msgid "Duplicate"
+msgstr "Actualizat"
+
+#: service_crm/templates/tickets/detail.html:70 service_crm/tickets/forms.py:71
+#, fuzzy
+msgid "No fault found"
+msgstr "Nu au fost găsiți clienți."
+
+#: service_crm/templates/tickets/detail.html:71 service_crm/tickets/forms.py:72
+msgid "Out of scope"
+msgstr "În afara scopului"
+
+#: service_crm/templates/tickets/detail.html:72 service_crm/tickets/forms.py:73
+#, fuzzy
+msgid "Other"
+msgstr "Notițe"
+
+#: service_crm/templates/tickets/detail.html:74
+#, fuzzy
+msgid "Reason (required for cancellation)"
+msgstr "Confirmă anularea"
+
+#: service_crm/templates/tickets/detail.html:84
+#, fuzzy
+msgid "Comments"
+msgstr "Clienți"
+
+#: service_crm/templates/tickets/detail.html:86
+msgid "Attachments"
+msgstr "Atașamente"
+
+#: service_crm/templates/tickets/detail.html:93
+msgid "When"
+msgstr "Când"
+
+#: service_crm/templates/tickets/detail.html:93
+#, fuzzy
+msgid "Actor"
+msgstr "Acțiuni"
+
+#: service_crm/templates/tickets/detail.html:93
+#: service_crm/templates/tickets/detail.html:154
+#: service_crm/tickets/forms.py:77 service_crm/tickets/forms.py:122
+#, fuzzy
+msgid "Reason"
+msgstr "Data expirării"
+
+#: service_crm/templates/tickets/detail.html:96
+msgid "(created)"
+msgstr "(creat)"
+
+#: service_crm/templates/tickets/detail.html:97
+msgid "system"
+msgstr "sistem"
+
+#: service_crm/templates/tickets/detail.html:106
+msgid "No status changes yet."
+msgstr "Nu există schimbări de status."
+
+#: service_crm/templates/tickets/detail.html:115
+#, fuzzy
+msgid "(deleted user)"
+msgstr "Șterge"
+
+#: service_crm/templates/tickets/detail.html:121
+#, fuzzy
+msgid "No comments yet."
+msgstr "Nu există modele de echipament."
+
+#: service_crm/templates/tickets/detail.html:127
+#: service_crm/tickets/forms.py:102
+#, fuzzy
+msgid "Comment"
+msgstr "Client"
+
+#: service_crm/templates/tickets/detail.html:129
+msgid "Write a comment…"
+msgstr "Scrie un comentariu…"
+
+#: service_crm/templates/tickets/detail.html:130
+#: service_crm/tickets/forms.py:104
+#, fuzzy
+msgid "Add"
+msgstr "Adresă"
+
+#: service_crm/templates/tickets/detail.html:142
+#: service_crm/tickets/forms.py:118
+msgid "Upload"
+msgstr "Încarcă"
+
+#: service_crm/templates/tickets/detail.html:144
+#, fuzzy
+msgid "File"
+msgstr "Titlu"
+
+#: service_crm/templates/tickets/detail.html:144
+#: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:34
+#: service_crm/tickets/forms.py:92
+msgid "Type"
+msgstr "Tip"
+
+#: service_crm/templates/tickets/detail.html:144
+msgid "Size"
+msgstr "Mărime"
+
+#: service_crm/templates/tickets/detail.html:144
+#, fuzzy
+msgid "Uploaded"
+msgstr "Actualizat"
+
+#: service_crm/templates/tickets/detail.html:156
+#, fuzzy
+msgid "Delete this attachment?"
+msgstr "Ștergi acest contact?"
+
+#: service_crm/templates/tickets/detail.html:167
+#, fuzzy
+msgid "No attachments yet."
+msgstr "Nu există modele de echipament."
+
+#: service_crm/templates/tickets/edit.html:6
+#: service_crm/templates/tickets/edit.html:17
+#, fuzzy
+msgid "Edit ticket"
+msgstr "Editează clientul"
+
+#: service_crm/templates/tickets/edit.html:25
+#, fuzzy
+msgid "Ticket details"
+msgstr "Detalii client"
+
+#: service_crm/templates/tickets/list.html:16
+#, fuzzy, python-format
+msgid "Tickets for %(name)s"
+msgstr "Echipamente pentru %(name)s"
+
+#: service_crm/templates/tickets/list.html:24
+#, fuzzy
+msgid "Search tickets"
+msgstr "Caută clienți"
+
+#: service_crm/templates/tickets/list.html:26
+msgid "Search title / description…"
+msgstr "Caută titlu / descriere…"
+
+#: service_crm/templates/tickets/list.html:33
+msgid "My queue"
+msgstr "Coada mea"
+
+#: service_crm/templates/tickets/list.html:35
+#, fuzzy
+msgid "Types"
+msgstr "Notițe"
+
+#: service_crm/templates/tickets/list.html:36
+#, fuzzy
+msgid "Priorities"
+msgstr "Garanții"
+
+#: service_crm/templates/tickets/list.html:47
+msgid "Open"
+msgstr "Deschise"
+
+#: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:37
+#: service_crm/tickets/forms.py:95
+#, fuzzy
+msgid "Priority"
+msgstr "Principal"
+
+#: service_crm/templates/tickets/list.html:72
+#, fuzzy
+msgid "No tickets found."
+msgstr "Nu au fost găsiți clienți."
+
+#: service_crm/templates/tickets/priorities_list.html:5
+#: service_crm/templates/tickets/priorities_list.html:11
+msgid "Ticket priorities"
+msgstr "Priorități tichete"
+
+#: service_crm/templates/tickets/priorities_list.html:14
+#: service_crm/templates/tickets/types_list.html:14
+msgid ""
+"Seeded codes can be renamed or hidden but not added or removed — add a "
+"migration for new codes."
+msgstr ""
+
+#: service_crm/templates/tickets/priorities_list.html:16
+msgid "Rank"
+msgstr "Rang"
+
+#: service_crm/templates/tickets/priorities_list.html:16
+#: service_crm/templates/tickets/types_list.html:16
+#, fuzzy
+msgid "Default"
+msgstr "Șterge"
+
+#: service_crm/templates/tickets/priorities_list.html:19
+#: service_crm/templates/tickets/priorities_list.html:20
+#: service_crm/templates/tickets/types_list.html:19
+#: service_crm/templates/tickets/types_list.html:20
+msgid "Yes"
+msgstr "Da"
+
+#: service_crm/templates/tickets/priorities_list.html:19
+#: service_crm/templates/tickets/types_list.html:19
+msgid "No"
+msgstr "Nu"
+
+#: service_crm/templates/tickets/priorities_list.html:26
+#, fuzzy
+msgid "No priorities."
+msgstr "Fără garanții."
+
+#: service_crm/templates/tickets/types_list.html:5
+#: service_crm/templates/tickets/types_list.html:11
+#, fuzzy
+msgid "Ticket types"
+msgstr "Tichete"
+
+#: service_crm/templates/tickets/types_list.html:26
+#, fuzzy
+msgid "No types."
+msgstr "Notițe"
+
+#: service_crm/tickets/_translations.py:24
+msgid "New"
+msgstr "Nou"
+
+#: service_crm/tickets/_translations.py:25
+msgid "Qualified"
+msgstr "Calificat"
+
+#: service_crm/tickets/_translations.py:26
+msgid "Scheduled"
+msgstr "Programat"
+
+#: service_crm/tickets/_translations.py:29
+msgid "Monitoring"
+msgstr "Monitorizare"
+
+#: service_crm/tickets/_translations.py:30
+msgid "Completed"
+msgstr "Finalizat"
+
+#: service_crm/tickets/_translations.py:32
+#, fuzzy
+msgid "Cancelled"
+msgstr "Anulează"
+
+#: service_crm/tickets/_translations.py:51
+#, fuzzy
+msgid "Incident"
+msgstr "Client"
+
+#: service_crm/tickets/_translations.py:52
+#, fuzzy
+msgid "Preventive"
+msgstr "Reactivează"
+
+#: service_crm/tickets/_translations.py:53
+msgid "Commissioning"
+msgstr "Punere în funcțiune"
+
+#: service_crm/tickets/_translations.py:54
+#, fuzzy
+msgid "Warranty"
+msgstr "Adaugă garanție"
+
+#: service_crm/tickets/_translations.py:55
+#, fuzzy
+msgid "Installation"
+msgstr "Dată instalare"
+
+#: service_crm/tickets/_translations.py:56
+#, fuzzy
+msgid "Audit"
+msgstr "Jurnal de audit"
+
+#: service_crm/tickets/_translations.py:61
+msgid "Low"
+msgstr "Scăzut"
+
+#: service_crm/tickets/_translations.py:62
+msgid "Normal"
+msgstr "Normal"
+
+#: service_crm/tickets/_translations.py:63
+msgid "High"
+msgstr "Ridicat"
+
+#: service_crm/tickets/_translations.py:64
+msgid "Urgent"
+msgstr "Urgent"
+
+#: service_crm/tickets/forms.py:40
+#, fuzzy
+msgid "Assignee"
+msgstr "Activ"
+
+#: service_crm/tickets/forms.py:43
+msgid "Description"
+msgstr "Descriere"
+
+#: service_crm/tickets/forms.py:45
+msgid "Due at"
+msgstr "Termen"
+
+#: service_crm/tickets/forms.py:48
+msgid "SLA due at"
+msgstr "Termen SLA"
+
+#: service_crm/tickets/forms.py:87
+#, fuzzy
+msgid "Search"
+msgstr "Caută clienți"
+
+#: service_crm/tickets/forms.py:97
+msgid "Filter"
+msgstr "Filtrează"
+
+#: service_crm/tickets/forms.py:109
+msgid "Attachment"
+msgstr "Atașament"
+
+#: service_crm/tickets/forms.py:114
+msgid "Allowed: images, PDFs, plain text, CSV."
+msgstr "Permise: imagini, PDF-uri, text simplu, CSV."
+
+#: service_crm/tickets/routes.py:127
+#, fuzzy
+msgid "— unassigned —"
+msgstr "— niciuna —"
+
+#: service_crm/tickets/routes.py:239 service_crm/tickets/routes.py:344
+#: service_crm/tickets/routes.py:395 service_crm/tickets/routes.py:444
+#: service_crm/tickets/routes.py:482 service_crm/tickets/routes.py:546
+msgid "This request was already submitted."
+msgstr "Această cerere a fost deja trimisă."
+
+#: service_crm/tickets/routes.py:255
+#, fuzzy, python-format
+msgid "Ticket %(label)s created."
+msgstr "Client creat."
+
+#: service_crm/tickets/routes.py:276 service_crm/tickets/routes.py:322
+#: service_crm/tickets/routes.py:381 service_crm/tickets/routes.py:432
+#: service_crm/tickets/routes.py:470
+#, fuzzy
+msgid "Ticket not found."
+msgstr "Clientul nu a fost găsit."
+
+#: service_crm/tickets/routes.py:360
+#, fuzzy
+msgid "Ticket updated."
+msgstr "Client actualizat."
+
+#: service_crm/tickets/routes.py:402
+msgid "Unknown target status."
+msgstr "Status țintă necunoscut."
+
+#: service_crm/tickets/routes.py:415
+#, fuzzy
+msgid "Status updated."
+msgstr "Contact actualizat."
+
+#: service_crm/tickets/routes.py:455
+#, fuzzy
+msgid "Comment added."
+msgstr "Contact adăugat."
+
+#: service_crm/tickets/routes.py:496
+#, fuzzy
+msgid "Attachment uploaded."
+msgstr "Client actualizat."
+
+#: service_crm/tickets/routes.py:536
+#, fuzzy
+msgid "Attachment not found."
+msgstr "Clientul nu a fost găsit."
+
+#: service_crm/tickets/routes.py:541
+msgid "A reason is required to delete an attachment."
+msgstr "Este nevoie de un motiv pentru a șterge un atașament."
+
+#: service_crm/tickets/routes.py:552
+msgid "Attachment removed."
+msgstr "Atașament eliminat."
+
+#: service_crm/tickets/routes.py:579
+#, fuzzy
+msgid "Ticket type not found."
+msgstr "Tip controler inexistent."
+
+#: service_crm/tickets/routes.py:593
+#, fuzzy
+msgid "Ticket type updated."
+msgstr "Client actualizat."
+
+#: service_crm/tickets/routes.py:600
+msgid "Edit ticket type"
+msgstr "Editează tip tichet"
+
+#: service_crm/tickets/routes.py:624
+#, fuzzy
+msgid "Ticket priority not found."
+msgstr "Garanție inexistentă."
+
+#: service_crm/tickets/routes.py:638
+#, fuzzy
+msgid "Ticket priority updated."
+msgstr "Garanție actualizată."
+
+#: service_crm/tickets/routes.py:645
+msgid "Edit ticket priority"
+msgstr "Editează prioritate tichet"
+
+#~ msgid "Tickets land in v0.5."
+#~ msgstr "Tichetele apar în v0.5."
 

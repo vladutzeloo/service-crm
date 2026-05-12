@@ -23,6 +23,7 @@ def register(app: Flask) -> None:
     app.cli.add_command(babel_extract)
     app.cli.add_command(babel_update)
     app.cli.add_command(babel_compile)
+    app.cli.add_command(sweep_idempotency)
 
 
 @click.command("reset-db")
@@ -119,3 +120,19 @@ def babel_compile() -> None:
     """Compile ``.po`` → ``.mo`` so Babel can serve translations."""
     _run_pybabel(["compile", "-d", "service_crm/locale"])
     click.echo("Compiled catalogs.")
+
+
+@click.command("sweep-idempotency")
+@with_appcontext
+def sweep_idempotency() -> None:
+    """Delete expired ``idempotency_key`` rows.
+
+    The window is 24 h; this command is meant to run from cron or
+    APScheduler (the latter lands in v0.7). Idempotent — running it more
+    than once a day is fine.
+    """
+    from .shared.idempotency import sweep
+
+    removed = sweep(db.session)
+    db.session.commit()
+    click.echo(f"Removed {removed} expired idempotency keys.")

@@ -12,6 +12,110 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-05-12
+
+### Added
+
+- **Tickets — header, history, comments, attachments** — ROADMAP 0.5.0.
+  - `service_crm/tickets/` blueprint with `ServiceTicket`,
+    `TicketStatusHistory` (append-only), `TicketComment`,
+    `TicketAttachment`, and the `TicketType` / `TicketPriority` lookups
+    seeded with the v1 codes (`incident`, `preventive`,
+    `commissioning`, `warranty`, `installation`, `audit` for type;
+    `low`, `normal`, `high`, `urgent` for priority). Alembic migration
+    `20260512_1200_c3a4d7e8f1b9_tickets_spine.py`.
+  - `service_crm/tickets/state.py` — pure-Python FSM. Lifecycle:
+    `new → qualified → scheduled → in_progress → waiting_parts →
+    monitoring → completed → closed`; `cancelled` from any
+    pre-`completed` state. Role-based: admin and manager can drive
+    every move, technician is limited to the in-progress section.
+    Hypothesis state-machine test plus exhaustive property test —
+    100 % line + branch on the FSM.
+  - `service_crm/shared/audit.py` extended: a `before_flush` listener
+    writes a `TicketStatusHistory` row on every status change, even
+    when code bypasses `services.transition_ticket` and assigns
+    `ticket.status` directly. The initial `from_state = NULL` row is
+    written on ticket creation. Transition reason / reason_code
+    metadata is stashed on the instance and consumed once per flush.
+  - Routes (all `@login_required`):
+    `/tickets/`, `/tickets/new`, `/tickets/<hex>`,
+    `/tickets/<hex>/edit`, `/tickets/<hex>/transition`,
+    `/tickets/<hex>/comments`, `/tickets/<hex>/attachments`,
+    `/tickets/<hex>/attachments/<aid>` (auth-gated download),
+    `/tickets/<hex>/attachments/<aid>/delete`, plus lookup admin at
+    `/tickets/types[/...]` and `/tickets/priorities[/...]` (rename +
+    deactivate only — new codes require a migration).
+  - **Tickets list** with filters (status, type, priority, client,
+    equipment, assignee, full-text search), "My queue" link in the
+    toolbar, translated status / type / priority chips, pagination,
+    open-vs-all view toggle, count-per-status badges. Single-column
+    stacked-card layout on phones via the 0.2.0 `data_table` macro.
+  - **Detail page**: header card, status pill, **transition bar**
+    showing only the legal next states for the current role/state
+    pair, dropdown of common cancel reasons + free-text, status
+    history timeline tab, comments tab (sticky compose box,
+    8 KB cap), attachments tab.
+  - **Comments**: plain text only, 8 KB cap enforced at both form and
+    service layer (UTF-8 byte length, so emoji-heavy bodies are caught
+    correctly), soft-delete via `is_active`.
+  - **Attachments**: shared upload pipeline at
+    `service_crm/shared/uploads.py` — extension + magic-byte
+    validation, Pillow image re-encode (WebP q85, long-edge ≤ 2048 px),
+    25 MB single-file cap, stored under
+    `instance/uploads/tickets/<ticket_hex>/<attachment_ulid><ext>`.
+    Streamed back through an auth-gated route; never linked from
+    `static/`. Soft-delete with required reason. 0.6 interventions
+    will reuse the same pipeline.
+  - **Idempotency**: server-side `idempotency_key` table with
+    `(user_id, token)` unique constraint and 24 h window. The hidden
+    `idempotency_token` field already wired into `form_shell` (from
+    0.2.0) is now deduplicated server-side; double-submits return a
+    "this request was already submitted" flash instead of writing
+    twice. `flask sweep-idempotency` CLI command deletes expired
+    rows; APScheduler integration lands in v0.7.
+  - **Ticket numbering**: `ServiceTicket.number` is monotonic.
+    Postgres path uses a `ticket_number_seq` sequence created on
+    first use; SQLite path computes `MAX(number) + 1` inside the
+    same transaction.
+- **Templates**: `tickets/list.html`, `tickets/detail.html`,
+  `tickets/edit.html`, `tickets/types_list.html`,
+  `tickets/priorities_list.html`, `tickets/lookup_edit.html`. All
+  use the 0.2.0 macros (`data_table`, `tabs`, `filter_bar`, `modal`).
+- **Tickets tab on equipment detail** now shows the list of tickets
+  for that machine (replaces the v0.5 placeholder), with a "New
+  ticket" button that pre-populates client + equipment.
+- **Sidebar Tickets link** wired up (was a `#` placeholder).
+- **160+ new tests** (`tests/tickets/`): state machine (Hypothesis +
+  property), models (constraints, cascades, history listener),
+  services (CRUD, FSM-driven transitions, search, comments,
+  attachments, lookup admin), routes (full e2e including idempotent
+  retries and the auth-gated download), shared upload pipeline,
+  idempotency, translations registry. 100 % line + branch coverage
+  on `service_crm/`. 369 → 541 tests.
+- **RO + EN translations** for every new label, status, type,
+  priority, button, and flash message; catalogs compiled into the
+  wheel.
+- Test factories: `TicketTypeFactory`, `TicketPriorityFactory`,
+  `ServiceTicketFactory`, `TicketCommentFactory`,
+  `TicketAttachmentFactory`.
+
+### Changed
+- `service_crm/__init__.py` registers the tickets blueprint.
+- `service_crm/cli.py` adds `flask sweep-idempotency`.
+- `pyproject.toml` mypy override adds `tickets.routes` and `cli` to
+  the same `arg-type` suppression as `clients.routes` and
+  `equipment.routes` (db.session is `scoped_session[Session]` but
+  services take `Session` — runtime compatible, statically divergent).
+- `tests/test_cli.py::test_reset_db_with_yes_runs_migrations` now
+  patches `db.drop_all` as well as `flask_migrate.upgrade` so it
+  doesn't wipe the session-scoped in-memory schema and leave later
+  tests with `no such table` errors. The bug was latent on `main`
+  because no test ran against the schema after `test_cli.py`; with
+  `tests/tickets/` ordered alphabetically *after* `test_cli.py`, the
+  ordering broke and is now fixed.
+
+## [0.4.0] - 2026-05-11
+
 ### Added
 
 - **Equipment / installed-base slice** — ROADMAP 0.4.0.
@@ -296,6 +400,10 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
   scaffold lands in 0.1.0 walking skeleton.
 - 2026-05-10: adopt the blueprint's CNC domain in full.
 
-[Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...v0.5.0
 [0.2.0]: https://github.com/vladutzeloo/service-crm/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/vladutzeloo/service-crm/releases/tag/v0.1.0
+
+[//]: # (v0.3.0 [clients] and v0.4.0 [equipment] were merged to ``main`` but)
+[//]: # (never tagged; their work is rolled into the v0.5.0 release range.)

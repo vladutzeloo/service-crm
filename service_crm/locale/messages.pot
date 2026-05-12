@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-11 20:01+0000\n"
+"POT-Creation-Date: 2026-05-12 15:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -102,6 +102,9 @@ msgstr ""
 #: service_crm/templates/equipment/detail.html:138
 #: service_crm/templates/equipment/edit.html:73
 #: service_crm/templates/macros/form_shell.html:48
+#: service_crm/templates/tickets/edit.html:88
+#: service_crm/templates/tickets/lookup_edit.html:32
+#: service_crm/tickets/forms.py:50 service_crm/tickets/forms.py:133
 msgid "Save"
 msgstr ""
 
@@ -121,6 +124,9 @@ msgstr ""
 #: service_crm/templates/clients/detail.html:173
 #: service_crm/templates/clients/detail.html:197
 #: service_crm/templates/clients/detail.html:217
+#: service_crm/templates/tickets/priorities_list.html:16
+#: service_crm/templates/tickets/types_list.html:16
+#: service_crm/tickets/forms.py:127
 msgid "Label"
 msgstr ""
 
@@ -148,6 +154,8 @@ msgstr ""
 #: service_crm/templates/clients/detail.html:241
 #: service_crm/templates/clients/detail.html:266
 #: service_crm/templates/clients/detail.html:287
+#: service_crm/templates/equipment/detail.html:150
+#: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:42
 msgid "Title"
 msgstr ""
 
@@ -275,6 +283,8 @@ msgstr ""
 #: service_crm/equipment/forms.py:24
 #: service_crm/templates/equipment/controllers_list.html:28
 #: service_crm/templates/equipment/controllers_list.html:47
+#: service_crm/templates/tickets/priorities_list.html:16
+#: service_crm/templates/tickets/types_list.html:16
 msgid "Code"
 msgstr ""
 
@@ -300,6 +310,7 @@ msgstr ""
 #: service_crm/equipment/forms.py:48
 #: service_crm/templates/dev/macro_smoke.html:76
 #: service_crm/templates/equipment/list.html:57
+#: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:28
 msgid "Client"
 msgstr ""
 
@@ -331,121 +342,123 @@ msgstr ""
 msgid "Provider"
 msgstr ""
 
-#: service_crm/equipment/routes.py:48 service_crm/equipment/routes.py:59
-#: service_crm/equipment/routes.py:63 service_crm/equipment/routes.py:69
+#: service_crm/equipment/routes.py:65 service_crm/equipment/routes.py:76
+#: service_crm/equipment/routes.py:80 service_crm/equipment/routes.py:86
+#: service_crm/tickets/forms.py:67 service_crm/tickets/routes.py:99
+#: service_crm/tickets/routes.py:113 service_crm/tickets/routes.py:120
 msgid "— none —"
 msgstr ""
 
-#: service_crm/equipment/routes.py:136
+#: service_crm/equipment/routes.py:156
 msgid "Equipment created."
 msgstr ""
 
-#: service_crm/equipment/routes.py:149 service_crm/equipment/routes.py:180
-#: service_crm/equipment/routes.py:242 service_crm/equipment/routes.py:256
-#: service_crm/equipment/routes.py:273 service_crm/equipment/routes.py:304
-#: service_crm/equipment/routes.py:350
+#: service_crm/equipment/routes.py:169 service_crm/equipment/routes.py:204
+#: service_crm/equipment/routes.py:269 service_crm/equipment/routes.py:283
+#: service_crm/equipment/routes.py:300 service_crm/equipment/routes.py:331
+#: service_crm/equipment/routes.py:377
 msgid "Equipment not found."
 msgstr ""
 
-#: service_crm/equipment/routes.py:209
+#: service_crm/equipment/routes.py:236
 msgid "Equipment updated."
 msgstr ""
 
-#: service_crm/equipment/routes.py:246
+#: service_crm/equipment/routes.py:273
 msgid "Equipment deactivated."
 msgstr ""
 
-#: service_crm/equipment/routes.py:260
+#: service_crm/equipment/routes.py:287
 msgid "Equipment reactivated."
 msgstr ""
 
-#: service_crm/equipment/routes.py:288
+#: service_crm/equipment/routes.py:315
 msgid "Warranty added."
 msgstr ""
 
-#: service_crm/equipment/routes.py:309 service_crm/equipment/routes.py:355
+#: service_crm/equipment/routes.py:336 service_crm/equipment/routes.py:382
 msgid "Warranty not found."
 msgstr ""
 
-#: service_crm/equipment/routes.py:324
+#: service_crm/equipment/routes.py:351
 msgid "Warranty updated."
 msgstr ""
 
-#: service_crm/equipment/routes.py:359
+#: service_crm/equipment/routes.py:386
 msgid "Warranty deleted."
 msgstr ""
 
-#: service_crm/equipment/routes.py:391
+#: service_crm/equipment/routes.py:418
 msgid "Controller type added."
 msgstr ""
 
-#: service_crm/equipment/routes.py:393
+#: service_crm/equipment/routes.py:420
 msgid "A controller type with that code already exists."
 msgstr ""
 
-#: service_crm/equipment/routes.py:407
+#: service_crm/equipment/routes.py:434
 msgid "Controller type not found."
 msgstr ""
 
-#: service_crm/equipment/routes.py:411
+#: service_crm/equipment/routes.py:438
 msgid "Controller type deleted."
 msgstr ""
 
-#: service_crm/equipment/routes.py:444
+#: service_crm/equipment/routes.py:471
 msgid "Equipment model added."
 msgstr ""
 
-#: service_crm/equipment/routes.py:447
+#: service_crm/equipment/routes.py:474
 msgid "An equipment model with that manufacturer + code already exists."
 msgstr ""
 
-#: service_crm/equipment/routes.py:463
+#: service_crm/equipment/routes.py:490
 msgid "Equipment model not found."
 msgstr ""
 
-#: service_crm/equipment/routes.py:467
+#: service_crm/equipment/routes.py:494
 msgid "Equipment model deleted."
 msgstr ""
 
-#: service_crm/equipment/routes.py:482
+#: service_crm/equipment/routes.py:509
 #, python-format
 msgid "%(count)s equipment imported."
 msgstr ""
 
-#: service_crm/equipment/routes.py:492
+#: service_crm/equipment/routes.py:519
 msgid "Import equipment"
 msgstr ""
 
-#: service_crm/equipment/routes.py:494
+#: service_crm/equipment/routes.py:521
 msgid ""
 "Expected columns: client_name (required), location_label, manufacturer, "
 "model_code, controller_code, serial_number, asset_tag, install_date "
 "(YYYY-MM-DD), notes"
 msgstr ""
 
-#: service_crm/equipment/routes.py:510
+#: service_crm/equipment/routes.py:537
 #, python-format
 msgid "%(count)s controller types imported."
 msgstr ""
 
-#: service_crm/equipment/routes.py:520
+#: service_crm/equipment/routes.py:547
 msgid "Import controller types"
 msgstr ""
 
-#: service_crm/equipment/routes.py:521
+#: service_crm/equipment/routes.py:548
 msgid "Expected columns: code (required), name (required), notes"
 msgstr ""
 
-#: service_crm/equipment/routes.py:534
+#: service_crm/equipment/routes.py:561
 #, python-format
 msgid "%(count)s equipment models imported."
 msgstr ""
 
-#: service_crm/equipment/routes.py:544
+#: service_crm/equipment/routes.py:571
 msgid "Import equipment models"
 msgstr ""
 
-#: service_crm/equipment/routes.py:546
+#: service_crm/equipment/routes.py:573
 msgid ""
 "Expected columns: manufacturer (required), model_code (required), "
 "display_name, controller_code, notes"
@@ -468,13 +481,20 @@ msgstr ""
 msgid "Dashboard"
 msgstr ""
 
-#: service_crm/templates/base.html:31
+#: service_crm/templates/base.html:31 service_crm/templates/tickets/list.html:9
 msgid "Operations"
 msgstr ""
 
 #: service_crm/templates/base.html:32
 #: service_crm/templates/dev/macro_smoke.html:56
 #: service_crm/templates/equipment/detail.html:70
+#: service_crm/templates/tickets/detail.html:9
+#: service_crm/templates/tickets/edit.html:10
+#: service_crm/templates/tickets/list.html:6
+#: service_crm/templates/tickets/list.html:16
+#: service_crm/templates/tickets/lookup_edit.html:6
+#: service_crm/templates/tickets/priorities_list.html:8
+#: service_crm/templates/tickets/types_list.html:8
 msgid "Tickets"
 msgstr ""
 
@@ -510,6 +530,7 @@ msgstr ""
 #: service_crm/templates/equipment/list.html:6
 #: service_crm/templates/equipment/list.html:16
 #: service_crm/templates/equipment/models_list.html:8
+#: service_crm/tickets/forms.py:31
 msgid "Equipment"
 msgstr ""
 
@@ -564,6 +585,9 @@ msgstr ""
 #: service_crm/templates/equipment/detail.html:36
 #: service_crm/templates/equipment/list.html:52
 #: service_crm/templates/equipment/list.html:61
+#: service_crm/templates/tickets/priorities_list.html:16
+#: service_crm/templates/tickets/types_list.html:16
+#: service_crm/tickets/forms.py:129 service_crm/tickets/forms.py:131
 msgid "Active"
 msgstr ""
 
@@ -572,6 +596,7 @@ msgstr ""
 #: service_crm/templates/clients/list.html:47
 #: service_crm/templates/equipment/detail.html:38
 #: service_crm/templates/equipment/list.html:62
+#: service_crm/tickets/forms.py:131
 msgid "Inactive"
 msgstr ""
 
@@ -581,6 +606,7 @@ msgstr ""
 #: service_crm/templates/clients/detail.html:246
 #: service_crm/templates/equipment/detail.html:43
 #: service_crm/templates/equipment/detail.html:90
+#: service_crm/templates/tickets/detail.html:45
 msgid "Edit"
 msgstr ""
 
@@ -628,6 +654,9 @@ msgstr ""
 #: service_crm/templates/equipment/detail.html:85
 #: service_crm/templates/equipment/list.html:57
 #: service_crm/templates/equipment/models_list.html:55
+#: service_crm/templates/tickets/detail.html:144
+#: service_crm/templates/tickets/priorities_list.html:16
+#: service_crm/templates/tickets/types_list.html:16
 msgid "Actions"
 msgstr ""
 
@@ -641,6 +670,7 @@ msgstr ""
 #: service_crm/templates/equipment/controllers_list.html:54
 #: service_crm/templates/equipment/detail.html:94
 #: service_crm/templates/equipment/models_list.html:62
+#: service_crm/tickets/forms.py:123
 msgid "Delete"
 msgstr ""
 
@@ -662,6 +692,8 @@ msgstr ""
 #: service_crm/templates/equipment/edit.html:72
 #: service_crm/templates/equipment/import.html:28
 #: service_crm/templates/macros/form_shell.html:45
+#: service_crm/templates/tickets/edit.html:87
+#: service_crm/templates/tickets/lookup_edit.html:31
 msgid "Cancel"
 msgstr ""
 
@@ -705,8 +737,11 @@ msgstr ""
 #: service_crm/templates/clients/list.html:33
 #: service_crm/templates/clients/list.html:40
 #: service_crm/templates/dev/macro_smoke.html:76
+#: service_crm/templates/equipment/detail.html:150
 #: service_crm/templates/equipment/list.html:50
 #: service_crm/templates/equipment/list.html:57
+#: service_crm/templates/tickets/list.html:54
+#: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:89
 msgid "Status"
 msgstr ""
 
@@ -762,6 +797,7 @@ msgstr ""
 #: service_crm/templates/clients/list.html:36
 #: service_crm/templates/dev/macro_smoke.html:65
 #: service_crm/templates/equipment/list.html:53
+#: service_crm/templates/tickets/list.html:48
 msgid "All"
 msgstr ""
 
@@ -771,17 +807,20 @@ msgstr ""
 
 #: service_crm/templates/clients/list.html:73
 #: service_crm/templates/equipment/list.html:88
+#: service_crm/templates/tickets/list.html:78
 msgid "Previous"
 msgstr ""
 
 #: service_crm/templates/clients/list.html:75
 #: service_crm/templates/equipment/list.html:90
+#: service_crm/templates/tickets/list.html:80
 #, python-format
 msgid "Page %(p)s"
 msgstr ""
 
 #: service_crm/templates/clients/list.html:78
 #: service_crm/templates/equipment/list.html:93
+#: service_crm/templates/tickets/list.html:83
 msgid "Next"
 msgstr ""
 
@@ -866,6 +905,7 @@ msgid "Warranties"
 msgstr ""
 
 #: service_crm/templates/dev/macro_smoke.html:58
+#: service_crm/templates/tickets/detail.html:82
 msgid "History"
 msgstr ""
 
@@ -878,22 +918,29 @@ msgid "Filter by status"
 msgstr ""
 
 #: service_crm/templates/dev/macro_smoke.html:66
+#: service_crm/tickets/_translations.py:27
 msgid "In progress"
 msgstr ""
 
 #: service_crm/templates/dev/macro_smoke.html:67
+#: service_crm/tickets/_translations.py:28
 msgid "Waiting parts"
 msgstr ""
 
 #: service_crm/templates/dev/macro_smoke.html:68
+#: service_crm/tickets/_translations.py:31
 msgid "Closed"
 msgstr ""
 
 #: service_crm/templates/dev/macro_smoke.html:76
+#: service_crm/templates/equipment/detail.html:150
+#: service_crm/templates/tickets/list.html:56
 msgid "Ticket"
 msgstr ""
 
 #: service_crm/templates/dev/macro_smoke.html:76
+#: service_crm/templates/equipment/detail.html:150
+#: service_crm/templates/tickets/list.html:56
 msgid "Updated"
 msgstr ""
 
@@ -988,11 +1035,18 @@ msgstr ""
 msgid "Edit warranty"
 msgstr ""
 
-#: service_crm/templates/equipment/detail.html:146
-msgid "Tickets land in v0.5."
+#: service_crm/templates/equipment/detail.html:148
+#: service_crm/templates/tickets/edit.html:6
+#: service_crm/templates/tickets/edit.html:17
+#: service_crm/templates/tickets/list.html:39
+msgid "New ticket"
 msgstr ""
 
-#: service_crm/templates/equipment/detail.html:150
+#: service_crm/templates/equipment/detail.html:160
+msgid "No tickets for this equipment yet."
+msgstr ""
+
+#: service_crm/templates/equipment/detail.html:164
 msgid "Maintenance plans land in v0.7."
 msgstr ""
 
@@ -1012,6 +1066,7 @@ msgid "Equipment details"
 msgstr ""
 
 #: service_crm/templates/equipment/edit.html:38
+#: service_crm/templates/tickets/edit.html:50
 msgid "Must belong to the chosen client."
 msgstr ""
 
@@ -1076,15 +1131,18 @@ msgstr ""
 
 #: service_crm/templates/macros/filter_bar.html:39
 #: service_crm/templates/macros/filter_bar.html:50
+#: service_crm/templates/tickets/detail.html:93
 msgid "From"
 msgstr ""
 
 #: service_crm/templates/macros/filter_bar.html:43
 #: service_crm/templates/macros/filter_bar.html:54
+#: service_crm/templates/tickets/detail.html:93
 msgid "To"
 msgstr ""
 
 #: service_crm/templates/macros/filter_bar.html:46
+#: service_crm/templates/tickets/detail.html:76 service_crm/tickets/forms.py:78
 msgid "Apply"
 msgstr ""
 
@@ -1094,5 +1152,402 @@ msgstr ""
 
 #: service_crm/templates/macros/tabs.html:11
 msgid "Section navigation"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:40
+msgid "Due"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:58 service_crm/tickets/forms.py:61
+msgid "Move to"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:64 service_crm/tickets/forms.py:64
+msgid "Reason code"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:66
+msgid "— reason —"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:67 service_crm/tickets/forms.py:68
+msgid "Resolved remotely"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:68 service_crm/tickets/forms.py:69
+msgid "Client request"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:69 service_crm/tickets/forms.py:70
+msgid "Duplicate"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:70 service_crm/tickets/forms.py:71
+msgid "No fault found"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:71 service_crm/tickets/forms.py:72
+msgid "Out of scope"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:72 service_crm/tickets/forms.py:73
+msgid "Other"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:74
+msgid "Reason (required for cancellation)"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:84
+msgid "Comments"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:86
+msgid "Attachments"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:93
+msgid "When"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:93
+msgid "Actor"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:93
+#: service_crm/templates/tickets/detail.html:154
+#: service_crm/tickets/forms.py:77 service_crm/tickets/forms.py:122
+msgid "Reason"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:96
+msgid "(created)"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:97
+msgid "system"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:106
+msgid "No status changes yet."
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:115
+msgid "(deleted user)"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:121
+msgid "No comments yet."
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:127
+#: service_crm/tickets/forms.py:102
+msgid "Comment"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:129
+msgid "Write a comment…"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:130
+#: service_crm/tickets/forms.py:104
+msgid "Add"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:142
+#: service_crm/tickets/forms.py:118
+msgid "Upload"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:144
+msgid "File"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:144
+#: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:34
+#: service_crm/tickets/forms.py:92
+msgid "Type"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:144
+msgid "Size"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:144
+msgid "Uploaded"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:156
+msgid "Delete this attachment?"
+msgstr ""
+
+#: service_crm/templates/tickets/detail.html:167
+msgid "No attachments yet."
+msgstr ""
+
+#: service_crm/templates/tickets/edit.html:6
+#: service_crm/templates/tickets/edit.html:17
+msgid "Edit ticket"
+msgstr ""
+
+#: service_crm/templates/tickets/edit.html:25
+msgid "Ticket details"
+msgstr ""
+
+#: service_crm/templates/tickets/list.html:16
+#, python-format
+msgid "Tickets for %(name)s"
+msgstr ""
+
+#: service_crm/templates/tickets/list.html:24
+msgid "Search tickets"
+msgstr ""
+
+#: service_crm/templates/tickets/list.html:26
+msgid "Search title / description…"
+msgstr ""
+
+#: service_crm/templates/tickets/list.html:33
+msgid "My queue"
+msgstr ""
+
+#: service_crm/templates/tickets/list.html:35
+msgid "Types"
+msgstr ""
+
+#: service_crm/templates/tickets/list.html:36
+msgid "Priorities"
+msgstr ""
+
+#: service_crm/templates/tickets/list.html:47
+msgid "Open"
+msgstr ""
+
+#: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:37
+#: service_crm/tickets/forms.py:95
+msgid "Priority"
+msgstr ""
+
+#: service_crm/templates/tickets/list.html:72
+msgid "No tickets found."
+msgstr ""
+
+#: service_crm/templates/tickets/priorities_list.html:5
+#: service_crm/templates/tickets/priorities_list.html:11
+msgid "Ticket priorities"
+msgstr ""
+
+#: service_crm/templates/tickets/priorities_list.html:14
+#: service_crm/templates/tickets/types_list.html:14
+msgid ""
+"Seeded codes can be renamed or hidden but not added or removed — add a "
+"migration for new codes."
+msgstr ""
+
+#: service_crm/templates/tickets/priorities_list.html:16
+msgid "Rank"
+msgstr ""
+
+#: service_crm/templates/tickets/priorities_list.html:16
+#: service_crm/templates/tickets/types_list.html:16
+msgid "Default"
+msgstr ""
+
+#: service_crm/templates/tickets/priorities_list.html:19
+#: service_crm/templates/tickets/priorities_list.html:20
+#: service_crm/templates/tickets/types_list.html:19
+#: service_crm/templates/tickets/types_list.html:20
+msgid "Yes"
+msgstr ""
+
+#: service_crm/templates/tickets/priorities_list.html:19
+#: service_crm/templates/tickets/types_list.html:19
+msgid "No"
+msgstr ""
+
+#: service_crm/templates/tickets/priorities_list.html:26
+msgid "No priorities."
+msgstr ""
+
+#: service_crm/templates/tickets/types_list.html:5
+#: service_crm/templates/tickets/types_list.html:11
+msgid "Ticket types"
+msgstr ""
+
+#: service_crm/templates/tickets/types_list.html:26
+msgid "No types."
+msgstr ""
+
+#: service_crm/tickets/_translations.py:24
+msgid "New"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:25
+msgid "Qualified"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:26
+msgid "Scheduled"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:29
+msgid "Monitoring"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:30
+msgid "Completed"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:32
+msgid "Cancelled"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:51
+msgid "Incident"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:52
+msgid "Preventive"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:53
+msgid "Commissioning"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:54
+msgid "Warranty"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:55
+msgid "Installation"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:56
+msgid "Audit"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:61
+msgid "Low"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:62
+msgid "Normal"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:63
+msgid "High"
+msgstr ""
+
+#: service_crm/tickets/_translations.py:64
+msgid "Urgent"
+msgstr ""
+
+#: service_crm/tickets/forms.py:40
+msgid "Assignee"
+msgstr ""
+
+#: service_crm/tickets/forms.py:43
+msgid "Description"
+msgstr ""
+
+#: service_crm/tickets/forms.py:45
+msgid "Due at"
+msgstr ""
+
+#: service_crm/tickets/forms.py:48
+msgid "SLA due at"
+msgstr ""
+
+#: service_crm/tickets/forms.py:87
+msgid "Search"
+msgstr ""
+
+#: service_crm/tickets/forms.py:97
+msgid "Filter"
+msgstr ""
+
+#: service_crm/tickets/forms.py:109
+msgid "Attachment"
+msgstr ""
+
+#: service_crm/tickets/forms.py:114
+msgid "Allowed: images, PDFs, plain text, CSV."
+msgstr ""
+
+#: service_crm/tickets/routes.py:127
+msgid "— unassigned —"
+msgstr ""
+
+#: service_crm/tickets/routes.py:239 service_crm/tickets/routes.py:344
+#: service_crm/tickets/routes.py:395 service_crm/tickets/routes.py:444
+#: service_crm/tickets/routes.py:482 service_crm/tickets/routes.py:546
+msgid "This request was already submitted."
+msgstr ""
+
+#: service_crm/tickets/routes.py:255
+#, python-format
+msgid "Ticket %(label)s created."
+msgstr ""
+
+#: service_crm/tickets/routes.py:276 service_crm/tickets/routes.py:322
+#: service_crm/tickets/routes.py:381 service_crm/tickets/routes.py:432
+#: service_crm/tickets/routes.py:470
+msgid "Ticket not found."
+msgstr ""
+
+#: service_crm/tickets/routes.py:360
+msgid "Ticket updated."
+msgstr ""
+
+#: service_crm/tickets/routes.py:402
+msgid "Unknown target status."
+msgstr ""
+
+#: service_crm/tickets/routes.py:415
+msgid "Status updated."
+msgstr ""
+
+#: service_crm/tickets/routes.py:455
+msgid "Comment added."
+msgstr ""
+
+#: service_crm/tickets/routes.py:496
+msgid "Attachment uploaded."
+msgstr ""
+
+#: service_crm/tickets/routes.py:536
+msgid "Attachment not found."
+msgstr ""
+
+#: service_crm/tickets/routes.py:541
+msgid "A reason is required to delete an attachment."
+msgstr ""
+
+#: service_crm/tickets/routes.py:552
+msgid "Attachment removed."
+msgstr ""
+
+#: service_crm/tickets/routes.py:579
+msgid "Ticket type not found."
+msgstr ""
+
+#: service_crm/tickets/routes.py:593
+msgid "Ticket type updated."
+msgstr ""
+
+#: service_crm/tickets/routes.py:600
+msgid "Edit ticket type"
+msgstr ""
+
+#: service_crm/tickets/routes.py:624
+msgid "Ticket priority not found."
+msgstr ""
+
+#: service_crm/tickets/routes.py:638
+msgid "Ticket priority updated."
+msgstr ""
+
+#: service_crm/tickets/routes.py:645
+msgid "Edit ticket priority"
 msgstr ""
 

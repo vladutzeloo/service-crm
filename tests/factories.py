@@ -28,6 +28,14 @@ from service_crm.equipment.models import (
     EquipmentWarranty,
 )
 from service_crm.extensions import db
+from service_crm.tickets.models import (
+    ServiceTicket,
+    TicketAttachment,
+    TicketComment,
+    TicketPriority,
+    TicketType,
+)
+from service_crm.tickets.state import TicketStatus
 
 
 class RoleFactory(SQLAlchemyModelFactory):
@@ -235,3 +243,115 @@ class EquipmentWarrantyFactory(SQLAlchemyModelFactory):
     @factory.lazy_attribute
     def equipment_id(self) -> bytes:
         return self.equipment.id  # type: ignore[return-value]
+
+
+# ── Tickets ───────────────────────────────────────────────────────────────────
+
+
+class TicketTypeFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = TicketType
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    code = factory.Sequence(lambda n: f"type-{n}")
+    label = factory.Sequence(lambda n: f"Type {n}")
+    is_active = True
+    is_default = False
+
+
+class TicketPriorityFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = TicketPriority
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    code = factory.Sequence(lambda n: f"prio-{n}")
+    label = factory.Sequence(lambda n: f"Priority {n}")
+    rank = factory.Sequence(lambda n: n)
+    is_active = True
+    is_default = False
+
+
+class ServiceTicketFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = ServiceTicket
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    client = factory.SubFactory(ClientFactory)
+    equipment = None
+    type = None
+    priority = None
+    assignee = None
+    number = factory.Sequence(lambda n: n + 1)
+    title = factory.Sequence(lambda n: f"Ticket {n}")
+    description = ""
+    status = TicketStatus.NEW.value
+    due_at = None
+    sla_due_at = None
+    scheduled_at = None
+    closed_at = None
+
+    @factory.lazy_attribute
+    def client_id(self) -> bytes:
+        return self.client.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def equipment_id(self) -> bytes | None:
+        return self.equipment.id if self.equipment else None  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def type_id(self) -> bytes | None:
+        return self.type.id if self.type else None  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def priority_id(self) -> bytes | None:
+        return self.priority.id if self.priority else None  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def assignee_user_id(self) -> bytes | None:
+        return self.assignee.id if self.assignee else None  # type: ignore[return-value]
+
+
+class TicketCommentFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = TicketComment
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    ticket = factory.SubFactory(ServiceTicketFactory)
+    author = None
+    body = factory.Sequence(lambda n: f"Comment body {n}")
+    is_active = True
+
+    @factory.lazy_attribute
+    def ticket_id(self) -> bytes:
+        return self.ticket.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def author_user_id(self) -> bytes | None:
+        return self.author.id if self.author else None  # type: ignore[return-value]
+
+
+class TicketAttachmentFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = TicketAttachment
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    ticket = factory.SubFactory(ServiceTicketFactory)
+    uploader = None
+    filename = factory.Sequence(lambda n: f"file-{n}.txt")
+    content_type = "text/plain"
+    size_bytes = 42
+    storage_key = factory.Sequence(lambda n: f"tickets/dummy/{n:08x}.txt")
+    is_active = True
+
+    @factory.lazy_attribute
+    def ticket_id(self) -> bytes:
+        return self.ticket.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def uploader_user_id(self) -> bytes | None:
+        return self.uploader.id if self.uploader else None  # type: ignore[return-value]

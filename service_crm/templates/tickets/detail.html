@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/tabs.html" import tabs %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ ticket.label }} {{ ticket.title }} — Service-CRM{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('tickets.list_tickets') }}">{{ _("Tickets") }}</a>
+  </div>
+{% endblock %}
+{% block page_title %}<span class="mono">{{ ticket.label }}</span> {{ ticket.title }}{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+  <div class="detail-meta">
+    <span class="meta-item">{{ icon("users") }}
+      <a href="{{ url_for('clients.detail', client_hex=ticket.client.id.hex()) }}" class="link">
+        {{ ticket.client.name }}
+      </a>
+    </span>
+    {% if ticket.equipment %}
+      <span class="meta-item">{{ icon("server") }}
+        <a href="{{ url_for('equipment.detail', equipment_hex=ticket.equipment.id.hex()) }}" class="link">
+          {{ ticket.equipment.label }}
+        </a>
+      </span>
+    {% endif %}
+    {% if ticket.type %}
+      <span class="meta-item">{{ type_label(ticket.type.code) }}</span>
+    {% endif %}
+    {% if ticket.priority %}
+      <span class="badge badge-{{ priority_tone(ticket.priority.code) }}">{{ priority_label(ticket.priority.code) }}</span>
+    {% endif %}
+    <span class="badge badge-{{ status_tone(ticket.status) }}">{{ status_label(ticket.status) }}</span>
+    {% if ticket.assignee %}
+      <span class="meta-item">{{ icon("user-cog") }} {{ ticket.assignee.email }}</span>
+    {% endif %}
+    {% if ticket.due_at %}
+      <span class="meta-item">{{ _("Due") }} {{ ticket.due_at.strftime('%Y-%m-%d %H:%M') }}</span>
+    {% endif %}
+  </div>
+  <div class="detail-actions">
+    <a href="{{ url_for('tickets.edit_ticket', ticket_hex=ticket.id.hex()) }}"
+       class="btn btn-sm btn-secondary">{{ icon("edit-2") }} {{ _("Edit") }}</a>
+  </div>
+</div>
+
+{% if ticket.description %}
+<div class="detail-notes">{{ ticket.description }}</div>
+{% endif %}
+
+{% if legal_transitions %}
+<div class="transition-bar">
+  <form method="post" action="{{ url_for('tickets.transition', ticket_hex=ticket.id.hex()) }}" class="transition-form">
+    {{ transition_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <label class="sr-only" for="to_state">{{ _("Move to") }}</label>
+    <select id="to_state" name="to_state" class="input">
+      {% for code in legal_transitions %}
+        <option value="{{ code }}">{{ status_label(code) }}</option>
+      {% endfor %}
+    </select>
+    <label class="sr-only" for="reason_code">{{ _("Reason code") }}</label>
+    <select id="reason_code" name="reason_code" class="input">
+      <option value="">{{ _("— reason —") }}</option>
+      <option value="resolved_remotely">{{ _("Resolved remotely") }}</option>
+      <option value="client_request">{{ _("Client request") }}</option>
+      <option value="duplicate">{{ _("Duplicate") }}</option>
+      <option value="no_fault_found">{{ _("No fault found") }}</option>
+      <option value="out_of_scope">{{ _("Out of scope") }}</option>
+      <option value="other">{{ _("Other") }}</option>
+    </select>
+    <input type="text" name="reason" class="input" placeholder="{{ _('Reason (required for cancellation)') }}"
+           maxlength="2000">
+    <button type="submit" class="btn btn-primary btn-sm">{{ _("Apply") }}</button>
+  </form>
+</div>
+{% endif %}
+
+{% set tab_items = [
+  {"label": _("History"),     "href": url_for("tickets.detail", ticket_hex=ticket.id.hex(), tab="history"),
+   "count": history|length, "active": tab == "history"},
+  {"label": _("Comments"),    "href": url_for("tickets.detail", ticket_hex=ticket.id.hex(), tab="comments"),
+   "count": comments|length, "active": tab == "comments"},
+  {"label": _("Attachments"), "href": url_for("tickets.detail", ticket_hex=ticket.id.hex(), tab="attachments"),
+   "count": attachments|length, "active": tab == "attachments"},
+] %}
+{{ tabs(tab_items) }}
+
+{% if tab == "history" %}
+<div class="tab-panel">
+  {% set h_cols = [_("When"), _("From"), _("To"), _("Actor"), _("Reason")] %}
+  {% set h_rows = [] %}
+  {% for h in history %}
+    {% set from_html %}{% if h.from_state %}{{ status_label(h.from_state) }}{% else %}<em>{{ _("(created)") }}</em>{% endif %}{% endset %}
+    {% set actor_html %}{% if h.actor %}{{ h.actor.email|e }}{% else %}<em>{{ _("system") }}</em>{% endif %}{% endset %}
+    {% set _ = h_rows.append([
+      h.occurred_at.strftime('%Y-%m-%d %H:%M'),
+      from_html,
+      status_label(h.to_state),
+      actor_html,
+      h.reason|e,
+    ]) %}
+  {% endfor %}
+  {{ data_table(h_cols, h_rows, empty=_("No status changes yet.")) }}
+</div>
+
+{% elif tab == "comments" %}
+<div class="tab-panel">
+  <div class="comment-list">
+    {% for c in comments %}
+      <article class="comment">
+        <header class="comment-meta">
+          <strong>{% if c.author %}{{ c.author.email|e }}{% else %}{{ _("(deleted user)") }}{% endif %}</strong>
+          <time>{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</time>
+        </header>
+        <p class="comment-body">{{ c.body }}</p>
+      </article>
+    {% else %}
+      <p class="empty">{{ _("No comments yet.") }}</p>
+    {% endfor %}
+  </div>
+  <form method="post" action="{{ url_for('tickets.comment_create', ticket_hex=ticket.id.hex()) }}" class="comment-compose">
+    {{ comment_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <label class="sr-only" for="comment-body">{{ _("Comment") }}</label>
+    <textarea id="comment-body" name="body" class="input textarea" rows="3" maxlength="8000"
+              placeholder="{{ _('Write a comment…') }}" required></textarea>
+    <button type="submit" class="btn btn-primary">{{ _("Add") }}</button>
+  </form>
+</div>
+
+{% elif tab == "attachments" %}
+<div class="tab-panel">
+  <form method="post" enctype="multipart/form-data"
+        action="{{ url_for('tickets.attachment_create', ticket_hex=ticket.id.hex()) }}" class="attachment-upload">
+    {{ attachment_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <input type="file" name="upload" accept="image/*,application/pdf,text/plain,text/csv"
+           capture="environment" required>
+    <button type="submit" class="btn btn-primary">{{ _("Upload") }}</button>
+  </form>
+  {% set a_cols = [_("File"), _("Type"), _("Size"), _("Uploaded"), _("Actions")] %}
+  {% set a_rows = [] %}
+  {% for a in attachments %}
+    {% set dl_url = url_for('tickets.attachment_download', ticket_hex=ticket.id.hex(), attachment_hex=a.id.hex()) %}
+    {% set del_url = url_for('tickets.attachment_delete', ticket_hex=ticket.id.hex(), attachment_hex=a.id.hex()) %}
+    {% set actions_html %}
+      <a href="{{ dl_url }}" class="btn btn-sm btn-ghost">{{ icon("download") }}</a>
+      <form method="post" action="{{ del_url }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="idempotency_token" value="{{ tok }}">
+        <input type="text" name="reason" placeholder="{{ _('Reason') }}" required maxlength="200" class="input input-sm">
+        <button type="submit" class="btn btn-sm btn-ghost btn-danger-ghost"
+                onclick="return confirm('{{ _("Delete this attachment?") }}')">{{ icon("trash-2") }}</button>
+      </form>
+    {% endset %}
+    {% set _ = a_rows.append([
+      '<a href="' ~ dl_url ~ '" class="link">' ~ a.filename|e ~ '</a>' | safe,
+      a.content_type|e or '—',
+      (a.size_bytes // 1024)|string ~ ' KB',
+      a.created_at.strftime('%Y-%m-%d %H:%M'),
+      actions_html,
+    ]) %}
+  {% endfor %}
+  {{ data_table(a_cols, a_rows, empty=_("No attachments yet.")) }}
+</div>
+{% endif %}
+{% endblock %}

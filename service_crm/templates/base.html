@@ -29,7 +29,7 @@
       </a>
 
       <div class="nav-section-title">{{ _("Operations") }}</div>
-      <a href="#" class="nav-link">{{ icon("wrench") }} {{ _("Tickets") }}</a>
+      <a href="{{ url_for('tickets.list_tickets') }}" class="nav-link">{{ icon("wrench") }} {{ _("Tickets") }}</a>
       <a href="#" class="nav-link">{{ icon("calendar-check") }} {{ _("Maintenance") }}</a>
       <a href="#" class="nav-link">{{ icon("calendar") }} {{ _("Planning") }}</a>
 

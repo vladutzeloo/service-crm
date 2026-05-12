@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Ticket priorities") }} — Service-CRM{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('tickets.list_tickets') }}">{{ _("Tickets") }}</a>
+  </div>
+{% endblock %}
+{% block page_title %}{{ _("Ticket priorities") }}{% endblock %}
+
+{% block content %}
+<p class="empty">{{ _("Seeded codes can be renamed or hidden but not added or removed — add a migration for new codes.") }}</p>
+
+{% set cols = [_("Code"), _("Label"), _("Rank"), _("Active"), _("Default"), _("Actions")] %}
+{% set rows = [] %}
+{% for p in items %}
+  {% set active_html %}{% if p.is_active %}{{ _("Yes") }}{% else %}{{ _("No") }}{% endif %}{% endset %}
+  {% set default_html %}{% if p.is_default %}{{ _("Yes") }}{% else %}—{% endif %}{% endset %}
+  {% set actions %}
+    <a href="{{ url_for('tickets.priority_edit', priority_hex=p.id.hex()) }}" class="btn btn-sm btn-ghost">{{ icon("edit-2") }}</a>
+  {% endset %}
+  {% set _ = rows.append([p.code|e, priority_label(p.code), p.rank|string, active_html, default_html, actions]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No priorities.")) }}
+{% endblock %}
