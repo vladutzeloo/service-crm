@@ -51,7 +51,7 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 - Sidebar now links to `/equipment/` (previously a placeholder `#`).
 - RO + EN translations for every new label and flash message.
 
-## [0.3.0] - 2026-05-11
+## 0.3.0 - 2026-05-11
 
 ### Added
 - **Clients blueprint — full CRUD** (`service_crm/clients/`) — ROADMAP 0.3.0.
@@ -337,7 +337,6 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 - 2026-05-10: adopt the blueprint's CNC domain in full.
 
 [Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.4.0...HEAD
-[0.4.0]: https://github.com/vladutzeloo/service-crm/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...v0.3.0
+[0.4.0]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...v0.4.0
 [0.2.0]: https://github.com/vladutzeloo/service-crm/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/vladutzeloo/service-crm/releases/tag/v0.1.0
