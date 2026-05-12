@@ -12,6 +12,8 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-12
+
 ### Added
 
 - **Equipment / installed-base slice** — ROADMAP 0.4.0.
@@ -48,6 +50,44 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
   to-client guard, CSV imports), routes (full e2e).
 - Sidebar now links to `/equipment/` (previously a placeholder `#`).
 - RO + EN translations for every new label and flash message.
+
+## [0.3.0] - 2026-05-11
+
+### Added
+- **Clients blueprint — full CRUD** (`service_crm/clients/`) — ROADMAP 0.3.0.
+  - `Client`, `Contact`, `Location`, `ServiceContract` models with `Auditable`
+    mixin; ULID PKs; all FKs with `ON DELETE CASCADE`.
+  - `ServiceContract` carries a `CHECK (ends_on IS NULL OR ends_on > starts_on)`
+    constraint enforced at the DB level and at the service layer.
+  - Soft-delete via `Client.is_active`; service history (contacts,
+    locations, contracts) remains queryable after deactivation.
+  - Service layer (`services.py`): `create/update/deactivate/reactivate_client`,
+    `list_clients` (pagination + search), `require_client/contact/location/contract`,
+    CRUD for contacts / locations / contracts, `import_clients_csv`.
+  - Cross-dialect search: Postgres uses `to_tsvector('simple', …)` / `plainto_tsquery`
+    with a GIN index on `(name || email || phone)`; SQLite falls back to
+    case-insensitive `LIKE` (adequate for dev/test volumes).
+  - Alembic migration `8f3a2c1d4e5b` — client-domain tables + Postgres GIN index.
+  - UI: list page with search/filter bar, paginated `data_table`; detail page
+    with Contacts / Locations / Contracts tabs, inline add/edit modals;
+    edit page; CSV import page — all extending `base.html` and using the
+    0.2.0 macros.
+  - CSV import: case-insensitive header normalisation; per-row error reporting.
+  - Flask-WTF forms with `prefix=` for each sub-entity modal.
+  - All form labels, flash messages, and nav strings translated (RO + EN).
+  - **100 tests** across `test_models.py`, `test_services.py`, `test_routes.py`:
+    cascade deletes, `back_populates` round-trips, date CHECK constraint,
+    soft-delete, `__repr__` coverage, search both dialects (monkeypatched),
+    all guard-raise paths, CSV import edge cases, every route happy/sad path.
+  - Coverage: 100 % line + branch on both SQLite and Postgres CI legs.
+
+### Changed
+- `pyproject.toml` — added `[[tool.mypy.overrides]]` for `service_crm.clients.routes`
+  to suppress `arg-type` noise from `scoped_session` / `Session` type divergence
+  (compatible at runtime; suppressed per-module rather than globally).
+- `tests/conftest.py` — `client_logged_in` no longer hard-codes
+  `email="admin@example.com"`; uses the factory sequence to avoid
+  `UNIQUE` constraint failures across parallel test runs.
 
 ## [0.2.0] - 2026-05-11
 
@@ -296,6 +336,8 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
   scaffold lands in 0.1.0 walking skeleton.
 - 2026-05-10: adopt the blueprint's CNC domain in full.
 
-[Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/vladutzeloo/service-crm/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/vladutzeloo/service-crm/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/vladutzeloo/service-crm/releases/tag/v0.1.0
