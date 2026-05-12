@@ -632,9 +632,39 @@ def test_search_filter_postgres_path(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.unit
+def test_search_filter_sqlite_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The SQLite fallback returns a ``LIKE`` predicate on title /
+    description. Asserting on the compiled SQL is enough — the real path
+    is covered every time the suite runs against SQLite, but the PG leg
+    of CI would otherwise leave these lines uncovered."""
+    monkeypatch.setattr("service_crm.tickets.services._dialect", lambda: "sqlite")
+    flt = services._ticket_search_filter("Help")
+    assert flt is not None
+    compiled = str(flt.compile(compile_kwargs={"literal_binds": True})).lower()
+    assert "like" in compiled
+    assert "%help%" in compiled
+
+
+@pytest.mark.unit
 def test_search_filter_empty_returns_none(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("service_crm.tickets.services._dialect", lambda: "sqlite")
     assert services._ticket_search_filter("   ") is None
+
+
+@pytest.mark.integration
+def test_next_ticket_number_sqlite_path(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The SQLite path scans ``MAX(number) + 1``. On Postgres CI the
+    real ``_dialect()`` returns ``postgresql`` and skips this branch, so
+    we monkeypatch to keep coverage stable across both legs.
+    """
+    monkeypatch.setattr("service_crm.tickets.services._dialect", lambda: "sqlite")
+    n1 = services._next_ticket_number(db_session)
+    ServiceTicketFactory(number=n1)
+    db_session.flush()
+    n2 = services._next_ticket_number(db_session)
+    assert n2 == n1 + 1
 
 
 @pytest.mark.integration
