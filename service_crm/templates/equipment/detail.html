@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/tabs.html" import tabs %}
+{% from "macros/modal.html" import modal %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ equipment.label }} — Service-CRM{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('equipment.list_equipment') }}">{{ _("Equipment") }}</a>
+  </div>
+{% endblock %}
+{% block page_title %}{{ equipment.label }}{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+  <div class="detail-meta">
+    <span class="meta-item">{{ icon("users") }}
+      <a href="{{ url_for('clients.detail', client_hex=equipment.client.id.hex()) }}" class="link">
+        {{ equipment.client.name }}
+      </a>
+    </span>
+    {% if equipment.location %}
+      <span class="meta-item">{{ icon("server") }} {{ equipment.location.label }}</span>
+    {% endif %}
+    {% if equipment.equipment_model %}
+      <span class="meta-item">{{ equipment.equipment_model.label }}</span>
+    {% endif %}
+    {% if equipment.controller_type %}
+      <span class="meta-item">{{ icon("settings") }} {{ equipment.controller_type.name }}</span>
+    {% endif %}
+    {% if equipment.serial_number %}
+      <span class="meta-item">{{ _("S/N") }} {{ equipment.serial_number }}</span>
+    {% endif %}
+    {% if equipment.is_active %}
+      <span class="badge badge-good">{{ _("Active") }}</span>
+    {% else %}
+      <span class="badge badge-muted">{{ _("Inactive") }}</span>
+    {% endif %}
+  </div>
+  <div class="detail-actions">
+    <a href="{{ url_for('equipment.edit_equipment', equipment_hex=equipment.id.hex()) }}"
+       class="btn btn-sm btn-secondary">{{ icon("edit-2") }} {{ _("Edit") }}</a>
+    {% if equipment.is_active %}
+      <form method="post" action="{{ url_for('equipment.deactivate', equipment_hex=equipment.id.hex()) }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-danger"
+                onclick="return confirm('{{ _("Deactivate this equipment?") }}')">
+          {{ icon("archive") }} {{ _("Deactivate") }}
+        </button>
+      </form>
+    {% else %}
+      <form method="post" action="{{ url_for('equipment.reactivate', equipment_hex=equipment.id.hex()) }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-success">
+          {{ icon("refresh-cw") }} {{ _("Reactivate") }}
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if equipment.notes %}
+<div class="detail-notes">{{ equipment.notes }}</div>
+{% endif %}
+
+{% set tab_items = [
+  {"label": _("Warranties"),  "href": url_for("equipment.detail", equipment_hex=equipment.id.hex(), tab="warranties"),
+   "count": equipment.warranties|length, "active": tab == "warranties"},
+  {"label": _("Tickets"),     "href": url_for("equipment.detail", equipment_hex=equipment.id.hex(), tab="tickets"),
+   "count": 0, "active": tab == "tickets"},
+  {"label": _("Maintenance"), "href": url_for("equipment.detail", equipment_hex=equipment.id.hex(), tab="maintenance"),
+   "count": 0, "active": tab == "maintenance"},
+] %}
+{{ tabs(tab_items) }}
+
+{% if tab == "warranties" %}
+<div class="tab-panel">
+  <div class="tab-toolbar">
+    <button type="button" class="btn btn-sm btn-primary" data-modal-open="modal-warranty-new">
+      {{ icon("plus") }} {{ _("Add warranty") }}
+    </button>
+  </div>
+
+  {% set w_cols = [_("Reference"), _("Provider"), _("Starts"), _("Ends"), _("Actions")] %}
+  {% set w_rows = [] %}
+  {% for w in equipment.warranties %}
+    {% set edit_url = url_for('equipment.detail', equipment_hex=equipment.id.hex(), tab='warranties', edit_warranty=w.id.hex()) %}
+    {% set w_actions %}
+      <a href="{{ edit_url }}" class="btn btn-sm btn-ghost" aria-label="{{ _('Edit') }}">{{ icon("edit-2") }}</a>
+      <form method="post" action="{{ url_for('equipment.warranty_delete', equipment_hex=equipment.id.hex(), warranty_hex=w.id.hex()) }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-ghost btn-danger-ghost"
+                onclick="return confirm('{{ _("Delete this warranty?") }}')" aria-label="{{ _('Delete') }}">
+          {{ icon("trash-2") }}
+        </button>
+      </form>
+    {% endset %}
+    {% set _ = w_rows.append([w.reference|e or '—', w.provider|e or '—', w.starts_on|string, w.ends_on|string, w_actions]) %}
+  {% endfor %}
+  {{ data_table(w_cols, w_rows, empty=_("No warranties.")) }}
+</div>
+
+{% call modal("modal-warranty-new", _("Add warranty"), hidden=true) %}
+  <form method="post" action="{{ url_for('equipment.warranty_create', equipment_hex=equipment.id.hex()) }}" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <div class="form-grid">
+      <div class="field"><label>{{ _("Reference") }}</label><input type="text" name="warranty-reference" class="input"></div>
+      <div class="field"><label>{{ _("Provider") }}</label><input type="text" name="warranty-provider" class="input"></div>
+      <div class="field"><label>{{ _("Starts on") }}</label><input type="date" name="warranty-starts_on" class="input" inputmode="numeric" required></div>
+      <div class="field"><label>{{ _("Ends on") }}</label><input type="date" name="warranty-ends_on" class="input" inputmode="numeric" required></div>
+      <div class="field field-full"><label>{{ _("Notes") }}</label><textarea name="warranty-notes" class="input textarea" rows="2"></textarea></div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" data-modal-close="modal-warranty-new">{{ _("Cancel") }}</button>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+{% endcall %}
+
+{% for w in equipment.warranties %}
+  {% set modal_id = "modal-warranty-" ~ w.id.hex() %}
+  {% set is_open = edit_warranty == w.id.hex() %}
+  {% call modal(modal_id, _("Edit warranty"), hidden=not is_open) %}
+    <form method="post" action="{{ url_for('equipment.warranty_update', equipment_hex=equipment.id.hex(), warranty_hex=w.id.hex()) }}" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="idempotency_token" value="{{ tok }}">
+      <div class="form-grid">
+        <div class="field"><label>{{ _("Reference") }}</label><input type="text" name="warranty-reference" value="{{ w.reference|e }}" class="input"></div>
+        <div class="field"><label>{{ _("Provider") }}</label><input type="text" name="warranty-provider" value="{{ w.provider|e }}" class="input"></div>
+        <div class="field"><label>{{ _("Starts on") }}</label><input type="date" name="warranty-starts_on" value="{{ w.starts_on }}" class="input" inputmode="numeric" required></div>
+        <div class="field"><label>{{ _("Ends on") }}</label><input type="date" name="warranty-ends_on" value="{{ w.ends_on }}" class="input" inputmode="numeric" required></div>
+        <div class="field field-full"><label>{{ _("Notes") }}</label><textarea name="warranty-notes" class="input textarea" rows="2">{{ w.notes|e }}</textarea></div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" data-modal-close="{{ modal_id }}">{{ _("Cancel") }}</button>
+        <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+      </div>
+    </form>
+  {% endcall %}
+{% endfor %}
+
+{% elif tab == "tickets" %}
+<div class="tab-panel">
+  <p class="empty">{{ _("Tickets land in v0.5.") }}</p>
+</div>
+{% elif tab == "maintenance" %}
+<div class="tab-panel">
+  <p class="empty">{{ _("Maintenance plans land in v0.7.") }}</p>
+</div>
+{% endif %}
+
+{% endblock %}

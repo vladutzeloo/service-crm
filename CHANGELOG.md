@@ -12,7 +12,42 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 ## [Unreleased]
 
-(no changes yet)
+### Added
+
+- **Equipment / installed-base slice** — ROADMAP 0.4.0.
+  - `service_crm/equipment/` blueprint with `Equipment`,
+    `EquipmentModel`, `EquipmentControllerType`, `EquipmentWarranty`
+    models + Alembic migration (`20260511_1500_b9c8d2e7a4f6`).
+  - Routes (all `@login_required`):
+    `/equipment/`, `/equipment/new`, `/equipment/<hex>`,
+    `/equipment/<hex>/edit`, `/equipment/<hex>/deactivate`,
+    `/equipment/<hex>/reactivate`, warranty add/edit/delete on
+    `/equipment/<hex>/warranties[/...]`,
+    controller-type lookup at `/equipment/controllers[...]`,
+    equipment-model lookup at `/equipment/models[...]`, and CSV imports
+    at `/equipment/import`, `/equipment/controllers/import`,
+    `/equipment/models/import`.
+  - Constraint: `Equipment.location_id`, when set, must belong to the
+    same client as `Equipment.client_id` — service-layer guard
+    (`services._validate_location_belongs_to_client`), enforced on
+    create and update with integration tests.
+  - Constraint: `EquipmentWarranty.ends_on > starts_on` — DB CHECK
+    plus service-layer guard.
+  - CSV imports resolve clients / locations / models / controllers by
+    human-friendly fields (no ULID hex required); each import runs
+    inside a SAVEPOINT so a complete failure leaves the request session
+    clean.
+  - Detail page tabs: warranties (functional) plus tickets / maintenance
+    placeholders, ready for 0.5 and 0.7.
+  - Postgres GIN expression-index on `serial_number + asset_tag` for
+    full-text search, mirroring the clients pattern.
+- Test factories: `ControllerTypeFactory`, `EquipmentModelFactory`,
+  `EquipmentFactory`, `EquipmentWarrantyFactory`.
+- **125 new tests** (`tests/equipment/`): models (cascade / SET NULL /
+  unique / CHECK / labels), services (CRUD, search, location-belongs-
+  to-client guard, CSV imports), routes (full e2e).
+- Sidebar now links to `/equipment/` (previously a placeholder `#`).
+- RO + EN translations for every new label and flash message.
 
 ## [0.2.0] - 2026-05-11
 

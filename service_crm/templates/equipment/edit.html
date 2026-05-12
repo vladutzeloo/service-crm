@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% from "macros/icons.html" import icon %}
+
+{% set is_new = equipment is none %}
+{% block title %}
+  {{ _("New equipment") if is_new else _("Edit equipment") }} — Service-CRM
+{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('equipment.list_equipment') }}">{{ _("Equipment") }}</a>
+    {% if not is_new %}
+      › <a href="{{ url_for('equipment.detail', equipment_hex=equipment.id.hex()) }}">{{ equipment.label }}</a>
+    {% endif %}
+  </div>
+{% endblock %}
+{% block page_title %}
+  {{ _("New equipment") if is_new else _("Edit equipment") }}
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('equipment.new_equipment') if is_new else url_for('equipment.edit_equipment', equipment_hex=equipment.id.hex()) }}"
+        novalidate>
+    <h2 class="form-title">{{ _("Equipment details") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      <div class="field{% if form.client_id.errors %} field-error{% endif %}">
+        {{ form.client_id.label }}
+        {{ form.client_id(class="input") }}
+        {% for err in form.client_id.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+      <div class="field{% if form.location_id.errors %} field-error{% endif %}">
+        {{ form.location_id.label }}
+        {{ form.location_id(class="input") }}
+        <span class="field-hint">{{ _("Must belong to the chosen client.") }}</span>
+        {% for err in form.location_id.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+      <div class="field{% if form.equipment_model_id.errors %} field-error{% endif %}">
+        {{ form.equipment_model_id.label }}
+        {{ form.equipment_model_id(class="input") }}
+      </div>
+      <div class="field{% if form.controller_type_id.errors %} field-error{% endif %}">
+        {{ form.controller_type_id.label }}
+        {{ form.controller_type_id(class="input") }}
+      </div>
+      <div class="field{% if form.serial_number.errors %} field-error{% endif %}">
+        {{ form.serial_number.label }}
+        {{ form.serial_number(class="input") }}
+        {% for err in form.serial_number.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+      <div class="field{% if form.asset_tag.errors %} field-error{% endif %}">
+        {{ form.asset_tag.label }}
+        {{ form.asset_tag(class="input") }}
+        {% for err in form.asset_tag.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+      <div class="field{% if form.install_date.errors %} field-error{% endif %}">
+        {{ form.install_date.label }}
+        {{ form.install_date(class="input", type="date", inputmode="numeric") }}
+        {% for err in form.install_date.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+      <div class="field field-full{% if form.notes.errors %} field-error{% endif %}">
+        {{ form.notes.label }}
+        {{ form.notes(class="input textarea", rows=3) }}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('equipment.list_equipment') if is_new else url_for('equipment.detail', equipment_hex=equipment.id.hex()) }}"
+         class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

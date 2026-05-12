@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Controller types") }} — Service-CRM{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('equipment.list_equipment') }}">{{ _("Equipment") }}</a>
+  </div>
+{% endblock %}
+{% block page_title %}{{ _("Controller types") }}{% endblock %}
+
+{% block content %}
+<div class="page-toolbar">
+  <div class="toolbar-actions" style="margin-left:auto">
+    <a href="{{ url_for('equipment.import_controllers') }}" class="btn btn-secondary btn-sm">
+      {{ icon("upload") }} {{ _("Import CSV") }}
+    </a>
+  </div>
+</div>
+
+<form method="post" action="{{ url_for('equipment.controller_create') }}"
+      class="form-shell" novalidate style="margin-bottom:1.25rem">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="idempotency_token" value="{{ tok }}">
+  <div class="form-grid">
+    <div class="field">
+      <label>{{ _("Code") }}</label>
+      <input type="text" name="code" class="input" required>
+    </div>
+    <div class="field">
+      <label>{{ _("Name") }}</label>
+      <input type="text" name="name" class="input" required>
+    </div>
+    <div class="field field-full">
+      <label>{{ _("Notes") }}</label>
+      <textarea name="notes" class="input textarea" rows="2"></textarea>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">
+      {{ icon("plus") }} {{ _("Add controller type") }}
+    </button>
+  </div>
+</form>
+
+{% set cols = [_("Code"), _("Name"), _("Notes"), _("Actions")] %}
+{% set rows = [] %}
+{% for c in items %}
+  {% set act %}
+    <form method="post" action="{{ url_for('equipment.controller_delete', controller_hex=c.id.hex()) }}" style="display:inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-sm btn-ghost btn-danger-ghost"
+              onclick="return confirm('{{ _("Delete this controller type?") }}')" aria-label="{{ _('Delete') }}">
+        {{ icon("trash-2") }}
+      </button>
+    </form>
+  {% endset %}
+  {% set _ = rows.append([c.code|e, c.name|e, c.notes|e, act]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No controller types yet.")) }}
+{% endblock %}
