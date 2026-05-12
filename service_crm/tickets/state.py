@@ -56,9 +56,7 @@ _FORWARD: dict[TicketStatus, frozenset[TicketStatus]] = {
         }
     ),
     TicketStatus.WAITING_PARTS: frozenset({TicketStatus.IN_PROGRESS}),
-    TicketStatus.MONITORING: frozenset(
-        {TicketStatus.IN_PROGRESS, TicketStatus.COMPLETED}
-    ),
+    TicketStatus.MONITORING: frozenset({TicketStatus.IN_PROGRESS, TicketStatus.COMPLETED}),
     TicketStatus.COMPLETED: frozenset({TicketStatus.CLOSED}),
     TicketStatus.CLOSED: frozenset(),
     TicketStatus.CANCELLED: frozenset(),
@@ -116,9 +114,7 @@ def is_terminal(state: TicketStatus) -> bool:
     return state in {TicketStatus.CLOSED, TicketStatus.CANCELLED}
 
 
-def transition(
-    from_state: TicketStatus, to_state: TicketStatus, role: str
-) -> TicketStatus:
+def transition(from_state: TicketStatus, to_state: TicketStatus, role: str) -> TicketStatus:
     """Verify the move is legal for ``role`` and return ``to_state``.
 
     Raises :class:`IllegalTransition` if the move would skip a stage, run

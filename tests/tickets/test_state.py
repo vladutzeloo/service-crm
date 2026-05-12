@@ -127,9 +127,7 @@ def test_transition_rejects_unknown_role() -> None:
     dst=st.sampled_from(list(TicketStatus)),
     role=st.sampled_from(["admin", "manager", "technician", "guest"]),
 )
-def test_transition_random_property(
-    src: TicketStatus, dst: TicketStatus, role: str
-) -> None:
+def test_transition_random_property(src: TicketStatus, dst: TicketStatus, role: str) -> None:
     moves = legal_transitions(src, role)
     if dst in moves:
         assert transition(src, dst, role) is dst

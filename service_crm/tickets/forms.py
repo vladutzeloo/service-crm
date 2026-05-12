@@ -30,9 +30,7 @@ class TicketCreateForm(FlaskForm):  # type: ignore[misc]
     equipment_id = SelectField(
         _l("Equipment"), validators=[Optional()], choices=[], validate_choice=False
     )
-    type_id = SelectField(
-        _l("Type"), validators=[Optional()], choices=[], validate_choice=False
-    )
+    type_id = SelectField(_l("Type"), validators=[Optional()], choices=[], validate_choice=False)
     priority_id = SelectField(
         _l("Priority"), validators=[Optional()], choices=[], validate_choice=False
     )
@@ -41,9 +39,7 @@ class TicketCreateForm(FlaskForm):  # type: ignore[misc]
     )
     title = StringField(_l("Title"), validators=[DataRequired(), Length(max=200)])
     description = TextAreaField(_l("Description"), validators=[Optional(), Length(max=8000)])
-    due_at = DateTimeLocalField(
-        _l("Due at"), validators=[Optional()], format="%Y-%m-%dT%H:%M"
-    )
+    due_at = DateTimeLocalField(_l("Due at"), validators=[Optional()], format="%Y-%m-%dT%H:%M")
     sla_due_at = DateTimeLocalField(
         _l("SLA due at"), validators=[Optional()], format="%Y-%m-%dT%H:%M"
     )
@@ -88,9 +84,7 @@ class TicketFilterForm(FlaskForm):  # type: ignore[misc]
     status = SelectMultipleField(
         _l("Status"), validators=[Optional()], choices=[], validate_choice=False
     )
-    type_id = SelectField(
-        _l("Type"), validators=[Optional()], choices=[], validate_choice=False
-    )
+    type_id = SelectField(_l("Type"), validators=[Optional()], choices=[], validate_choice=False)
     priority_id = SelectField(
         _l("Priority"), validators=[Optional()], choices=[], validate_choice=False
     )
@@ -98,9 +92,7 @@ class TicketFilterForm(FlaskForm):  # type: ignore[misc]
 
 
 class TicketCommentForm(FlaskForm):  # type: ignore[misc]
-    body = TextAreaField(
-        _l("Comment"), validators=[DataRequired(), Length(max=8000)]
-    )
+    body = TextAreaField(_l("Comment"), validators=[DataRequired(), Length(max=8000)])
     submit = SubmitField(_l("Add"))
 
 

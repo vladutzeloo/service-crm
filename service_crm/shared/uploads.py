@@ -113,9 +113,7 @@ def _read_into_buffer(stream: IO[bytes]) -> bytes:
     """Read a stream into memory enforcing :data:`MAX_BYTES`."""
     data = stream.read(MAX_BYTES + 1)
     if len(data) > MAX_BYTES:
-        raise UploadRejected(
-            f"file is larger than the {MAX_BYTES // (1024 * 1024)} MB limit"
-        )
+        raise UploadRejected(f"file is larger than the {MAX_BYTES // (1024 * 1024)} MB limit")
     return data
 
 

@@ -129,9 +129,7 @@ def update_ticket_type(
 # ── Lookups: ticket priorities ───────────────────────────────────────────────
 
 
-def list_ticket_priorities(
-    session: Session, *, active_only: bool = True
-) -> list[TicketPriority]:
+def list_ticket_priorities(session: Session, *, active_only: bool = True) -> list[TicketPriority]:
     q = session.query(TicketPriority)
     if active_only:
         q = q.filter(TicketPriority.is_active.is_(True))
@@ -224,9 +222,7 @@ def create_ticket(
 ) -> ServiceTicket:
     if session.get(Client, client_id) is None:
         raise ValueError("client not found")
-    _validate_equipment_belongs_to_client(
-        session, client_id=client_id, equipment_id=equipment_id
-    )
+    _validate_equipment_belongs_to_client(session, client_id=client_id, equipment_id=equipment_id)
     _validate_user_active(session, assignee_user_id)
     if not title.strip():
         raise ValueError("title is required")
@@ -318,9 +314,7 @@ def transition_ticket(
     return ticket
 
 
-def _stash_transition_meta(
-    ticket: ServiceTicket, *, reason: str, reason_code: str
-) -> None:
+def _stash_transition_meta(ticket: ServiceTicket, *, reason: str, reason_code: str) -> None:
     """Attach a one-shot ``{reason, reason_code}`` dict to the instance.
 
     The audit listener reads it when building the history row and clears
@@ -352,9 +346,7 @@ def list_tickets(
         base = base.filter(ServiceTicket.status.in_(statuses))
     if open_only:
         base = base.filter(
-            ServiceTicket.status.notin_(
-                [TicketStatus.CLOSED.value, TicketStatus.CANCELLED.value]
-            )
+            ServiceTicket.status.notin_([TicketStatus.CLOSED.value, TicketStatus.CANCELLED.value])
         )
     if type_id is not None:
         base = base.filter(ServiceTicket.type_id == type_id)
@@ -421,9 +413,7 @@ def add_comment(
     if not body:
         raise ValueError("comment body is required")
     if len(body.encode("utf-8")) > TicketComment.BODY_MAX_BYTES:
-        raise ValueError(
-            f"comment exceeds {TicketComment.BODY_MAX_BYTES // 1024} KB"
-        )
+        raise ValueError(f"comment exceeds {TicketComment.BODY_MAX_BYTES // 1024} KB")
     if session.get(ServiceTicket, ticket_id) is None:
         raise ValueError("ticket not found")
     comment = TicketComment(
@@ -453,9 +443,7 @@ def soft_delete_comment(session: Session, comment: TicketComment) -> None:
 # ── Attachments ──────────────────────────────────────────────────────────────
 
 
-def require_attachment(
-    session: Session, hex_id: str, ticket: ServiceTicket
-) -> TicketAttachment:
+def require_attachment(session: Session, hex_id: str, ticket: ServiceTicket) -> TicketAttachment:
     try:
         aid = bytes.fromhex(hex_id)
     except ValueError as exc:
@@ -495,9 +483,7 @@ def add_attachment(
     return attachment
 
 
-def soft_delete_attachment(
-    session: Session, attachment: TicketAttachment, *, reason: str
-) -> None:
+def soft_delete_attachment(session: Session, attachment: TicketAttachment, *, reason: str) -> None:
     if not reason.strip():
         raise ValueError("a reason is required to delete an attachment")
     attachment.is_active = False

@@ -248,9 +248,7 @@ class TicketStatusHistory(db.Model):  # type: ignore[name-defined,misc]
     actor: Mapped[User | None] = relationship("User")
 
     def __repr__(self) -> str:
-        return (
-            f"<TicketStatusHistory {self.from_state!r} → {self.to_state!r} @ {self.occurred_at}>"
-        )
+        return f"<TicketStatusHistory {self.from_state!r} → {self.to_state!r} @ {self.occurred_at}>"
 
 
 class TicketComment(db.Model, Auditable):  # type: ignore[name-defined,misc]

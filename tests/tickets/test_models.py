@@ -226,9 +226,7 @@ def test_lookup_display_label_translates_inside_request(
     with current_app.test_request_context("/?lang=en"):
         t = db_session.query(TicketType).filter(TicketType.code == "incident").one()
         assert t.display_label == "Incident"
-        p = (
-            db_session.query(TicketPriority).filter(TicketPriority.code == "normal").one()
-        )
+        p = db_session.query(TicketPriority).filter(TicketPriority.code == "normal").one()
         assert p.display_label == "Normal"
 
 
@@ -245,9 +243,7 @@ def test_lookup_display_label_unknown_code_falls_back(db_session: Session) -> No
 
 @pytest.mark.integration
 def test_lookup_default_seeds(db_session: Session) -> None:
-    default_type = (
-        db_session.query(TicketType).filter(TicketType.is_default.is_(True)).one()
-    )
+    default_type = db_session.query(TicketType).filter(TicketType.is_default.is_(True)).one()
     default_prio = (
         db_session.query(TicketPriority).filter(TicketPriority.is_default.is_(True)).one()
     )

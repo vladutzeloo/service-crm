@@ -67,13 +67,9 @@ def test_list_renders(client_logged_in: FlaskClient, db_session: Session) -> Non
 
 
 @pytest.mark.e2e
-def test_list_filters_by_status(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_list_filters_by_status(client_logged_in: FlaskClient, db_session: Session) -> None:
     ServiceTicketFactory(title="open-one", number=100, status=TicketStatus.NEW.value)
-    ServiceTicketFactory(
-        title="closed-one", number=101, status=TicketStatus.CLOSED.value
-    )
+    ServiceTicketFactory(title="closed-one", number=101, status=TicketStatus.CLOSED.value)
     db_session.flush()
     resp = client_logged_in.get("/tickets/?status=closed")
     assert b"closed-one" in resp.data
@@ -84,12 +80,8 @@ def test_list_filters_by_status(
 def test_list_open_show_filters_terminal(
     client_logged_in: FlaskClient, db_session: Session
 ) -> None:
-    ServiceTicketFactory(
-        title="MarkerOpenOne", number=200, status=TicketStatus.NEW.value
-    )
-    ServiceTicketFactory(
-        title="MarkerClosedOne", number=201, status=TicketStatus.CLOSED.value
-    )
+    ServiceTicketFactory(title="MarkerOpenOne", number=200, status=TicketStatus.NEW.value)
+    ServiceTicketFactory(title="MarkerClosedOne", number=201, status=TicketStatus.CLOSED.value)
     db_session.flush()
     resp = client_logged_in.get("/tickets/?show=open")
     assert b"MarkerOpenOne" in resp.data
@@ -115,9 +107,7 @@ def test_list_search(client_logged_in: FlaskClient, db_session: Session) -> None
 
 
 @pytest.mark.e2e
-def test_list_filters_by_client(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_list_filters_by_client(client_logged_in: FlaskClient, db_session: Session) -> None:
     a = ClientFactory(name="ClientA")
     b = ClientFactory(name="ClientB")
     ServiceTicketFactory(client=a, title="for-a", number=400)
@@ -129,17 +119,13 @@ def test_list_filters_by_client(
 
 
 @pytest.mark.e2e
-def test_list_my_queue(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_list_my_queue(client_logged_in: FlaskClient, db_session: Session) -> None:
     resp = client_logged_in.get("/tickets/?assigned_to=me")
     assert resp.status_code == 200
 
 
 @pytest.mark.e2e
-def test_list_assigned_to_explicit_user(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_list_assigned_to_explicit_user(client_logged_in: FlaskClient, db_session: Session) -> None:
     user = UserFactory()
     ServiceTicketFactory(assignee=user, title="mine", number=500)
     db_session.flush()
@@ -148,9 +134,7 @@ def test_list_assigned_to_explicit_user(
 
 
 @pytest.mark.e2e
-def test_list_bad_query_hex_ignored(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_list_bad_query_hex_ignored(client_logged_in: FlaskClient, db_session: Session) -> None:
     resp = client_logged_in.get("/tickets/?client=not-hex&type_id=also-bad")
     assert resp.status_code == 200
 
@@ -159,9 +143,7 @@ def test_list_bad_query_hex_ignored(
 
 
 @pytest.mark.e2e
-def test_new_get_renders(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_new_get_renders(client_logged_in: FlaskClient, db_session: Session) -> None:
     ClientFactory(name="FormClient")
     db_session.flush()
     resp = client_logged_in.get("/tickets/new")
@@ -172,9 +154,7 @@ def test_new_get_renders(
 
 
 @pytest.mark.e2e
-def test_new_get_preselected_client(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_new_get_preselected_client(client_logged_in: FlaskClient, db_session: Session) -> None:
     c = ClientFactory(name="Preselected")
     db_session.flush()
     resp = client_logged_in.get(f"/tickets/new?client={c.id.hex()}")
@@ -216,9 +196,7 @@ def test_new_get_when_no_defaults_seeded(
 
 
 @pytest.mark.e2e
-def test_new_post_creates(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_new_post_creates(client_logged_in: FlaskClient, db_session: Session) -> None:
     c = ClientFactory(name="Buyer")
     db_session.flush()
     resp = client_logged_in.post(
@@ -241,9 +219,7 @@ def test_new_post_creates(
 
 
 @pytest.mark.e2e
-def test_new_post_validation_flashes(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_new_post_validation_flashes(client_logged_in: FlaskClient, db_session: Session) -> None:
     c = ClientFactory()
     db_session.flush()
     resp = client_logged_in.post(
@@ -260,9 +236,7 @@ def test_new_post_validation_flashes(
 
 
 @pytest.mark.e2e
-def test_new_post_service_error_flashes(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_new_post_service_error_flashes(client_logged_in: FlaskClient, db_session: Session) -> None:
     c1 = ClientFactory()
     c2 = ClientFactory()
     eq = EquipmentFactory(client=c2)
@@ -282,9 +256,7 @@ def test_new_post_service_error_flashes(
 
 
 @pytest.mark.e2e
-def test_new_post_idempotent_retry(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_new_post_idempotent_retry(client_logged_in: FlaskClient, db_session: Session) -> None:
     c = ClientFactory()
     db_session.flush()
     token = _tok()
@@ -307,9 +279,7 @@ def test_new_post_idempotent_retry(
 
 
 @pytest.mark.e2e
-def test_edit_get_renders(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_edit_get_renders(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(title="To-edit", number=700)
     db_session.flush()
     resp = client_logged_in.get(f"/tickets/{ticket.id.hex()}/edit")
@@ -326,9 +296,7 @@ def test_edit_get_unknown_ticket_redirects(
 
 
 @pytest.mark.e2e
-def test_edit_post_updates(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_edit_post_updates(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(title="Old", number=701)
     db_session.flush()
     resp = client_logged_in.post(
@@ -369,9 +337,7 @@ def test_edit_post_invalid_redirects_no_change(
 
 
 @pytest.mark.e2e
-def test_edit_post_service_error(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_edit_post_service_error(client_logged_in: FlaskClient, db_session: Session) -> None:
     c1 = ClientFactory()
     c2 = ClientFactory()
     eq = EquipmentFactory(client=c2)
@@ -391,9 +357,7 @@ def test_edit_post_service_error(
 
 
 @pytest.mark.e2e
-def test_edit_post_dedup(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_edit_post_dedup(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(title="Edge", number=704)
     db_session.flush()
     token = _tok()
@@ -413,9 +377,7 @@ def test_edit_post_dedup(
 
 
 @pytest.mark.e2e
-def test_detail_renders(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_detail_renders(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(title="Detail-title", number=800)
     db_session.flush()
     resp = client_logged_in.get(f"/tickets/{ticket.id.hex()}")
@@ -432,9 +394,7 @@ def test_detail_unknown_ticket_redirects(
 
 
 @pytest.mark.e2e
-def test_detail_tab_comments(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_detail_tab_comments(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(number=801)
     TicketCommentFactory(ticket=ticket, body="Visible-comment-body")
     db_session.flush()
@@ -446,9 +406,7 @@ def test_detail_tab_comments(
 
 
 @pytest.mark.e2e
-def test_transition_happy_path(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_transition_happy_path(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(status=TicketStatus.NEW.value, number=900)
     db_session.flush()
     resp = client_logged_in.post(
@@ -467,9 +425,7 @@ def test_transition_happy_path(
 
 
 @pytest.mark.e2e
-def test_transition_illegal_flashes(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_transition_illegal_flashes(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(status=TicketStatus.NEW.value, number=901)
     db_session.flush()
     resp = client_logged_in.post(
@@ -484,9 +440,7 @@ def test_transition_illegal_flashes(
 
 
 @pytest.mark.e2e
-def test_transition_unknown_target(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_transition_unknown_target(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(number=902)
     db_session.flush()
     resp = client_logged_in.post(
@@ -510,9 +464,7 @@ def test_transition_unknown_ticket(
 
 
 @pytest.mark.e2e
-def test_transition_form_invalid(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_transition_form_invalid(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(number=903)
     db_session.flush()
     resp = client_logged_in.post(
@@ -541,9 +493,7 @@ def test_transition_cancel_requires_reason(
 
 
 @pytest.mark.e2e
-def test_transition_dedup(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_transition_dedup(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(status=TicketStatus.NEW.value, number=905)
     db_session.flush()
     token = _tok()
@@ -566,9 +516,7 @@ def test_transition_dedup(
 
 
 @pytest.mark.e2e
-def test_comment_create(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_comment_create(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(number=1000)
     db_session.flush()
     resp = client_logged_in.post(
@@ -577,18 +525,11 @@ def test_comment_create(
         follow_redirects=False,
     )
     assert resp.status_code == 302
-    assert (
-        db_session.query(TicketComment)
-        .filter(TicketComment.ticket_id == ticket.id)
-        .count()
-        == 1
-    )
+    assert db_session.query(TicketComment).filter(TicketComment.ticket_id == ticket.id).count() == 1
 
 
 @pytest.mark.e2e
-def test_comment_create_empty_redirects(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_comment_create_empty_redirects(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(number=1001)
     db_session.flush()
     resp = client_logged_in.post(
@@ -612,21 +553,14 @@ def test_comment_create_unknown_ticket(
 
 
 @pytest.mark.e2e
-def test_comment_create_dedup(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_comment_create_dedup(client_logged_in: FlaskClient, db_session: Session) -> None:
     ticket = ServiceTicketFactory(number=1002)
     db_session.flush()
     token = _tok()
     payload = {"body": "dedupe-comment", "idempotency_token": token}
     client_logged_in.post(f"/tickets/{ticket.id.hex()}/comments", data=payload)
     client_logged_in.post(f"/tickets/{ticket.id.hex()}/comments", data=payload)
-    assert (
-        db_session.query(TicketComment)
-        .filter(TicketComment.ticket_id == ticket.id)
-        .count()
-        == 1
-    )
+    assert db_session.query(TicketComment).filter(TicketComment.ticket_id == ticket.id).count() == 1
 
 
 # ── Attachments ─────────────────────────────────────────────────────────────
@@ -652,9 +586,7 @@ def test_attachment_create(
     )
     assert resp.status_code == 302
     assert (
-        db_session.query(TicketAttachment)
-        .filter(TicketAttachment.ticket_id == ticket.id)
-        .count()
+        db_session.query(TicketAttachment).filter(TicketAttachment.ticket_id == ticket.id).count()
         == 1
     )
 
@@ -714,14 +646,8 @@ def test_attachment_download(
         content_type="multipart/form-data",
     )
     db_session.expire_all()
-    a = (
-        db_session.query(TicketAttachment)
-        .filter(TicketAttachment.ticket_id == ticket.id)
-        .one()
-    )
-    resp = client_logged_in.get(
-        f"/tickets/{ticket.id.hex()}/attachments/{a.id.hex()}"
-    )
+    a = db_session.query(TicketAttachment).filter(TicketAttachment.ticket_id == ticket.id).one()
+    resp = client_logged_in.get(f"/tickets/{ticket.id.hex()}/attachments/{a.id.hex()}")
     assert resp.status_code == 200
     assert resp.data == b"download me"
 
@@ -730,9 +656,7 @@ def test_attachment_download(
 def test_attachment_download_unknown(
     client_logged_in: FlaskClient,
 ) -> None:
-    resp = client_logged_in.get(
-        f"/tickets/{'aa' * 16}/attachments/{'bb' * 16}"
-    )
+    resp = client_logged_in.get(f"/tickets/{'aa' * 16}/attachments/{'bb' * 16}")
     assert resp.status_code == 404
 
 
@@ -750,11 +674,7 @@ def test_attachment_delete_requires_reason(
         content_type="multipart/form-data",
     )
     db_session.expire_all()
-    a = (
-        db_session.query(TicketAttachment)
-        .filter(TicketAttachment.ticket_id == ticket.id)
-        .one()
-    )
+    a = db_session.query(TicketAttachment).filter(TicketAttachment.ticket_id == ticket.id).one()
     # Missing reason → form-validation failure path.
     resp = client_logged_in.post(
         f"/tickets/{ticket.id.hex()}/attachments/{a.id.hex()}/delete",
@@ -781,11 +701,7 @@ def test_attachment_delete_happy(
         content_type="multipart/form-data",
     )
     db_session.expire_all()
-    a = (
-        db_session.query(TicketAttachment)
-        .filter(TicketAttachment.ticket_id == ticket.id)
-        .one()
-    )
+    a = db_session.query(TicketAttachment).filter(TicketAttachment.ticket_id == ticket.id).one()
     resp = client_logged_in.post(
         f"/tickets/{ticket.id.hex()}/attachments/{a.id.hex()}/delete",
         data={"reason": "mistake", "idempotency_token": _tok()},
@@ -827,9 +743,7 @@ def test_priorities_list_renders(client_logged_in: FlaskClient) -> None:
 
 
 @pytest.mark.e2e
-def test_type_edit_get_and_post(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_type_edit_get_and_post(client_logged_in: FlaskClient, db_session: Session) -> None:
     t = db_session.query(TicketType).filter(TicketType.code == "incident").one()
     resp = client_logged_in.get(f"/tickets/types/{t.id.hex()}/edit")
     assert resp.status_code == 200
@@ -851,9 +765,7 @@ def test_type_edit_unknown(client_logged_in: FlaskClient) -> None:
 
 
 @pytest.mark.e2e
-def test_priority_edit_get_and_post(
-    client_logged_in: FlaskClient, db_session: Session
-) -> None:
+def test_priority_edit_get_and_post(client_logged_in: FlaskClient, db_session: Session) -> None:
     p = db_session.query(TicketPriority).filter(TicketPriority.code == "normal").one()
     resp = client_logged_in.get(f"/tickets/priorities/{p.id.hex()}/edit")
     assert resp.status_code == 200
@@ -870,9 +782,7 @@ def test_priority_edit_get_and_post(
 
 @pytest.mark.e2e
 def test_priority_edit_unknown(client_logged_in: FlaskClient) -> None:
-    resp = client_logged_in.get(
-        f"/tickets/priorities/{'00' * 16}/edit", follow_redirects=False
-    )
+    resp = client_logged_in.get(f"/tickets/priorities/{'00' * 16}/edit", follow_redirects=False)
     assert resp.status_code == 302
 
 
@@ -895,9 +805,7 @@ def test_new_post_no_token_falls_through(
     )
     assert resp.status_code == 302
     assert (
-        db_session.query(ServiceTicket)
-        .filter(ServiceTicket.title == "no-token-ticket")
-        .count()
+        db_session.query(ServiceTicket).filter(ServiceTicket.title == "no-token-ticket").count()
         == 1
     )
 
@@ -954,9 +862,7 @@ def test_attachment_create_dedup(
     )
     assert second.status_code == 302
     assert (
-        db_session.query(TicketAttachment)
-        .filter(TicketAttachment.ticket_id == ticket.id)
-        .count()
+        db_session.query(TicketAttachment).filter(TicketAttachment.ticket_id == ticket.id).count()
         == 1
     )
 
@@ -996,16 +902,10 @@ def test_attachment_download_inactive_404(
         content_type="multipart/form-data",
     )
     db_session.expire_all()
-    a = (
-        db_session.query(TicketAttachment)
-        .filter(TicketAttachment.ticket_id == ticket.id)
-        .one()
-    )
+    a = db_session.query(TicketAttachment).filter(TicketAttachment.ticket_id == ticket.id).one()
     a.is_active = False
     db_session.flush()
-    resp = client_logged_in.get(
-        f"/tickets/{ticket.id.hex()}/attachments/{a.id.hex()}"
-    )
+    resp = client_logged_in.get(f"/tickets/{ticket.id.hex()}/attachments/{a.id.hex()}")
     assert resp.status_code == 404
 
 
@@ -1024,15 +924,9 @@ def test_attachment_download_missing_file_404(
         content_type="multipart/form-data",
     )
     db_session.expire_all()
-    a = (
-        db_session.query(TicketAttachment)
-        .filter(TicketAttachment.ticket_id == ticket.id)
-        .one()
-    )
+    a = db_session.query(TicketAttachment).filter(TicketAttachment.ticket_id == ticket.id).one()
     (uploads_root / a.storage_key).unlink()
-    resp = client_logged_in.get(
-        f"/tickets/{ticket.id.hex()}/attachments/{a.id.hex()}"
-    )
+    resp = client_logged_in.get(f"/tickets/{ticket.id.hex()}/attachments/{a.id.hex()}")
     assert resp.status_code == 404
 
 
@@ -1050,11 +944,7 @@ def test_attachment_delete_dedup(
         content_type="multipart/form-data",
     )
     db_session.expire_all()
-    a = (
-        db_session.query(TicketAttachment)
-        .filter(TicketAttachment.ticket_id == ticket.id)
-        .one()
-    )
+    a = db_session.query(TicketAttachment).filter(TicketAttachment.ticket_id == ticket.id).one()
     token = _tok()
     payload = {"reason": "mistake", "idempotency_token": token}
     one = client_logged_in.post(

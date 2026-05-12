@@ -60,12 +60,8 @@ def test_label_lookups_fall_back_to_code() -> None:
     assert status_label("totally-unknown-status-code-12345") == (
         "totally-unknown-status-code-12345"
     )
-    assert type_label("totally-unknown-type-code-12345") == (
-        "totally-unknown-type-code-12345"
-    )
-    assert priority_label("totally-unknown-prio-code-12345") == (
-        "totally-unknown-prio-code-12345"
-    )
+    assert type_label("totally-unknown-type-code-12345") == ("totally-unknown-type-code-12345")
+    assert priority_label("totally-unknown-prio-code-12345") == ("totally-unknown-prio-code-12345")
 
 
 @pytest.mark.unit

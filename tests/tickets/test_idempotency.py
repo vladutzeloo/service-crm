@@ -17,9 +17,7 @@ def test_record_new_pair(db_session: Session) -> None:
     user = UserFactory()
     db_session.flush()
     assert record(db_session, user_id=user.id, token="abc", route="/t") is True
-    rows = (
-        db_session.query(IdempotencyKey).filter(IdempotencyKey.user_id == user.id).all()
-    )
+    rows = db_session.query(IdempotencyKey).filter(IdempotencyKey.user_id == user.id).all()
     assert len(rows) == 1
 
 
@@ -63,9 +61,7 @@ def test_sweep_removes_expired(db_session: Session) -> None:
     removed = sweep(db_session)
     assert removed >= 1
     remaining = (
-        db_session.query(IdempotencyKey)
-        .filter(IdempotencyKey.token == "expired-token")
-        .count()
+        db_session.query(IdempotencyKey).filter(IdempotencyKey.token == "expired-token").count()
     )
     assert remaining == 0
 

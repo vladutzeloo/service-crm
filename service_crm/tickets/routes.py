@@ -112,22 +112,18 @@ def _populate_create_choices(
 
     type_choices: list[tuple[str, str]] = [("", _("— none —"))]
     type_choices.extend(
-        (t.id.hex(), type_label(t.code))
-        for t in services.list_ticket_types(db.session)
+        (t.id.hex(), type_label(t.code)) for t in services.list_ticket_types(db.session)
     )
     form.type_id.choices = type_choices
 
     prio_choices: list[tuple[str, str]] = [("", _("— none —"))]
     prio_choices.extend(
-        (p.id.hex(), priority_label(p.code))
-        for p in services.list_ticket_priorities(db.session)
+        (p.id.hex(), priority_label(p.code)) for p in services.list_ticket_priorities(db.session)
     )
     form.priority_id.choices = prio_choices
 
     assignee_choices: list[tuple[str, str]] = [("", _("— unassigned —"))]
-    assignees = (
-        db.session.query(User).filter(User.is_active.is_(True)).order_by(User.email).all()
-    )
+    assignees = db.session.query(User).filter(User.is_active.is_(True)).order_by(User.email).all()
     assignee_choices.extend((u.id.hex(), u.email) for u in assignees)
     form.assignee_user_id.choices = assignee_choices
 

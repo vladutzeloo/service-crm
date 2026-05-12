@@ -115,9 +115,7 @@ def test_require_ticket_unknown(db_session: Session) -> None:
 def test_create_ticket_minimal(db_session: Session) -> None:
     client = ClientFactory()
     db_session.flush()
-    ticket = services.create_ticket(
-        db_session, client_id=client.id, title="Help!"
-    )
+    ticket = services.create_ticket(db_session, client_id=client.id, title="Help!")
     db_session.flush()
     assert ticket.client_id == client.id
     assert ticket.status == TicketStatus.NEW.value
@@ -153,9 +151,7 @@ def test_create_ticket_equipment_belongs_to_client_guard(db_session: Session) ->
     eq = EquipmentFactory(client=c2)
     db_session.flush()
     with pytest.raises(ValueError, match="equipment does not belong"):
-        services.create_ticket(
-            db_session, client_id=c1.id, equipment_id=eq.id, title="x"
-        )
+        services.create_ticket(db_session, client_id=c1.id, equipment_id=eq.id, title="x")
 
 
 @pytest.mark.integration
@@ -173,9 +169,7 @@ def test_create_ticket_unknown_type(db_session: Session) -> None:
     client = ClientFactory()
     db_session.flush()
     with pytest.raises(ValueError, match="ticket type not found"):
-        services.create_ticket(
-            db_session, client_id=client.id, type_id=b"\x00" * 16, title="x"
-        )
+        services.create_ticket(db_session, client_id=client.id, type_id=b"\x00" * 16, title="x")
 
 
 @pytest.mark.integration
@@ -183,9 +177,7 @@ def test_create_ticket_unknown_priority(db_session: Session) -> None:
     client = ClientFactory()
     db_session.flush()
     with pytest.raises(ValueError, match="ticket priority not found"):
-        services.create_ticket(
-            db_session, client_id=client.id, priority_id=b"\x00" * 16, title="x"
-        )
+        services.create_ticket(db_session, client_id=client.id, priority_id=b"\x00" * 16, title="x")
 
 
 @pytest.mark.integration
@@ -214,9 +206,7 @@ def test_create_ticket_inactive_assignee_rejected(db_session: Session) -> None:
     user = UserFactory(is_active=False)
     db_session.flush()
     with pytest.raises(ValueError, match="inactive"):
-        services.create_ticket(
-            db_session, client_id=client.id, assignee_user_id=user.id, title="x"
-        )
+        services.create_ticket(db_session, client_id=client.id, assignee_user_id=user.id, title="x")
 
 
 @pytest.mark.integration
@@ -346,9 +336,7 @@ def test_update_ticket_unknown_priority(db_session: Session) -> None:
 def test_transition_legal_move_writes_history(db_session: Session) -> None:
     ticket = ServiceTicketFactory()
     db_session.flush()
-    services.transition_ticket(
-        db_session, ticket, to_state=TicketStatus.QUALIFIED, role="admin"
-    )
+    services.transition_ticket(db_session, ticket, to_state=TicketStatus.QUALIFIED, role="admin")
     db_session.flush()
     rows = (
         db_session.query(TicketStatusHistory)
@@ -409,9 +397,7 @@ def test_transition_cancel_with_reason(db_session: Session) -> None:
 def test_transition_close_stamps_closed_at(db_session: Session) -> None:
     ticket = ServiceTicketFactory(status=TicketStatus.COMPLETED.value)
     db_session.flush()
-    services.transition_ticket(
-        db_session, ticket, to_state=TicketStatus.CLOSED, role="admin"
-    )
+    services.transition_ticket(db_session, ticket, to_state=TicketStatus.CLOSED, role="admin")
     db_session.flush()
     assert ticket.closed_at is not None
 
@@ -424,9 +410,7 @@ def test_list_tickets_filters_by_status(db_session: Session) -> None:
     ServiceTicketFactory(status=TicketStatus.NEW.value, title="A")
     ServiceTicketFactory(status=TicketStatus.IN_PROGRESS.value, title="B")
     db_session.flush()
-    items, total = services.list_tickets(
-        db_session, statuses=[TicketStatus.IN_PROGRESS.value]
-    )
+    items, total = services.list_tickets(db_session, statuses=[TicketStatus.IN_PROGRESS.value])
     assert total >= 1
     assert all(t.status == TicketStatus.IN_PROGRESS.value for t in items)
 
@@ -476,9 +460,7 @@ def test_list_tickets_filters_by_type_priority_equipment(db_session: Session) ->
     client = ClientFactory()
     eq = EquipmentFactory(client=client)
     db_session.flush()
-    ServiceTicketFactory(
-        client=client, equipment=eq, type=t_type, priority=t_prio, title="match"
-    )
+    ServiceTicketFactory(client=client, equipment=eq, type=t_type, priority=t_prio, title="match")
     db_session.flush()
     items, _t = services.list_tickets(
         db_session,
@@ -522,9 +504,7 @@ def test_add_comment_happy_path(db_session: Session) -> None:
     ticket = ServiceTicketFactory()
     user = UserFactory()
     db_session.flush()
-    c = services.add_comment(
-        db_session, ticket_id=ticket.id, author_user_id=user.id, body="Hello"
-    )
+    c = services.add_comment(db_session, ticket_id=ticket.id, author_user_id=user.id, body="Hello")
     assert c.body == "Hello"
     assert services.list_comments(db_session, ticket.id) == [c]
 
@@ -534,9 +514,7 @@ def test_add_comment_requires_body(db_session: Session) -> None:
     ticket = ServiceTicketFactory()
     db_session.flush()
     with pytest.raises(ValueError, match="body is required"):
-        services.add_comment(
-            db_session, ticket_id=ticket.id, author_user_id=None, body="   "
-        )
+        services.add_comment(db_session, ticket_id=ticket.id, author_user_id=None, body="   ")
 
 
 @pytest.mark.integration
@@ -545,17 +523,13 @@ def test_add_comment_size_cap(db_session: Session) -> None:
     db_session.flush()
     too_big = "x" * (TicketComment.BODY_MAX_BYTES + 1)
     with pytest.raises(ValueError, match="exceeds"):
-        services.add_comment(
-            db_session, ticket_id=ticket.id, author_user_id=None, body=too_big
-        )
+        services.add_comment(db_session, ticket_id=ticket.id, author_user_id=None, body=too_big)
 
 
 @pytest.mark.integration
 def test_add_comment_unknown_ticket(db_session: Session) -> None:
     with pytest.raises(ValueError, match="ticket not found"):
-        services.add_comment(
-            db_session, ticket_id=b"\x00" * 16, author_user_id=None, body="x"
-        )
+        services.add_comment(db_session, ticket_id=b"\x00" * 16, author_user_id=None, body="x")
 
 
 @pytest.mark.integration
@@ -590,9 +564,7 @@ def test_require_attachment_wrong_ticket(db_session: Session) -> None:
 
 
 @pytest.mark.integration
-def test_add_attachment_persists_metadata(
-    db_session: Session, tmp_path: object
-) -> None:
+def test_add_attachment_persists_metadata(db_session: Session, tmp_path: object) -> None:
     """Add a small text attachment; happy path through store_upload."""
     from flask import current_app
 
@@ -684,9 +656,11 @@ def test_next_ticket_number_postgres_path(
         if "CREATE SEQUENCE" in text:
             return real_execute.__self__.execute  # type: ignore[attr-defined]
         if "nextval" in text:
+
             class _R:
                 def scalar_one(self) -> int:
                     return 4242
+
             return _R()
         return real_execute(stmt, *args, **kwargs)  # pragma: no cover
 

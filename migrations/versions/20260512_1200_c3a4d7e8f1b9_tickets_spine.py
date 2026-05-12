@@ -46,9 +46,7 @@ def upgrade() -> None:
         sa.UniqueConstraint("code", name="uq_ticket_type_code"),
     )
     with op.batch_alter_table("ticket_type", schema=None) as batch_op:
-        batch_op.create_index(
-            batch_op.f("ix_ticket_type_is_active"), ["is_active"], unique=False
-        )
+        batch_op.create_index(batch_op.f("ix_ticket_type_is_active"), ["is_active"], unique=False)
 
     op.create_table(
         "ticket_priority",
@@ -90,9 +88,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["equipment_id"], ["equipment.id"], ondelete="SET NULL"),
         sa.ForeignKeyConstraint(["type_id"], ["ticket_type.id"], ondelete="SET NULL"),
         sa.ForeignKeyConstraint(["priority_id"], ["ticket_priority.id"], ondelete="SET NULL"),
-        sa.ForeignKeyConstraint(
-            ["assignee_user_id"], ["user_account.id"], ondelete="SET NULL"
-        ),
+        sa.ForeignKeyConstraint(["assignee_user_id"], ["user_account.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("service_ticket", schema=None) as batch_op:
@@ -103,9 +99,7 @@ def upgrade() -> None:
         batch_op.create_index(
             batch_op.f("ix_service_ticket_equipment_id"), ["equipment_id"], unique=False
         )
-        batch_op.create_index(
-            batch_op.f("ix_service_ticket_type_id"), ["type_id"], unique=False
-        )
+        batch_op.create_index(batch_op.f("ix_service_ticket_type_id"), ["type_id"], unique=False)
         batch_op.create_index(
             batch_op.f("ix_service_ticket_priority_id"), ["priority_id"], unique=False
         )
@@ -127,9 +121,7 @@ def upgrade() -> None:
         sa.Column("reason_code", sa.String(length=40), nullable=False, server_default=""),
         sa.Column("occurred_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["ticket_id"], ["service_ticket.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(
-            ["actor_user_id"], ["user_account.id"], ondelete="SET NULL"
-        ),
+        sa.ForeignKeyConstraint(["actor_user_id"], ["user_account.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("ticket_status_history", schema=None) as batch_op:
@@ -157,9 +149,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["ticket_id"], ["service_ticket.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(
-            ["author_user_id"], ["user_account.id"], ondelete="SET NULL"
-        ),
+        sa.ForeignKeyConstraint(["author_user_id"], ["user_account.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("ticket_comment", schema=None) as batch_op:
@@ -188,9 +178,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["ticket_id"], ["service_ticket.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(
-            ["uploader_user_id"], ["user_account.id"], ondelete="SET NULL"
-        ),
+        sa.ForeignKeyConstraint(["uploader_user_id"], ["user_account.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("ticket_attachment", schema=None) as batch_op:
@@ -218,9 +206,7 @@ def upgrade() -> None:
         sa.UniqueConstraint("user_id", "token", name="uq_idempotency_user_token"),
     )
     with op.batch_alter_table("idempotency_key", schema=None) as batch_op:
-        batch_op.create_index(
-            batch_op.f("ix_idempotency_key_user_id"), ["user_id"], unique=False
-        )
+        batch_op.create_index(batch_op.f("ix_idempotency_key_user_id"), ["user_id"], unique=False)
         batch_op.create_index(
             batch_op.f("ix_idempotency_key_expires_at"), ["expires_at"], unique=False
         )
