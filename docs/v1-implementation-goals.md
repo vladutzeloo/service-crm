@@ -338,6 +338,85 @@ foundation concern, not a finishing touch.
 - [ ] Net new public function without a docstring fails review (skill:
       [`/consistency-pass`](../.claude/skills/consistency-pass/SKILL.md)).
 
+### 3.5 Ease of use (4 dimensions × 3 personas, 0.5 → 0.9)
+
+Adopted 2026-05-12. Ease-of-use is a v1 foundation concern, not a
+finishing touch — every milestone from 0.5.0 onwards is graded against
+the cells below. Personas: front-desk, manager, technician
+(per [`../ARCHITECTURE.md`](../ARCHITECTURE.md) §2). Enforcement:
+`/ease-pass` skill per PR + the mechanisable subset (Lighthouse,
+touch-targets, axe-core) in CI from 0.8 onwards (per
+[`testing-cadence.md`](./testing-cadence.md) §4). The full v0.5 derivation
+of the bar lives in [`v0.5-plan.md`](./v0.5-plan.md) §4.2.
+
+**The single dial.** *"Can the target persona finish this flow in ≤ N
+taps without leaving the page, with the right defaults, and recover
+gracefully from a network blip?"* — `N = 3` for technician actions,
+`N = 5` for manager actions, `N = 7` for front-desk creation flows.
+If `N` is exceeded for any P1 flow the slice doesn't merge.
+
+**Speed-to-action**
+
+- [ ] Front-desk: every create flow has ≤ 4 required fields + 1 submit;
+      smart defaults (today's date; `current_user` as actor;
+      client/equipment pre-filled when the page is reached from the
+      relevant detail page via query-string carry — no JS state).
+- [ ] Manager: list-page actions (qualify / schedule / cancel /
+      transition) run in **inline modals** (the `modal` macro from
+      0.2.0), not separate URLs. Bulk-select on every list with
+      ≥ 2 selectable rows; per-action ≤ 1 click.
+- [ ] Technician: status changes are **one tap** — status pills double
+      as transition buttons that show only the legal next states for
+      the current role (FSM exposes `legal_transitions(from, role)`).
+      No dropdown-then-save dance.
+
+**Findability**
+
+- [ ] Front-desk: search-as-you-type on every list page; results in
+      ≤ 300 ms P95 on the seeded reference dataset (matches §1.3
+      budget). Server-rendered with a tiny vanilla-JS debouncer
+      (no framework).
+- [ ] Manager: per-user saved filters persisted across sessions
+      (`user_<entity>_filter` lookup tables); recall on next visit;
+      hard cap 8 per user per entity (the "save as" button is disabled
+      with a tooltip once full — silent eviction would lose user work
+      and conflict with the *forgiving workflow* dimension below).
+- [ ] Technician: "My queue" link in the topbar visible to users with
+      the `technician` role, linking to the role-relevant filtered
+      list (e.g., `/tickets/?assigned_to=me&status=in_progress,scheduled,waiting_parts`).
+
+**Forgiving workflow**
+
+- [ ] Front-desk: form drafts auto-save in `sessionStorage` keyed by
+      the server-rendered idempotency token. Backgrounding,
+      orientation flip, or network blip does not lose typed data.
+      Pure progressive enhancement — no server state.
+- [ ] Manager: every destructive action (`cancel`, `close`, delete
+      attachment / comment) requires a reason, stored on the audit /
+      history row (`reason_code` + free-text `reason`). The audit row
+      is the undo trail.
+- [ ] Technician: idempotency tokens cover every state-changing form;
+      server-side dedup via the `idempotency_key` table for 24 h on
+      `(user_id, token)`. Forced retry test passes per §2.5.
+
+**Phone ergonomics**
+
+- [ ] Front-desk: at 768 px portrait (iPad), every create form is
+      single-column; submit is sticky bottom-right within the
+      form-shell, not below the fold.
+- [ ] Manager: at 768 px tablet, dashboards collapse to single-column
+      KPI strip + scrollable table (`.table-stacked`); no horizontal
+      scroll, no overflow.
+- [ ] Technician: at 360 px portrait (Pixel-5), the action bar is
+      bottom-fixed and full-width within thumb reach; primary action
+      is always visible without scrolling. Status pills wrap, never
+      scroll horizontally. Tap targets ≥ 44 pt (already enforced by
+      the `--tap-min` token contract).
+
+**Per-milestone application.** Each milestone is the union of all
+prior milestones' checks plus the surface it newly exposes — see
+[§4](#4-per-milestone-implementation-goals) for the per-slice deltas.
+
 ## 4. Per-milestone implementation goals
 
 Maps the milestones in [`ROADMAP.md`](../ROADMAP.md) to concrete
@@ -436,6 +515,11 @@ and desktops, with the full status lifecycle audited.
 - [ ] Ticket number sequence (`Sequence("ticket_number_seq")`) on PG;
       SQLite fallback in service layer + tested.
 - [ ] Every status, type, and priority label translated (RO+EN).
+- [ ] **Ease-of-use bar (§3.5):** all cells for tickets list / detail /
+      create / transition / comments / attachments. Status-pill-as-
+      button, bulk actions, per-user saved filters, "my queue"
+      topbar link, reason-on-destructive, draft auto-save. Detailed
+      derivation in [`v0.5-plan.md`](./v0.5-plan.md) §4.2.
 
 ### 0.6.0 — Interventions, parts, knowledge
 
@@ -454,6 +538,10 @@ checklist, attach photos — works from a phone in the field.
 - [ ] Intervention create/edit form built for one-handed phone use:
       ≥ 44 pt taps, mobile keyboards, photo upload via camera capture.
 - [ ] All checklist labels and procedure UI translated.
+- [ ] **Ease-of-use bar (§3.5):** one-handed intervention form,
+      camera capture, checklist progresses without page-nav (each
+      item POSTs back via the existing `idempotency_key` pattern),
+      procedure search-as-you-type.
 
 ### 0.7.0 — Maintenance + planning
 
@@ -470,6 +558,11 @@ checklist, attach photos — works from a phone in the field.
       models + migration.
 - [ ] Per-day technician capacity view modeled on
       `oee-calculator2.0/templates/capacity.html`.
+- [ ] **Ease-of-use bar (§3.5):** one-click "open ticket from plan"
+      (carries `plan_id` → ticket via query-string smart defaults),
+      tap-to-assign on the capacity grid, APScheduler-generated tasks
+      surface in the technician's "my queue" without a refresh
+      (server-side, on next page load).
 
 ### 0.8.0 — Operational dashboard
 
@@ -481,6 +574,10 @@ checklist, attach photos — works from a phone in the field.
       `oee-calculator2.0/templates/operator/dashboard.html`): no left
       sidebar, today's queue, one-tap "start intervention".
 - [ ] Both dashboards meet the §1.3 P95 budget on the reference dataset.
+- [ ] **Ease-of-use bar (§3.5):** every KPI tile is drillable to a
+      filtered list (single click from "12 overdue tickets" to
+      `/tickets/?status=overdue`); reports default to "this month" +
+      "this technician"; CSV export is one button, no modal.
 
 ### 0.9.0 — Hardening for 1.0
 
@@ -503,6 +600,10 @@ Feature freeze. Spend a milestone making §1, §2, and §3 actually true.
 - [ ] §3.2 i18n — RO catalog at 100 % coverage of user-facing strings.
       EN catalog at 100 % coverage. CI enforces no untranslated string
       shipped. Layout audit at 320 px in both languages.
+- [ ] §3.5 ease-of-use — per-screen tap-target audit (Playwright);
+      Lighthouse PWA ≥ 90 on dashboard, tickets list, ticket detail
+      (per §2.6); manual real-device pass per §2.7 uses the §3.5
+      cells as the script.
 
 ### 1.0.0 — Production-ready single-tenant
 
@@ -519,7 +620,8 @@ A single page the release captain works through. Everything ✅ or no tag.
 
 - [ ] §1.1–§1.8 — production-ready bar, all boxes.
 - [ ] §2.1–§2.7 — phone-ready bar, all boxes.
-- [ ] §3.1–§3.4 — cross-cutting, all boxes.
+- [ ] §3.1–§3.5 — cross-cutting, all boxes (a11y, i18n, audit, code
+      quality, ease-of-use).
 - [ ] §4 — every milestone's "Done when" met.
 - [ ] [`CHANGELOG.md`](../CHANGELOG.md) `## [1.0.0]` populated, dated.
 - [ ] [`VERSION`](../VERSION) reads `1.0.0`.
