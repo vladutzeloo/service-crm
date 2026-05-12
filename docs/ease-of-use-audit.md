@@ -108,9 +108,10 @@ of JSON. The single-dial test fails before it starts — there's no
 "flow" to finish; the user has to manually navigate to `/clients/` or
 `/equipment/`. Reading the URL bar is not a flow.
 
-### P0-2 — Eight of eleven sidebar links are dead
+### P0-2 — Nine of eleven sidebar links are dead
 
-[`base.html:27`](../service_crm/templates/base.html) `Dashboard`,
+[`base.html:24`](../service_crm/templates/base.html) `Service-CRM` (brand),
+[`:27`](../service_crm/templates/base.html) `Dashboard`,
 [`:32`](../service_crm/templates/base.html) `Tickets`,
 [`:33`](../service_crm/templates/base.html) `Maintenance`,
 [`:34`](../service_crm/templates/base.html) `Planning`,
@@ -118,14 +119,18 @@ of JSON. The single-dial test fails before it starts — there's no
 [`:42`](../service_crm/templates/base.html) `Users`,
 [`:43`](../service_crm/templates/base.html) `Audit Log`,
 [`:44`](../service_crm/templates/base.html) `Settings` all point at
-`href="#"`. The Dashboard link additionally carries `.is-active`
+`href="#"`. Only `Clients` (`:37`) and `Equipment` (`:38`) carry real
+URLs. The Dashboard link additionally carries `.is-active`
 unconditionally — it looks selected from `/clients/`, `/equipment/`,
 and every detail page.
 
 **Why P0:** the sidebar is the *first thing* a user reads in the app.
-Clicking eight of eleven links does nothing. The `.is-active` class
-on a dead link is worse than no class at all (Nielsen #1, visibility
-of system status). First-impression damage is severe and immediate.
+Clicking nine of eleven links does nothing. The brand link in
+particular violates the universal "click the logo to go home"
+convention (Nielsen #4, consistency / standards). The `.is-active`
+class on a dead link is worse than no class at all (Nielsen #1,
+visibility of system status). First-impression damage is severe and
+immediate.
 
 ### P0-3 — Sidebar on every authenticated screen contradicts a stated rule
 
@@ -402,17 +407,17 @@ work starts on a clean shell. **Size:** ~600 LOC including tests
 
 | Finding | Change | Files touched |
 | --- | --- | --- |
-| P0-1 | Post-login lands at `/clients/`. `/version` stays as the machine endpoint, but `/` (new) is added for humans: redirect to `/clients/` if authenticated, else to `/login`. `auth.login` after-login fallback (line 64) changes to `clients.list_clients`. | [`auth/routes.py`](../service_crm/auth/routes.py), new `service_crm/landing.py` (≤ 30 LOC blueprint), `templates/landing/index.html` not needed — pure redirect |
-| P0-2 | Stub nav links are visibly *disabled* (cursor: not-allowed, muted text, `aria-disabled="true"`, no `href`), with a translatable "Coming in v0.X" tooltip via `title=` and `aria-describedby`. The `.is-active` class moves off `Dashboard` (which doesn't exist yet — re-styled as a "no link" header until 0.8). | [`templates/base.html`](../service_crm/templates/base.html), `templates/macros/nav_link.html` (new), `static/css/style.css` (+~20 LOC) |
+| P0-1 | Post-login lands at `/clients/`. `/version` stays as the machine endpoint, but `/` (new) is added for humans: redirect to `/clients/` if authenticated, else to `/login`. **Both** redirect sites in [`auth/routes.py`](../service_crm/auth/routes.py) change: the already-authenticated GET guard at `:40` *and* the successful-POST fallback at `:64` move from `url_for("health.version")` to `url_for("clients.list_clients")`. Missing either site leaves a stale `/version` round-trip on one of the two entry paths. | [`auth/routes.py`](../service_crm/auth/routes.py), new `service_crm/landing.py` (≤ 30 LOC blueprint), `templates/landing/index.html` not needed — pure redirect |
+| P0-2 | Stub nav links (including the brand at `base.html:24`) are visibly *disabled* (cursor: not-allowed, muted text, `aria-disabled="true"`, no `href`), with a translatable "Coming in v0.X" tooltip via `title=` and `aria-describedby`. The brand specifically becomes a *real* link to the new `/` landing route in the same change (so "click the logo to go home" works) — it's the one item in the dead-link set that earns a route in 0.4.1 rather than a disabled state. The `.is-active` class moves off `Dashboard` (which doesn't exist yet — re-styled as a "no link" header until 0.8). | [`templates/base.html`](../service_crm/templates/base.html), `templates/macros/nav_link.html` (new), `static/css/style.css` (+~20 LOC) |
 | P0-3 | **Sidebar stays** (with rationale captured in [`docs/ui-reference.md`](./ui-reference.md) — see §5.1 of this audit and Open Question §8.1 for the proposed AGENTS.md amendment). What changes: technician screens get a bottom-fixed action bar from 0.6 onwards (per §3.5); on phones the sidebar already collapses to a drawer. AGENTS.md gets a one-line amendment: *"Sidebar is allowed; it must collapse to a drawer below 900 px and a bottom-fixed action bar must be present on technician-primary screens (intervention, ticket detail)."* | [`AGENTS.md`](../AGENTS.md), [`docs/ui-reference.md`](./ui-reference.md) |
 | P0-4 | `auth/login.html` rewritten to extend `base.html` with a `{% block content %}` that uses `form_shell`. The inline `<style>` block is deleted. The inline RO/EN switch is deleted (topbar already carries it; on `auth.login` it's preserved because the topbar's hidden inputs already round-trip `?next=`). The shell hides the sidebar on unauthenticated pages via `data-shell="anon"`. | [`auth/login.html`](../service_crm/templates/auth/login.html), [`base.html`](../service_crm/templates/base.html) |
 | P0-5 | Auto-resolves with P0-4 (shell extension pulls `--tap-min`). E2E touch-target test extended to walk `/login` as well. | [`tests/e2e/test_touch_targets.py`](../tests/e2e/test_touch_targets.py) |
 | P1-3 | Bell + help icons are hidden behind feature flags (`config.NOTIFICATIONS_ENABLED`, `config.HELP_PORTAL_URL`). Default off. When help URL is configured, the icon opens it in a new tab. | [`base.html`](../service_crm/templates/base.html), [`config.py`](../service_crm/config.py) |
-| P1-4 | `form_shell` macro renders a `<span class="required-pip" aria-label="{{ _('required') }}">*</span>` after labels when the bound field has the `required` flag. Single change, ~10 LOC, applies to every form already using the macro. | [`templates/macros/form_shell.html`](../service_crm/templates/macros/form_shell.html), `style.css` (one new rule) |
+| P1-4 | The required-pip belongs at the *field* layer, not the wrapper: `form_shell` is a `{% call %}`-style wrapper ([`form_shell.html:32-52`](../service_crm/templates/macros/form_shell.html)) that has no access to per-field state. Two compatible options, both shipped in 0.4.1: (a) the **CSS-only** approach is the primary — one rule using `label:has(+ input[required])::after { content: "*"; … }` plus the symmetric `label:has(+ textarea[required])` / `label:has(+ select[required])` selectors (broadly supported across modern browsers as of 2026); (b) for explicit a11y wiring, introduce the `render_field(field)` macro the `form_shell` docstring already references (`form_shell.html:9` — currently a convention without an implementation) and have it emit the `<span class="required-pip" aria-label="{{ _('required') }}">*</span>` next to the label when `field.flags.required`. The legend "Fields marked with * are required" lives at the top of every form-shell. ~10 LOC CSS + ~15 LOC for `render_field` if pursued. | `templates/macros/render_field.html` (new — single new macro), `static/css/style.css` (one new rule); **not** `form_shell.html` (no per-field access there) |
 | P1-8 | `data_table` macro accepts an optional `empty_action={"href": ..., "label": ..., "icon": ...}` parameter. When supplied, the empty state renders a centred primary button. | [`templates/macros/data_table.html`](../service_crm/templates/macros/data_table.html), call sites in `clients/list.html`, `equipment/list.html`, `equipment/detail.html`, `clients/detail.html` |
 | P1-9 | New `nav_link(endpoint, label, icon)` macro: adds `is-active` when `request.endpoint == endpoint` or starts with the endpoint's blueprint prefix. Used by every sidebar link. | [`templates/macros/nav_link.html`](../service_crm/templates/macros/nav_link.html) (new), `base.html` |
 | P1-10 | Sidebar gains a "Settings → Lookups → Equipment models / Controller types" section, gated to admin role. (Other "Admin" sub-items stay disabled per P0-2.) | `base.html`, `templates/macros/nav_link.html` |
-| P2-9 | `base.html:62` reads `current_user.role.code` instead of the hardcoded "Operator" string. Role label translated via `_("role.admin")` / `_("role.manager")` / `_("role.technician")` / `_("role.readonly")` lookup. | `base.html`, new `service_crm/shared/role_labels.py` (≤ 20 LOC) |
+| P2-9 | `base.html:62` reads `current_user.role.code` instead of the hardcoded "Operator" string. **Wrapped in the same `current_user.is_authenticated` guard already used at [`base.html:48-53`](../service_crm/templates/base.html)** — without it, the unauthenticated render path (the `data-shell="anon"` login page, which still inherits `base.html`) hits `AnonymousUserMixin.role` and raises `AttributeError`. The pattern: `{% if current_user.is_authenticated and current_user.role %}{{ role_label(current_user.role.code) }}{% else %}{{ _("Guest") }}{% endif %}`. Role label translated via `_("role.admin")` / `_("role.manager")` / `_("role.technician")` / `_("role.readonly")` lookup. | `base.html`, new `service_crm/shared/role_labels.py` (≤ 20 LOC) |
 
 #### 6.1.2 Tests
 
@@ -536,7 +541,7 @@ real route lands.
 
 | Option | Shape | Pros | Cons |
 | --- | --- | --- | --- |
-| **A — Asterisk after the label, `aria-label="required"`, CSS `color: var(--accent)`** (recommended) | Visible + a11y | Standard pattern; one CSS rule + one macro change. | Asterisk-as-meaning relies on the legend "required fields are marked with *"; we ship the legend at the top of every form via the form_shell macro. |
+| **A — Asterisk after the label, `aria-label="required"`, CSS `color: var(--accent)`** (recommended) | Visible + a11y | Standard pattern. **Placement matters:** the `form_shell` macro is a `{% call %}` wrapper with no per-field access ([`form_shell.html:32-52`](../service_crm/templates/macros/form_shell.html)) — the pip rendering must live either in CSS (`label:has(+ input[required])::after`, broadly supported in 2026) or in a new sibling `render_field(field)` macro that `form_shell`'s docstring already references at `form_shell.html:9` but does not yet implement. CSS-only is the primary path; `render_field` is the explicit-a11y alternative. | Asterisk-as-meaning relies on the legend "required fields are marked with *"; we ship the legend at the top of every form via the form_shell macro. |
 | B — "(required)" suffix on every label | Most explicit | Doubles label width on small phones. |
 | C — Border colour change only | Cleanest | Fails colour-blindness contrast; fails screen-reader. |
 
@@ -567,6 +572,14 @@ audit's 0.4.1 slice writes the skill and uses it on its own PR.
   `/auth/login`.
 - `service_crm/templates/macros/nav_link.html` — `nav_link(endpoint,
   label, icon, disabled=False, tooltip=None)` macro. ~25 LOC.
+- `service_crm/templates/macros/render_field.html` — `render_field(field)`
+  macro emitting `<label>` + bound field widget + required-pip when
+  `field.flags.required`. The `form_shell` docstring at
+  [`form_shell.html:9`](../service_crm/templates/macros/form_shell.html)
+  already references this name; this slice provides the
+  implementation. Optional if §5.4 chooses the pure-CSS path —
+  the CSS-only `label:has(+ input[required])::after` rule covers
+  the same surface with no template change. ~15 LOC.
 - `service_crm/shared/role_labels.py` — `label_for(role) → str`,
   Babel-extractable. ~20 LOC.
 - `tests/templates/test_base_shell.py` — sidebar shape, `is-active`
@@ -592,8 +605,6 @@ audit's 0.4.1 slice writes the skill and uses it on its own PR.
   `{% block topbar_role_links %}{% endblock %}` slot.
 - `service_crm/templates/auth/login.html` — rewrite to extend base;
   delete inline `<style>`; delete inline RO/EN.
-- `service_crm/templates/macros/form_shell.html` — render the
-  `required-pip`.
 - `service_crm/templates/macros/data_table.html` — accept
   `empty_action`.
 - `service_crm/templates/clients/list.html`,
