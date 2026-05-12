@@ -158,21 +158,21 @@ Mirrors [`docs/tasks.md`](./docs/tasks.md) steps 8–11 for the `clients` bluepr
 Core ticket workflow. Splits the ticket domain across two milestones so
 0.5 stays reviewable; interventions land in 0.6.
 
-- [ ] `ServiceTicket` + state machine
+- [x] `ServiceTicket` + state machine
       (`new → qualified → scheduled → in_progress → waiting_parts →
       monitoring → completed → closed`, `cancelled` from any pre-completed
       state) — pure-Python `tickets/state.py`.
-- [ ] `TicketStatusHistory` (append-only); `before_flush` hook writes a
+- [x] `TicketStatusHistory` (append-only); `before_flush` hook writes a
       row on every status change.
-- [ ] `TicketComment`, `TicketAttachment`.
-- [ ] `TicketType`, `TicketPriority` lookup tables seeded with default
+- [x] `TicketComment`, `TicketAttachment`.
+- [x] `TicketType`, `TicketPriority` lookup tables seeded with default
       RO/EN-translated labels.
-- [ ] Tickets list with filters (status, priority, type, due, technician,
+- [x] Tickets list with filters (status, priority, type, due, technician,
       client) and translated filter chips.
-- [ ] Ticket detail page with status-history timeline.
-- [ ] Idempotency token on every state-changing form (server-rendered
+- [x] Ticket detail page with status-history timeline.
+- [x] Idempotency token on every state-changing form (server-rendered
       UUID, `(user_id, token)` dedupe for 24 h). Tested by forced retry.
-- [ ] Tests: state machine ≥ 95 % line+branch (Hypothesis state machine);
+- [x] Tests: state machine ≥ 95 % line+branch (Hypothesis state machine);
       integration tests assert no history-less status transitions.
 
 ## 0.6.0 — "Interventions, parts, knowledge"

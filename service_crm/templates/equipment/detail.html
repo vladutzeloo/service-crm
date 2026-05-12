@@ -143,7 +143,21 @@
 
 {% elif tab == "tickets" %}
 <div class="tab-panel">
-  <p class="empty">{{ _("Tickets land in v0.5.") }}</p>
+  <div class="tab-toolbar">
+    <a href="{{ url_for('tickets.new_ticket', equipment=equipment.id.hex(), client=equipment.client.id.hex()) }}"
+       class="btn btn-sm btn-primary">{{ icon("plus") }} {{ _("New ticket") }}</a>
+  </div>
+  {% set t_cols = [_("Ticket"), _("Title"), _("Status"), _("Updated")] %}
+  {% set t_rows = [] %}
+  {% for t in equipment_tickets %}
+    {% set _ = t_rows.append([
+      '<a href="' ~ url_for('tickets.detail', ticket_hex=t.id.hex()) ~ '" class="link mono">' ~ t.label ~ '</a>' | safe,
+      '<a href="' ~ url_for('tickets.detail', ticket_hex=t.id.hex()) ~ '" class="link">' ~ t.title|e ~ '</a>' | safe,
+      t.status|e,
+      t.updated_at.strftime('%Y-%m-%d %H:%M'),
+    ]) %}
+  {% endfor %}
+  {{ data_table(t_cols, t_rows, empty=_("No tickets for this equipment yet.")) }}
 </div>
 {% elif tab == "maintenance" %}
 <div class="tab-panel">

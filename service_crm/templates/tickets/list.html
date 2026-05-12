@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/filter_bar.html" import filter_bar %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Tickets") }} — Service-CRM{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    {{ _("Operations") }}
+    {% if client %}
+      › <a href="{{ url_for('clients.detail', client_hex=client.id.hex()) }}">{{ client.name }}</a>
+    {% endif %}
+  </div>
+{% endblock %}
+{% block page_title %}
+  {% if client %}{{ _("Tickets for %(name)s", name=client.name) }}{% else %}{{ _("Tickets") }}{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-toolbar">
+  <form method="get" action="{{ url_for('tickets.list_tickets') }}" class="search-form" role="search">
+    {% if client %}<input type="hidden" name="client" value="{{ client.id.hex() }}">{% endif %}
+    {% for s in statuses %}<input type="hidden" name="status" value="{{ s }}">{% endfor %}
+    <label class="sr-only" for="q">{{ _("Search tickets") }}</label>
+    <input id="q" type="search" name="q" value="{{ q }}"
+           placeholder="{{ _('Search title / description…') }}"
+           class="search-input" autocomplete="off">
+    <button type="submit" class="btn btn-primary btn-sm">{{ icon("search") }}</button>
+  </form>
+  <div class="toolbar-actions">
+    {% set my_queue_url = url_for('tickets.list_tickets', assigned_to='me') %}
+    <a href="{{ my_queue_url }}" class="btn btn-secondary btn-sm">
+      {{ icon("user-cog") }} {{ _("My queue") }}
+    </a>
+    <a href="{{ url_for('tickets.list_types') }}" class="btn btn-ghost btn-sm">{{ _("Types") }}</a>
+    <a href="{{ url_for('tickets.list_priorities') }}" class="btn btn-ghost btn-sm">{{ _("Priorities") }}</a>
+    <a href="{{ url_for('tickets.new_ticket', client=client.id.hex() if client else None) }}"
+       class="btn btn-primary btn-sm">
+      {{ icon("plus") }} {{ _("New ticket") }}
+    </a>
+  </div>
+</div>
+
+{% set open_href = url_for('tickets.list_tickets', show='open', q=q, client=client.id.hex() if client else None) %}
+{% set all_href  = url_for('tickets.list_tickets', show='all',  q=q, client=client.id.hex() if client else None) %}
+{% set status_chips = [
+  {"label": _("Open"), "href": open_href, "count": none, "active": (not statuses) and show == 'open'},
+  {"label": _("All"),  "href": all_href,  "count": none, "active": show == 'all' and not statuses},
+] %}
+{% for code, label in status_labels.items() %}
+  {% set chip_href = url_for('tickets.list_tickets', status=code, q=q, client=client.id.hex() if client else None) %}
+  {% set _ = status_chips.append({"label": status_label(code), "href": chip_href, "count": counts.get(code, 0) or none, "active": code in statuses}) %}
+{% endfor %}
+{{ filter_bar(label=_("Status"), chips=status_chips) }}
+
+{% set cols = [_("Ticket"), _("Title"), _("Client"), _("Type"), _("Priority"), _("Status"), _("Updated")] %}
+{% set rows = [] %}
+{% for ticket in items %}
+  {% set badge_html %}<span class="badge badge-{{ status_tone(ticket.status) }}">{{ status_label(ticket.status) }}</span>{% endset %}
+  {% set priority_html %}{% if ticket.priority %}<span class="badge badge-{{ priority_tone(ticket.priority.code) }}">{{ priority_label(ticket.priority.code) }}</span>{% else %}—{% endif %}{% endset %}
+  {% set type_html %}{% if ticket.type %}{{ type_label(ticket.type.code) }}{% else %}—{% endif %}{% endset %}
+  {% set _ = rows.append([
+    '<a href="' ~ url_for('tickets.detail', ticket_hex=ticket.id.hex()) ~ '" class="link mono">' ~ ticket.label ~ '</a>' | safe,
+    '<a href="' ~ url_for('tickets.detail', ticket_hex=ticket.id.hex()) ~ '" class="link">' ~ ticket.title|e ~ '</a>' | safe,
+    '<a href="' ~ url_for('clients.detail', client_hex=ticket.client.id.hex()) ~ '" class="link">' ~ ticket.client.name|e ~ '</a>' | safe,
+    type_html,
+    priority_html,
+    badge_html,
+    ticket.updated_at.strftime('%Y-%m-%d %H:%M'),
+  ]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No tickets found.")) }}
+
+{% if total > 50 %}
+<div class="pagination">
+  {% if page > 1 %}
+    <a href="{{ url_for('tickets.list_tickets', q=q, show=show, page=page-1, client=client.id.hex() if client else None) }}"
+       class="btn btn-sm btn-ghost">&laquo; {{ _("Previous") }}</a>
+  {% endif %}
+  <span class="page-info">{{ _("Page %(p)s", p=page) }}</span>
+  {% if items|length == 50 %}
+    <a href="{{ url_for('tickets.list_tickets', q=q, show=show, page=page+1, client=client.id.hex() if client else None) }}"
+       class="btn btn-sm btn-ghost">{{ _("Next") }} &raquo;</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

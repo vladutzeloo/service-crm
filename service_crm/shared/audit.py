@@ -76,7 +76,8 @@ class AuditEvent(db.Model):  # type: ignore[name-defined,misc]
 
 
 @event.listens_for(Session, "before_flush")
-def _record_audit_events(session: Session, _flush_ctx: Any, _instances: Any) -> None:
+def _record_audit_events(session: Session, _flush_ctx: Any, _instances: Any) -> None:  # noqa: PLR0912
+
     if not _audit_enabled():
         return
 
@@ -97,9 +98,14 @@ def _record_audit_events(session: Session, _flush_ctx: Any, _instances: Any) -> 
             instance.id = ulid.new()  # type: ignore[attr-defined]
 
     pending: list[AuditEvent] = []
+    history_rows: list[Any] = []
+
     for instance in session.new:
         if isinstance(instance, Auditable) and not isinstance(instance, AuditEvent):
             pending.append(_event_for(instance, "create", actor, request_id))
+            row = _ticket_creation_history(instance, actor)
+            if row is not None:
+                history_rows.append(row)
     for instance in session.dirty:
         if (
             isinstance(instance, Auditable)
@@ -107,12 +113,70 @@ def _record_audit_events(session: Session, _flush_ctx: Any, _instances: Any) -> 
             and session.is_modified(instance, include_collections=False)
         ):
             pending.append(_event_for(instance, "update", actor, request_id))
+            row = _ticket_status_change_history(instance, actor)
+            if row is not None:
+                history_rows.append(row)
     for instance in session.deleted:
         if isinstance(instance, Auditable) and not isinstance(instance, AuditEvent):
             pending.append(_event_for(instance, "delete", actor, request_id))
 
     for evt in pending:
         session.add(evt)
+    for row in history_rows:
+        session.add(row)
+
+
+def _ticket_creation_history(instance: Any, actor: bytes | None) -> Any:
+    """Build the initial ``from_state=NULL`` history row for a new ticket."""
+    # Lazy import so the listener module stays loadable before the tickets
+    # blueprint exists (e.g. during partial Alembic upgrades).
+    try:
+        from ..tickets.models import ServiceTicket, TicketStatusHistory
+    except ImportError:  # pragma: no cover - tickets always imported in prod
+        return None
+    if not isinstance(instance, ServiceTicket):
+        return None
+    return TicketStatusHistory(
+        ticket_id=instance.id,
+        from_state=None,
+        to_state=instance.status,
+        actor_user_id=actor,
+        occurred_at=clock.now(),
+    )
+
+
+def _ticket_status_change_history(instance: Any, actor: bytes | None) -> Any:
+    """Build a history row when ``ServiceTicket.status`` changed in this flush."""
+    try:
+        from ..tickets.models import ServiceTicket, TicketStatusHistory
+    except ImportError:  # pragma: no cover
+        return None
+    if not isinstance(instance, ServiceTicket):
+        return None
+    state: Any = inspect(instance)
+    history = state.attrs.status.history
+    if not history.deleted or not history.added:
+        return None
+    old_value = history.deleted[0]
+    new_value = history.added[0]
+    if old_value == new_value:  # pragma: no cover - SQLAlchemy never marks unchanged rows dirty
+        return None
+    reason = ""
+    reason_code = ""
+    pending = getattr(instance, "_pending_history_meta", None)
+    if isinstance(pending, dict):
+        reason = str(pending.get("reason", "") or "")
+        reason_code = str(pending.get("reason_code", "") or "")
+        instance._pending_history_meta = None
+    return TicketStatusHistory(
+        ticket_id=instance.id,
+        from_state=str(old_value) if old_value is not None else None,
+        to_state=str(new_value),
+        actor_user_id=actor,
+        reason=reason,
+        reason_code=reason_code,
+        occurred_at=clock.now(),
+    )
 
 
 def _audit_enabled() -> bool:

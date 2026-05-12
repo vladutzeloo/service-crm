@@ -22,15 +22,20 @@ def test_reset_db_requires_yes_flag(app: Flask) -> None:
 def test_reset_db_with_yes_runs_migrations(app: Flask, monkeypatch: pytest.MonkeyPatch) -> None:
     """``reset_db`` should ``db.drop_all`` and then ``flask_migrate.upgrade``.
 
-    Asserting on the upgrade *call* rather than the schema state because
-    the foundation PR ships zero Alembic revisions; the real upgrade
-    round-trip is exercised once /data-model lands the first revision.
+    Both calls are mocked so the test asserts on the *shape* of the
+    command (drop then upgrade) without actually wiping the session-
+    scoped in-memory schema — which would break every later test that
+    needs the tables.
     """
     calls: list[str] = []
+
+    def _fake_drop_all(*_args: object, **_kwargs: object) -> None:
+        calls.append("drop_all")
 
     def _fake_upgrade(*_args: object, **_kwargs: object) -> None:
         calls.append("upgrade")
 
+    monkeypatch.setattr("service_crm.cli.db.drop_all", _fake_drop_all)
     monkeypatch.setattr("flask_migrate.upgrade", _fake_upgrade)
 
     runner = CliRunner()
@@ -39,7 +44,7 @@ def test_reset_db_with_yes_runs_migrations(app: Flask, monkeypatch: pytest.Monke
 
     assert result.exit_code == 0, result.output
     assert "Database reset." in result.output
-    assert calls == ["upgrade"]
+    assert calls == ["drop_all", "upgrade"]
 
 
 @pytest.mark.unit
@@ -89,6 +94,21 @@ def test_babel_commands_shell_out_to_pybabel(
     args_list: list[str] = captured["args"]  # type: ignore[assignment]
     assert args_list[0] == "pybabel"
     assert args_list[1 : 1 + len(expected_args_head)] == expected_args_head
+
+
+@pytest.mark.integration
+def test_sweep_idempotency_command(app: Flask) -> None:
+    """``flask sweep-idempotency`` runs the sweep helper and commits.
+
+    With an empty table it removes zero rows and reports ``Removed 0``.
+    """
+    from service_crm.cli import sweep_idempotency
+
+    runner = CliRunner()
+    with app.app_context():
+        result = runner.invoke(sweep_idempotency, [])
+    assert result.exit_code == 0, result.output
+    assert "Removed 0" in result.output
 
 
 @pytest.mark.unit

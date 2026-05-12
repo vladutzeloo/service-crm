@@ -180,6 +180,9 @@ def detail(equipment_hex: str) -> Any:
         except ValueError:
             edit_warranty = None
 
+    from ..tickets import services as ticket_services
+
+    equipment_tickets = ticket_services.list_for_equipment(db.session, eq.id)
     return render_template(
         "equipment/detail.html",
         equipment=eq,
@@ -187,6 +190,7 @@ def detail(equipment_hex: str) -> Any:
         warranty_form=warranty_form,
         edit_warranty=edit_warranty,
         edit_warranty_obj=edit_warranty_obj,
+        equipment_tickets=equipment_tickets,
         tok=_tok(),
     )
 

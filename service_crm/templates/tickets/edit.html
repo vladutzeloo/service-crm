@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% from "macros/icons.html" import icon %}
+
+{% set is_new = ticket is none %}
+{% block title %}
+  {{ _("New ticket") if is_new else _("Edit ticket") }} — Service-CRM
+{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('tickets.list_tickets') }}">{{ _("Tickets") }}</a>
+    {% if not is_new %}
+      › <a href="{{ url_for('tickets.detail', ticket_hex=ticket.id.hex()) }}">{{ ticket.label }}</a>
+    {% endif %}
+  </div>
+{% endblock %}
+{% block page_title %}
+  {{ _("New ticket") if is_new else _("Edit ticket") }}
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('tickets.new_ticket') if is_new else url_for('tickets.edit_ticket', ticket_hex=ticket.id.hex()) }}"
+        novalidate>
+    <h2 class="form-title">{{ _("Ticket details") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      <div class="field field-full{% if form.title.errors %} field-error{% endif %}">
+        {{ form.title.label }}
+        {{ form.title(class="input", autocomplete="off") }}
+        {% for err in form.title.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+
+      <div class="field{% if form.client_id.errors %} field-error{% endif %}">
+        {{ form.client_id.label }}
+        {% if is_new %}
+          {{ form.client_id(class="input") }}
+        {% else %}
+          {{ form.client_id(class="input", disabled=True) }}
+          <input type="hidden" name="client_id" value="{{ form.client_id.data }}">
+        {% endif %}
+        {% for err in form.client_id.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+
+      <div class="field{% if form.equipment_id.errors %} field-error{% endif %}">
+        {{ form.equipment_id.label }}
+        {{ form.equipment_id(class="input") }}
+        <span class="field-hint">{{ _("Must belong to the chosen client.") }}</span>
+        {% for err in form.equipment_id.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+
+      <div class="field{% if form.type_id.errors %} field-error{% endif %}">
+        {{ form.type_id.label }}
+        {{ form.type_id(class="input") }}
+      </div>
+
+      <div class="field{% if form.priority_id.errors %} field-error{% endif %}">
+        {{ form.priority_id.label }}
+        {{ form.priority_id(class="input") }}
+      </div>
+
+      <div class="field{% if form.assignee_user_id.errors %} field-error{% endif %}">
+        {{ form.assignee_user_id.label }}
+        {{ form.assignee_user_id(class="input") }}
+      </div>
+
+      <div class="field{% if form.due_at.errors %} field-error{% endif %}">
+        {{ form.due_at.label }}
+        {{ form.due_at(class="input", type="datetime-local") }}
+      </div>
+
+      <div class="field{% if form.sla_due_at.errors %} field-error{% endif %}">
+        {{ form.sla_due_at.label }}
+        {{ form.sla_due_at(class="input", type="datetime-local") }}
+      </div>
+
+      <div class="field field-full{% if form.description.errors %} field-error{% endif %}">
+        {{ form.description.label }}
+        {{ form.description(class="input textarea", rows=4) }}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('tickets.list_tickets') if is_new else url_for('tickets.detail', ticket_hex=ticket.id.hex()) }}"
+         class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

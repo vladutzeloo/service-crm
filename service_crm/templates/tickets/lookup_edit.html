@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} — Service-CRM{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('tickets.list_tickets') }}">{{ _("Tickets") }}</a>
+  </div>
+{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post" novalidate>
+    <h2 class="form-title">{{ obj.code }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      <div class="field field-full{% if form.label.errors %} field-error{% endif %}">
+        {{ form.label.label }}
+        {{ form.label(class="input") }}
+        {% for err in form.label.errors %}<span class="field-hint error">{{ err }}</span>{% endfor %}
+      </div>
+      <div class="field{% if form.is_active.errors %} field-error{% endif %}">
+        {{ form.is_active.label }}
+        {{ form.is_active(class="input") }}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ cancel_href }}" class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
