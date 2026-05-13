@@ -284,7 +284,41 @@ def test_technician_load_week_returns_per_tech_summary(
     row = rows_by_tech[tech.id]
     assert row["assignment_count"] == 1
     assert row["scheduled_minutes"] == 60
-    assert row["tone"] in {"success", "warning", "danger"}
+    assert row["tone"] == "success"
+
+
+@pytest.mark.parametrize(
+    ("capacity", "assignments", "expected_tone"),
+    [
+        # ratio 60/100 = 0.60 → success (< 0.75)
+        (100, 1, "success"),
+        # ratio (3 * 60)/240 = 0.75 → warning ([0.75, 1.0))
+        (240, 3, "warning"),
+        # ratio (5 * 60)/120 = 2.5 → danger (>= 1.0)
+        (120, 5, "danger"),
+    ],
+)
+def test_technician_load_week_tone_thresholds(
+    db_session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+    now: datetime,
+    today: date,
+    capacity: int,
+    assignments: int,
+    expected_tone: str,
+) -> None:
+    """Each saturation band yields its tone class."""
+    _patch_clock(monkeypatch, now)
+    tech = TechnicianFactory(weekly_capacity_minutes=capacity)
+    week_start = today - timedelta(days=today.weekday())
+    week_dt = datetime(week_start.year, week_start.month, week_start.day, 9, 0, 0, tzinfo=UTC)
+    for _ in range(assignments):
+        asg = TechnicianAssignmentFactory(technician=tech)
+        asg.assigned_at = week_dt
+    db_session.flush()
+    rows = ds.technician_load_week(db_session, today=today)
+    rows_by_tech = {r["technician"].id: r for r in rows}
+    assert rows_by_tech[tech.id]["tone"] == expected_tone
 
 
 def test_my_open_tickets_filters_to_assignee(

@@ -24,13 +24,12 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
-from ..auth.models import User
 from ..equipment.models import Equipment
 from ..maintenance.models import (
     MaintenanceExecution,
@@ -78,17 +77,29 @@ def bucket_for(day: date, bucket: str) -> date:
 
 @dataclass(frozen=True)
 class ReportResult:
-    """Generic shape returned by every report function."""
+    """Generic shape returned by every report function.
+
+    ``total_row`` defaults to ``()`` (an empty tuple) for reports that
+    don't carry a footer — the route layer appends it unconditionally
+    and templates render it iff it's non-empty.
+    """
 
     headers: list[str]
     rows: list[tuple[Any, ...]]
-    total_row: tuple[Any, ...] | None = None
+    total_row: tuple[Any, ...] = ()
     bucket: str | None = None
     meta: dict[str, Any] = field(default_factory=dict)
 
 
-def _to_naive_utc(d: date) -> datetime:
-    return datetime(d.year, d.month, d.day)
+def _to_utc(d: date) -> datetime:
+    """``date`` → midnight UTC ``datetime``.
+
+    Returns a tz-aware value so comparisons against
+    ``DateTime(timezone=True)`` columns stay index-friendly on
+    Postgres. See ``service_crm.dashboard.services._to_utc`` for the
+    rationale.
+    """
+    return datetime(d.year, d.month, d.day, tzinfo=UTC)
 
 
 # ── 1. tickets_by_status ─────────────────────────────────────────────────────
@@ -114,8 +125,8 @@ def tickets_by_status(
             ServiceTicket.status,
         )
         .filter(
-            ServiceTicket.created_at >= _to_naive_utc(window.start),
-            ServiceTicket.created_at < _to_naive_utc(window.end_exclusive),
+            ServiceTicket.created_at >= _to_utc(window.start),
+            ServiceTicket.created_at < _to_utc(window.end_exclusive),
         )
         .all()
     )
@@ -154,31 +165,35 @@ def interventions_by_machine(
 
     Duration is the sum of ``(ended_at - started_at)`` minutes for
     closed interventions; still-open interventions add zero to the
-    duration column and 1 to the count column.
+    duration column and 1 to the count column. The query eagerly
+    fetches ``Ticket.equipment`` so the loop never lazy-loads.
     """
     rows_raw = (
         session.query(ServiceIntervention)
         .join(ServiceIntervention.ticket)
+        .options(joinedload(ServiceIntervention.ticket).joinedload(ServiceTicket.equipment))
         .filter(
-            ServiceIntervention.started_at >= _to_naive_utc(window.start),
-            ServiceIntervention.started_at < _to_naive_utc(window.end_exclusive),
+            ServiceIntervention.started_at >= _to_utc(window.start),
+            ServiceIntervention.started_at < _to_utc(window.end_exclusive),
         )
         .all()
     )
     by_equipment: dict[bytes | None, dict[str, Any]] = defaultdict(
-        lambda: {"count": 0, "minutes": 0, "open": 0}
+        lambda: {"count": 0, "minutes": 0, "open": 0, "equipment": None}
     )
     for iv in rows_raw:
-        equipment_id = iv.ticket.equipment_id if iv.ticket is not None else None
+        equipment = iv.ticket.equipment if iv.ticket is not None else None
+        equipment_id = equipment.id if equipment is not None else None
         slot = by_equipment[equipment_id]
         slot["count"] = int(slot["count"]) + 1
+        slot["equipment"] = equipment
         if iv.duration_minutes is not None:
             slot["minutes"] = int(slot["minutes"]) + int(iv.duration_minutes)
         else:
             slot["open"] = int(slot["open"]) + 1
     out_rows: list[tuple[Any, ...]] = []
     for equipment_id, agg in by_equipment.items():
-        equipment = session.get(Equipment, equipment_id) if equipment_id is not None else None
+        equipment = agg["equipment"]
         code = equipment_id.hex() if equipment_id is not None else ""
         label = equipment.label if equipment is not None else "—"
         out_rows.append(
@@ -210,31 +225,41 @@ def parts_used(
     *,
     window: DateWindow,
 ) -> ReportResult:
-    """Quantity of each part consumed inside the window."""
+    """Quantity of each part consumed inside the window.
+
+    LEFT OUTER JOIN to :class:`PartMaster` so the master description
+    falls in alongside the usage in a single query — ad-hoc usages
+    (no master row) get ``NULL`` on the master columns.
+    """
     rows_raw = (
         session.query(
             ServicePartUsage.part_code,
             ServicePartUsage.description,
             func.sum(ServicePartUsage.quantity),
+            PartMaster.description,
         )
         .join(
             ServiceIntervention,
             ServiceIntervention.id == ServicePartUsage.intervention_id,
         )
+        .outerjoin(PartMaster, PartMaster.code == ServicePartUsage.part_code)
         .filter(
-            ServiceIntervention.started_at >= _to_naive_utc(window.start),
-            ServiceIntervention.started_at < _to_naive_utc(window.end_exclusive),
+            ServiceIntervention.started_at >= _to_utc(window.start),
+            ServiceIntervention.started_at < _to_utc(window.end_exclusive),
         )
-        .group_by(ServicePartUsage.part_code, ServicePartUsage.description)
+        .group_by(
+            ServicePartUsage.part_code,
+            ServicePartUsage.description,
+            PartMaster.description,
+        )
         .all()
     )
     out_rows: list[tuple[Any, ...]] = []
-    for code, description, qty in rows_raw:
-        master = session.query(PartMaster).filter(PartMaster.code == code).first()
+    for code, description, qty, master_description in rows_raw:
         out_rows.append(
             (
                 str(code),
-                description or (master.description if master is not None else ""),
+                description or (master_description or ""),
                 int(qty or 0),
             )
         )
@@ -270,8 +295,8 @@ def maintenance_due_vs_completed(
     completed_rows = (
         session.query(MaintenanceExecution.completed_at)
         .filter(
-            MaintenanceExecution.completed_at >= _to_naive_utc(window.start),
-            MaintenanceExecution.completed_at < _to_naive_utc(window.end_exclusive),
+            MaintenanceExecution.completed_at >= _to_utc(window.start),
+            MaintenanceExecution.completed_at < _to_utc(window.end_exclusive),
         )
         .all()
     )
@@ -311,43 +336,53 @@ def technician_workload(
     """Per-technician summary inside the window.
 
     Columns: interventions count, total minutes (closed only), open
-    interventions, completed maintenance tasks.
+    interventions, completed maintenance tasks. All relationships are
+    eager-loaded so the per-row math runs without follow-up queries.
     """
-    techs = session.query(Technician).order_by(Technician.display_name).all()
+    techs = (
+        session.query(Technician)
+        .options(joinedload(Technician.user))
+        .order_by(Technician.display_name)
+        .all()
+    )
     interventions = (
         session.query(ServiceIntervention)
+        .options(joinedload(ServiceIntervention.technician))
         .filter(
-            ServiceIntervention.started_at >= _to_naive_utc(window.start),
-            ServiceIntervention.started_at < _to_naive_utc(window.end_exclusive),
+            ServiceIntervention.started_at >= _to_utc(window.start),
+            ServiceIntervention.started_at < _to_utc(window.end_exclusive),
         )
         .all()
     )
-    by_user: dict[bytes, dict[str, int]] = defaultdict(
-        lambda: {"count": 0, "minutes": 0, "open": 0}
+    by_user: dict[bytes, dict[str, Any]] = defaultdict(
+        lambda: {"count": 0, "minutes": 0, "open": 0, "user": None}
     )
     for iv in interventions:
         if iv.technician_user_id is None:  # pragma: no cover - guard for legacy data
             continue
         slot = by_user[iv.technician_user_id]
-        slot["count"] = slot["count"] + 1
+        slot["count"] = int(slot["count"]) + 1
+        slot["user"] = iv.technician
         if iv.duration_minutes is not None:
-            slot["minutes"] = slot["minutes"] + int(iv.duration_minutes)
+            slot["minutes"] = int(slot["minutes"]) + int(iv.duration_minutes)
         else:
-            slot["open"] = slot["open"] + 1
-    executions = (
-        session.query(MaintenanceExecution)
-        .join(MaintenanceTask, MaintenanceTask.id == MaintenanceExecution.task_id)
-        .filter(
-            MaintenanceExecution.completed_at >= _to_naive_utc(window.start),
-            MaintenanceExecution.completed_at < _to_naive_utc(window.end_exclusive),
+            slot["open"] = int(slot["open"]) + 1
+    # Completed maintenance count via SQL aggregate — no per-row Python.
+    completed_rows = (
+        session.query(
+            MaintenanceTask.assigned_technician_id,
+            func.count(MaintenanceExecution.id),
         )
+        .join(MaintenanceExecution, MaintenanceExecution.task_id == MaintenanceTask.id)
+        .filter(
+            MaintenanceExecution.completed_at >= _to_utc(window.start),
+            MaintenanceExecution.completed_at < _to_utc(window.end_exclusive),
+            MaintenanceTask.assigned_technician_id.is_not(None),
+        )
+        .group_by(MaintenanceTask.assigned_technician_id)
         .all()
     )
-    completed_by_tech: dict[bytes, int] = defaultdict(int)
-    for ex in executions:
-        tech_id = ex.task.assigned_technician_id
-        if tech_id is not None:
-            completed_by_tech[tech_id] = completed_by_tech[tech_id] + 1
+    completed_by_tech: dict[bytes, int] = {tid: int(c) for tid, c in completed_rows}
 
     out_rows: list[tuple[Any, ...]] = []
     for tech in techs:
@@ -368,7 +403,7 @@ def technician_workload(
     for user_id, agg in by_user.items():
         if user_id in tech_user_ids:
             continue
-        user = session.get(User, user_id)
+        user = agg["user"]
         out_rows.append(
             (
                 "",
@@ -401,30 +436,32 @@ def repeat_issues(
     window: DateWindow,
     min_tickets: int = 2,
 ) -> ReportResult:
-    """Equipment with more than one ticket opened inside the window."""
+    """Equipment with more than one ticket opened inside the window.
+
+    Joins :class:`Equipment` so the row materialises in one round-trip
+    and the optional ``client`` relationship is eager-loaded.
+    """
     rows_raw = (
         session.query(
-            ServiceTicket.equipment_id,
+            Equipment,
             func.count(ServiceTicket.id),
         )
+        .join(ServiceTicket, ServiceTicket.equipment_id == Equipment.id)
+        .options(joinedload(Equipment.client))
         .filter(
-            ServiceTicket.equipment_id.is_not(None),
-            ServiceTicket.created_at >= _to_naive_utc(window.start),
-            ServiceTicket.created_at < _to_naive_utc(window.end_exclusive),
+            ServiceTicket.created_at >= _to_utc(window.start),
+            ServiceTicket.created_at < _to_utc(window.end_exclusive),
         )
-        .group_by(ServiceTicket.equipment_id)
+        .group_by(Equipment.id)
         .having(func.count(ServiceTicket.id) >= min_tickets)
         .all()
     )
     out_rows: list[tuple[Any, ...]] = []
-    for equipment_id, count in rows_raw:
-        equipment = session.get(Equipment, equipment_id) if equipment_id is not None else None
-        if equipment is None:  # pragma: no cover - FK is SET NULL; can't happen for filtered rows
-            continue
+    for equipment, count in rows_raw:
         client = equipment.client
         out_rows.append(
             (
-                equipment_id.hex(),
+                equipment.id.hex(),
                 equipment.label,
                 client.name if client is not None else "—",
                 int(count),

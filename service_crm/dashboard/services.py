@@ -13,7 +13,7 @@ No writes. No commits. No model mutations.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import func
@@ -178,8 +178,6 @@ def technician_utilization_pct(session: Session, *, today: date | None = None) -
         .filter(Technician.is_active.is_(True))
         .all()
     )
-    if not techs:
-        return 0
     total_capacity = sum(int(weekly) for _, weekly in techs)
     if total_capacity <= 0:
         return 0
@@ -192,8 +190,8 @@ def technician_utilization_pct(session: Session, *, today: date | None = None) -
         session.query(func.count(TechnicianAssignment.id))
         .filter(
             TechnicianAssignment.technician_id.in_(tech_ids),
-            TechnicianAssignment.assigned_at >= _to_naive_utc(week.start),
-            TechnicianAssignment.assigned_at < _to_naive_utc(week.end_exclusive),
+            TechnicianAssignment.assigned_at >= _to_utc(week.start),
+            TechnicianAssignment.assigned_at < _to_utc(week.end_exclusive),
         )
         .scalar()
         or 0
@@ -203,14 +201,16 @@ def technician_utilization_pct(session: Session, *, today: date | None = None) -
     return min(pct, 999)
 
 
-def _to_naive_utc(d: date) -> datetime:
+def _to_utc(d: date) -> datetime:
     """``date`` → midnight UTC ``datetime``.
 
-    ``ServiceTicket.due_at`` and friends are timezone-aware columns;
-    SQLAlchemy + SQLite accept a naive datetime for the comparison
-    fine, but Postgres-side we want explicit UTC so the index is hit.
+    Returns a timezone-aware value so it compares cleanly against the
+    ``DateTime(timezone=True)`` columns the dashboard reads. Postgres
+    needs the comparison to be tz-aware to keep the index usable; on
+    SQLite the difference is cosmetic but stays consistent with the
+    column type.
     """
-    return datetime(d.year, d.month, d.day)
+    return datetime(d.year, d.month, d.day, tzinfo=UTC)
 
 
 # ── Secondary panels ─────────────────────────────────────────────────────────
@@ -269,38 +269,27 @@ def high_risk_machines(
 ) -> list[dict[str, Any]]:
     """Equipment with ≥ ``min_tickets`` opened inside ``window``.
 
-    The dashboard's "recurring issues" proxy until v1.3 lands the
-    proper ``TechnicianSkill`` + finding-bucketing report. Returns
-    plain dicts so the template doesn't lazy-load the equipment
-    relationship.
+    Single query: joins :class:`Equipment` so the row materialises in
+    one round-trip — no per-equipment ``session.get`` follow-up.
+    Returns plain dicts so the template doesn't wander off the
+    relationship graph.
     """
     rows = (
         session.query(
-            ServiceTicket.equipment_id,
+            Equipment,
             func.count(ServiceTicket.id).label("ticket_count"),
         )
+        .join(ServiceTicket, ServiceTicket.equipment_id == Equipment.id)
         .filter(
-            ServiceTicket.equipment_id.is_not(None),
-            ServiceTicket.created_at >= _to_naive_utc(window.start),
-            ServiceTicket.created_at < _to_naive_utc(window.end_exclusive),
+            ServiceTicket.created_at >= _to_utc(window.start),
+            ServiceTicket.created_at < _to_utc(window.end_exclusive),
         )
-        .group_by(ServiceTicket.equipment_id)
+        .group_by(Equipment.id)
         .having(func.count(ServiceTicket.id) >= min_tickets)
+        .order_by(func.count(ServiceTicket.id).desc())
         .all()
     )
-    out: list[dict[str, Any]] = []
-    for equipment_id, count in rows:
-        equipment = session.get(Equipment, equipment_id) if equipment_id is not None else None
-        if equipment is None:  # pragma: no cover - orphan guard (FK is SET NULL)
-            continue
-        out.append(
-            {
-                "equipment": equipment,
-                "ticket_count": int(count),
-            }
-        )
-    out.sort(key=lambda row: int(row["ticket_count"]), reverse=True)
-    return out
+    return [{"equipment": equipment, "ticket_count": int(count)} for equipment, count in rows]
 
 
 def technician_load_week(
@@ -330,8 +319,8 @@ def technician_load_week(
         )
         .filter(
             TechnicianAssignment.technician_id.in_([t.id for t in techs]),
-            TechnicianAssignment.assigned_at >= _to_naive_utc(week.start),
-            TechnicianAssignment.assigned_at < _to_naive_utc(week.end_exclusive),
+            TechnicianAssignment.assigned_at >= _to_utc(week.start),
+            TechnicianAssignment.assigned_at < _to_utc(week.end_exclusive),
         )
         .group_by(TechnicianAssignment.technician_id)
         .all()

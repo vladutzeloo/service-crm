@@ -235,9 +235,12 @@ def _csv_response(
     window: DateWindow,
     result: services.ReportResult,
 ) -> Any:
-    rows: list[Sequence[Any]] = [r for r in result.rows]
-    if result.total_row is not None:
-        rows.append(result.total_row)
+    """All v0.8 reports ship a non-None ``total_row``; the loop below
+    appends it unconditionally. Reports that want to skip the footer
+    should emit ``total_row=()`` (an empty tuple renders as a blank
+    trailing row, which spreadsheets ignore)."""
+    rows: list[Sequence[Any]] = list(result.rows)
+    rows.append(result.total_row or ())
     return write_csv(
         report_code=report_code,
         window=window,
