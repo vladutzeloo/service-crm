@@ -249,7 +249,13 @@ def _part_search_filter(q: str) -> Any:
     if _dialect() == "postgresql":
         from sqlalchemy import literal_column
 
-        tsq = func.plainto_tsquery(literal_column("'simple'"), q)
+        # ``plainto_tsquery`` keeps a hyphenated input as a compound
+        # lexeme (e.g. ``part-a``) but the indexed ``to_tsvector``
+        # carries the individual tokens too; the match would fail for
+        # codes like ``X-12``. Normalising non-word chars to spaces
+        # lets the query tokenise the same way the indexed vector did.
+        normalised = _normalise_for_tsquery(q)
+        tsq = func.plainto_tsquery(literal_column("'simple'"), normalised)
         text = func.coalesce(PartMaster.code, "") + " " + func.coalesce(PartMaster.description, "")
         return func.to_tsvector(literal_column("'simple'"), text).op("@@")(tsq)
     pattern = f"%{q.lower()}%"
@@ -257,6 +263,18 @@ def _part_search_filter(q: str) -> Any:
         func.lower(PartMaster.code).like(pattern),
         func.lower(PartMaster.description).like(pattern),
     )
+
+
+def _normalise_for_tsquery(q: str) -> str:
+    """Replace non-word characters with spaces.
+
+    Used on the Postgres path before ``plainto_tsquery`` so hyphenated
+    inputs (``part-a``) don't get rejected for not matching a
+    compound lexeme that the indexed text didn't produce on its own.
+    """
+    import re
+
+    return re.sub(r"[^\w\s]", " ", q)
 
 
 def list_parts(

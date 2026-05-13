@@ -138,9 +138,14 @@ def _render_inline(text: str) -> str:
 
 
 def _apply_emphasis_and_links(text: str) -> str:
-    text = _LINK_RE.sub(_link_sub, text)
+    # Emphasis runs *before* link substitution so a URL like
+    # ``http://ex.com/a*b*c`` can't have its ``href`` corrupted by the
+    # italic regex. Emphasis inside link labels still renders because
+    # ``[**bold**](url)`` becomes ``[<strong>bold</strong>](url)``
+    # before the link regex consumes the brackets.
     text = _BOLD_RE.sub(r"<strong>\1</strong>", text)
     text = _ITALIC_RE.sub(r"<em>\1</em>", text)
+    text = _LINK_RE.sub(_link_sub, text)
     return text
 
 

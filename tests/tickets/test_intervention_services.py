@@ -580,6 +580,31 @@ def test_list_intervention_photos_excludes_inactive(db_session: Session) -> None
 
 
 @pytest.mark.integration
+def test_part_search_filter_sqlite_branch(monkeypatch) -> None:
+    """The SQLite LIKE fallback. On the Postgres CI leg the real
+    ``_dialect()`` returns ``postgresql`` and skips this branch, so we
+    monkeypatch to keep coverage stable across both legs."""
+    monkeypatch.setattr(
+        "service_crm.tickets.intervention_services._dialect",
+        lambda: "sqlite",
+    )
+    flt = intervention_services._part_search_filter("Spindle")
+    assert flt is not None
+    compiled = str(flt.compile(compile_kwargs={"literal_binds": True})).lower()
+    assert "like" in compiled
+    assert "%spindle%" in compiled
+
+
+@pytest.mark.unit
+def test_part_search_filter_empty_returns_none(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "service_crm.tickets.intervention_services._dialect",
+        lambda: "sqlite",
+    )
+    assert intervention_services._part_search_filter("   ") is None
+
+
+@pytest.mark.integration
 def test_part_search_filter_postgres_branch(db_session: Session, monkeypatch) -> None:
     """Postgres path returns a tsvector @@ tsquery expression — compile
     the SQL without executing so we exercise the lines without needing

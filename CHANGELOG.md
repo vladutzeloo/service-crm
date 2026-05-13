@@ -79,6 +79,18 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
   - **RO + EN translations** for every new label, button caption,
     flash message, and form hint; catalogs compiled into the wheel.
 
+### Fixed
+
+- Part / procedure search on Postgres: ``plainto_tsquery`` keeps a
+  hyphenated input (``part-a``) as a compound lexeme but the indexed
+  ``to_tsvector`` carries the individual tokens too — the conjunction
+  would never match for codes like ``X-12``. The query is now
+  normalised by replacing non-word characters with spaces before
+  being handed to ``plainto_tsquery`` so it tokenises the same way as
+  the indexed vector. Applies to both ``part_master`` and
+  ``procedure_document`` search; SQLite ``LIKE`` was already
+  hyphen-safe.
+
 ### Changed
 
 - `service_crm/__init__.py` registers the `knowledge` blueprint.

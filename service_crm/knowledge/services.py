@@ -347,9 +347,15 @@ def _procedure_search_filter(q: str) -> Any:
     if not q:
         return None
     if _dialect() == "postgresql":
+        import re
+
         from sqlalchemy import literal_column
 
-        tsq = func.plainto_tsquery(literal_column("'simple'"), q)
+        # Normalise hyphens / punctuation so ``plainto_tsquery`` doesn't
+        # produce compound lexemes the indexed vector lacks. See
+        # ``tickets.intervention_services._part_search_filter``.
+        normalised = re.sub(r"[^\w\s]", " ", q)
+        tsq = func.plainto_tsquery(literal_column("'simple'"), normalised)
         text = (
             func.coalesce(ProcedureDocument.title, "")
             + " "

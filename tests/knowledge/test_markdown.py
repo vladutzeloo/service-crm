@@ -145,3 +145,12 @@ def test_link_with_path_having_colon() -> None:
     # A relative URL with a colon inside the path (after a slash) is allowed.
     html = render("[ok](/foo/bar:baz)")
     assert 'href="/foo/bar:baz"' in html
+
+
+def test_link_url_with_asterisks_not_corrupted_by_emphasis() -> None:
+    # If the italic regex ran *after* link substitution, ``*b*`` inside
+    # the URL would be replaced with ``<em>b</em>`` and the href would
+    # break. Emphasis runs first so this round-trips cleanly.
+    html = render("[link](http://ex.com/a*b*c)")
+    assert 'href="http://ex.com/a*b*c"' in html
+    assert "<em>" not in html

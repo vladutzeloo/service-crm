@@ -483,6 +483,24 @@ def test_procedure_search_filter_postgres_branch(monkeypatch) -> None:
 
 
 @pytest.mark.integration
+def test_procedure_search_filter_sqlite_branch(monkeypatch) -> None:
+    """SQLite LIKE fallback — covered explicitly so the Postgres CI
+    leg doesn't drop the dialect branch."""
+    monkeypatch.setattr("service_crm.knowledge.services._dialect", lambda: "sqlite")
+    flt = services._procedure_search_filter("hello")
+    assert flt is not None
+    compiled = str(flt.compile(compile_kwargs={"literal_binds": True})).lower()
+    assert "like" in compiled
+    assert "%hello%" in compiled
+
+
+@pytest.mark.unit
+def test_procedure_search_filter_empty_returns_none(monkeypatch) -> None:
+    monkeypatch.setattr("service_crm.knowledge.services._dialect", lambda: "sqlite")
+    assert services._procedure_search_filter("  ") is None
+
+
+@pytest.mark.integration
 def test_update_procedure_clears_tags_on_empty(db_session: Session) -> None:
     tag = ProcedureTagFactory()
     doc = ProcedureDocumentFactory()
