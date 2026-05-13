@@ -61,7 +61,7 @@
     {% set _ = rows.append([
       t.due_on,
       status_cell,
-      (t.assigned_technician_id.hex()[:8] if t.assigned_technician_id else '—'),
+      (t.assigned_technician.label if t.assigned_technician else '—'),
       ticket_cell,
       actions,
     ]) %}

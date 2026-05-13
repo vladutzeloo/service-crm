@@ -449,7 +449,7 @@ def escalate_task(
 
 def _lookup_code_id(session: Session, model: Any, code: str) -> bytes | None:
     row = session.query(model).filter(func.lower(model.code) == code.lower()).first()
-    return bytes(row.id) if row is not None else None
+    return row.id if row is not None else None
 
 
 # ── Scheduler entrypoint ─────────────────────────────────────────────────────

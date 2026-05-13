@@ -16,6 +16,15 @@ from ..shared import idempotency
 from . import bp, forms, services
 from .models import Technician
 
+# Default windows for the per-technician detail page's capacity-slot
+# section: surface a week of history plus two weeks of look-ahead.
+_SLOT_VIEW_PAST_DAYS = 7
+_SLOT_VIEW_FUTURE_DAYS = 14
+
+# Default look-ahead window for the planning capacity grid — two weeks
+# is dense enough to plan but short enough that the page stays compact.
+_CAPACITY_DEFAULT_WINDOW_DAYS = 13
+
 
 def _tok() -> str:
     return uuid.uuid4().hex
@@ -119,8 +128,8 @@ def technician_detail(technician_hex: str) -> Any:
     slots = services.list_capacity_slots(
         db.session,
         technician_id=tech.id,
-        start=today - timedelta(days=7),
-        end=today + timedelta(days=14),
+        start=today - timedelta(days=_SLOT_VIEW_PAST_DAYS),
+        end=today + timedelta(days=_SLOT_VIEW_FUTURE_DAYS),
     )
     slot_form = forms.CapacitySlotForm()
     if (
@@ -196,9 +205,10 @@ def _today() -> date:
 def capacity() -> Any:
     today = _today()
     start = _parse_date(request.args.get("start")) or today
-    end = _parse_date(request.args.get("end")) or (start + timedelta(days=13))
+    default_end = start + timedelta(days=_CAPACITY_DEFAULT_WINDOW_DAYS)
+    end = _parse_date(request.args.get("end")) or default_end
     if end < start:
-        end = start + timedelta(days=13)
+        end = default_end
     load = services.daily_load(db.session, start=start, end=end)
     return render_template(
         "planning/capacity.html",

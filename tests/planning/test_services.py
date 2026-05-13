@@ -290,7 +290,38 @@ def test_daily_load_counts_assignments(db_session, frozen_clock):
     db_session.flush()
     rows = services.daily_load(db_session, start=frozen_clock.date(), end=frozen_clock.date())
     my_row = _row_for(rows, tech)
-    assert my_row["days"][0]["assignment_count"] == 1
+    cell = my_row["days"][0]
+    assert cell["assignment_count"] == 1
+    assert cell["scheduled_minutes"] == services.DEFAULT_ASSIGNMENT_MINUTES
+
+
+def test_daily_load_tone_scales_with_saturation(db_session, frozen_clock):
+    """At low load the cell tone is ``success``; at >= 100 % it's ``danger``."""
+    day = frozen_clock.date()
+    # Tiny capacity slot makes the single assignment saturate the day.
+    busy = TechnicianFactory(display_name="busy-tone-tech")
+    TechnicianCapacitySlotFactory(technician=busy, day=day, capacity_minutes=30)
+    ticket_busy = ServiceTicketFactory(number=950_700)
+    iv_busy = ServiceInterventionFactory(ticket=ticket_busy, started_at=frozen_clock)
+    TechnicianAssignmentFactory(technician=busy, ticket=None, intervention=iv_busy)
+    # Plenty of capacity → the same assignment stays in the success band.
+    slack = TechnicianFactory(display_name="slack-tone-tech")
+    TechnicianCapacitySlotFactory(technician=slack, day=day, capacity_minutes=480)
+    ticket_slack = ServiceTicketFactory(number=950_701)
+    iv_slack = ServiceInterventionFactory(ticket=ticket_slack, started_at=frozen_clock)
+    TechnicianAssignmentFactory(technician=slack, ticket=None, intervention=iv_slack)
+    # Mid-band capacity → warning tone (ratio between 0.75 and 1.0).
+    edge = TechnicianFactory(display_name="edge-tone-tech")
+    TechnicianCapacitySlotFactory(technician=edge, day=day, capacity_minutes=70)
+    ticket_edge = ServiceTicketFactory(number=950_702)
+    iv_edge = ServiceInterventionFactory(ticket=ticket_edge, started_at=frozen_clock)
+    TechnicianAssignmentFactory(technician=edge, ticket=None, intervention=iv_edge)
+    db_session.flush()
+
+    rows = services.daily_load(db_session, start=day, end=day)
+    assert _row_for(rows, busy)["days"][0]["tone"] == "danger"
+    assert _row_for(rows, slack)["days"][0]["tone"] == "success"
+    assert _row_for(rows, edge)["days"][0]["tone"] == "warning"
 
 
 def test_daily_load_swaps_inverted_range(db_session, frozen_clock):

@@ -176,6 +176,17 @@ def delete_capacity_slot(session: Session, slot: TechnicianCapacitySlot) -> None
 
 # ── Capacity view ───────────────────────────────────────────────────────────
 
+# v0.7 has no per-assignment time estimate yet (free-text interventions
+# and tickets don't carry duration), so the capacity view weighs each
+# assignment by a flat default. v1.3 will replace this with the
+# templated-action duration sum.
+DEFAULT_ASSIGNMENT_MINUTES = 60
+
+# Saturation thresholds: under this ratio the cell renders as the
+# "success" tone; up to 1.0 as "warning"; otherwise "danger".
+_LOAD_TONE_SUCCESS = 0.75
+_LOAD_TONE_WARNING = 1.0
+
 
 def daily_load(
     session: Session,
@@ -190,6 +201,14 @@ def daily_load(
     assignments count against their started_at date. Capacity comes from
     :class:`TechnicianCapacitySlot`; days without a slot fall back to
     ``weekly_capacity_minutes / 7`` (rounded down).
+
+    Each ``days[]`` entry carries:
+
+    - ``capacity_minutes`` — declared or fallback minutes available.
+    - ``assignment_count`` — number of assignments on that day.
+    - ``scheduled_minutes`` — ``assignment_count * DEFAULT_ASSIGNMENT_MINUTES``.
+    - ``tone`` — pre-computed UI tone (``success`` / ``warning`` /
+      ``danger``) so the template doesn't carry the ratio math.
     """
     if end < start:
         start, end = end, start
@@ -225,11 +244,21 @@ def daily_load(
             if capacity is None:
                 capacity = tech.weekly_capacity_minutes // 7
             count = scheduled.get((tech.id, d), 0)
+            scheduled_minutes = count * DEFAULT_ASSIGNMENT_MINUTES
+            ratio = scheduled_minutes / capacity if capacity else 0.0
+            if ratio < _LOAD_TONE_SUCCESS:
+                tone = "success"
+            elif ratio < _LOAD_TONE_WARNING:
+                tone = "warning"
+            else:
+                tone = "danger"
             per_day.append(
                 {
                     "day": d,
                     "capacity_minutes": capacity,
                     "assignment_count": count,
+                    "scheduled_minutes": scheduled_minutes,
+                    "tone": tone,
                 }
             )
         rows.append({"technician": tech, "days": per_day})

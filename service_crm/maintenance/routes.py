@@ -23,6 +23,12 @@ from . import bp, forms, services
 from ._translations import task_status_label, task_status_tone
 from .models import MaintenancePlan, TaskStatus
 
+# Cap on the dropdown of "link an existing intervention to this task" —
+# enough to cover real field histories without dumping the whole table
+# into the form. If a technician's target slips off, they can open the
+# intervention directly and link from its detail page.
+_INTERVENTION_CHOICE_LIMIT = 20
+
 
 def _tok() -> str:
     return uuid.uuid4().hex
@@ -406,7 +412,7 @@ def _populate_intervention_choices(form: forms.TaskCompleteForm, plan: Maintenan
         .join(ServiceIntervention.ticket)
         .filter(ServiceIntervention.ticket.has(equipment_id=plan.equipment_id))
         .order_by(ServiceIntervention.started_at.desc())
-        .limit(20)
+        .limit(_INTERVENTION_CHOICE_LIMIT)
         .all()
     )
     choices: list[tuple[str, str]] = [("", _("— no linked intervention —"))]

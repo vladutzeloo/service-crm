@@ -88,10 +88,14 @@ class MaintenanceTemplate(db.Model, Auditable):  # type: ignore[name-defined,mis
     )
 
     checklist_template: Mapped[ChecklistTemplate | None] = relationship("ChecklistTemplate")
+    # No ``delete``/``delete-orphan`` cascade: the FK on
+    # ``maintenance_plan.template_id`` uses ``ondelete="RESTRICT"``, so
+    # deleting a template with live plans is an error by design. The ORM
+    # cascade would race the DB constraint and turn the friendly
+    # ValueError into an opaque IntegrityError.
     plans: Mapped[list[MaintenancePlan]] = relationship(
         "MaintenancePlan",
         back_populates="template",
-        cascade="all, delete-orphan",
         order_by="MaintenancePlan.created_at",
     )
 

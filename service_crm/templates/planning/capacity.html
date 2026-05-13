@@ -45,11 +45,9 @@
           </a>
         </th>
         {% for cell in row.days %}
-          {% set ratio = (cell.assignment_count * 60) / (cell.capacity_minutes if cell.capacity_minutes else 1) %}
-          {% set tone = 'success' if ratio < 0.75 else ('warning' if ratio < 1.0 else 'danger') %}
-          <td class="capacity-cell capacity-cell-{{ tone }}" data-label="{{ cell.day }}">
+          <td class="capacity-cell capacity-cell-{{ cell.tone }}" data-label="{{ cell.day }}">
             <div class="capacity-cell-count">{{ cell.assignment_count }}</div>
-            <div class="capacity-cell-cap">{{ cell.capacity_minutes }}m</div>
+            <div class="capacity-cell-cap">{{ cell.scheduled_minutes }}/{{ cell.capacity_minutes }}m</div>
           </td>
         {% endfor %}
       </tr>
