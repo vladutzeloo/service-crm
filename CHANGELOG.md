@@ -12,6 +12,17 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 ## [Unreleased]
 
+### Added
+
+- `docs/v0.9-plan.md` — `/architecture-audit` output for ROADMAP §0.9.0
+  ("Hardening for 1.0"). Doc-only; no application code. Maps the §1 /
+  §2 / §3 bars in `docs/v1-implementation-goals.md` onto eight
+  workstreams (W0 minimum dashboard slice through W8 phone / a11y /
+  i18n polish), addresses the 0.8 dashboard gap head-on (recommends
+  absorbing a minimum dashboard slice into 0.9 as W0 — catch-up
+  release pattern from PR #21), and sequences the workstreams as a
+  series of small PRs against this branch rather than one mega-PR.
+
 ## [0.7.0] - 2026-05-13
 
 ### Added
