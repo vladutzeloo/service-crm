@@ -1,0 +1,25 @@
+{% extends "reports/_layout.html" %}
+{% from "macros/data_table.html" import data_table %}
+
+{% block report_body %}
+{% set cols = [_("Equipment"), _("Interventions"), _("Minutes"), _("Still open")] %}
+{% set rows = [] %}
+{% for code, label, count, minutes, open_count in result.rows %}
+  {% set name_cell %}
+    {% if code %}
+      <a href="{{ url_for('tickets.list_tickets', equipment=code) }}" class="cell-link">{{ label }}</a>
+    {% else %}{{ label }}{% endif %}
+  {% endset %}
+  {% set _ = rows.append([name_cell, count, minutes, open_count]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No interventions recorded in this window.")) }}
+
+{% if result.total_row %}
+<p class="report-total">
+  <strong>{{ _("Total:") }}</strong>
+  {{ result.total_row[2] }} {{ _("interventions") }} •
+  {{ result.total_row[3] }} {{ _("min") }} •
+  {{ result.total_row[4] }} {{ _("still open") }}
+</p>
+{% endif %}
+{% endblock %}

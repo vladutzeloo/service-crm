@@ -147,6 +147,10 @@ module = [
     "service_crm.maintenance.routes",
     "service_crm.maintenance.services",
     "service_crm.planning.routes",
+    "service_crm.dashboard.routes",
+    "service_crm.dashboard.services",
+    "service_crm.reports.routes",
+    "service_crm.reports.services",
     "service_crm.shared.scheduler",
     "service_crm.cli",
 ]

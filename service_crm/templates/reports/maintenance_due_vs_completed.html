@@ -1,0 +1,22 @@
+{% extends "reports/_layout.html" %}
+{% from "macros/data_table.html" import data_table %}
+
+{% block report_body %}
+{% set cols = [result.headers[0], _("Due"), _("Completed"), _("Delta")] %}
+{% set rows = [] %}
+{% for bucket_date, due, done in result.rows %}
+  {% set delta = done - due %}
+  {% set delta_cell %}
+    <span class="pill pill-{{ 'success' if delta >= 0 else 'warning' }}">{{ delta }}</span>
+  {% endset %}
+  {% set _ = rows.append([bucket_date, due, done, delta_cell]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No maintenance activity in this window.")) }}
+
+{% if result.total_row %}
+<p class="report-total">
+  <strong>{{ _("Total:") }}</strong>
+  {{ result.total_row[1] }} {{ _("due") }} • {{ result.total_row[2] }} {{ _("completed") }}
+</p>
+{% endif %}
+{% endblock %}
