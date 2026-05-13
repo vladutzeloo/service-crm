@@ -141,6 +141,8 @@ module = [
     "service_crm.clients.routes",
     "service_crm.equipment.routes",
     "service_crm.tickets.routes",
+    "service_crm.tickets.intervention_routes",
+    "service_crm.knowledge.routes",
     "service_crm.cli",
 ]
 disable_error_code = ["arg-type"]

@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Intervention") }} — {{ ticket.label }}{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('tickets.list_tickets') }}">{{ _("Tickets") }}</a>
+    › <a href="{{ url_for('tickets.detail', ticket_hex=ticket.id.hex()) }}">{{ ticket.label }}</a>
+  </div>
+{% endblock %}
+{% block page_title %}{{ _("Intervention") }} — <span class="mono">{{ ticket.label }}</span>{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+  <div class="detail-meta">
+    <span class="meta-item">{{ icon("clock") }} {{ intervention.started_at.strftime('%Y-%m-%d %H:%M') }}</span>
+    {% if intervention.is_open %}
+      <span class="badge badge-good">{{ _("In progress") }}</span>
+    {% else %}
+      <span class="meta-item">{{ icon("check") }} {{ intervention.ended_at.strftime('%Y-%m-%d %H:%M') }}</span>
+      {% if intervention.duration_minutes is not none %}
+        <span class="meta-item">{{ intervention.duration_minutes }} {{ _("min") }}</span>
+      {% endif %}
+    {% endif %}
+    {% if intervention.technician %}
+      <span class="meta-item">{{ icon("user-cog") }} {{ intervention.technician.email }}</span>
+    {% endif %}
+  </div>
+  <div class="detail-actions">
+    <a href="{{ url_for('tickets.intervention_edit', ticket_hex=ticket.id.hex(), intervention_hex=intervention.id.hex()) }}"
+       class="btn btn-sm btn-secondary">{{ icon("edit-2") }} {{ _("Edit") }}</a>
+    {% if intervention.is_open %}
+      <form method="post"
+            action="{{ url_for('tickets.intervention_stop', ticket_hex=ticket.id.hex(), intervention_hex=intervention.id.hex()) }}"
+            class="inline-form">
+        {{ stop_form.csrf_token }}
+        <input type="hidden" name="idempotency_token" value="{{ tok }}">
+        <button type="submit" class="btn btn-sm btn-primary">{{ icon("square") }} {{ _("Stop") }}</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if intervention.summary %}
+<div class="detail-notes">{{ intervention.summary }}</div>
+{% endif %}
+
+<section class="intervention-section">
+  <h3>{{ _("Actions") }}</h3>
+  {% set a_cols = [_("When"), _("Action"), _("Duration"), ""] %}
+  {% set a_rows = [] %}
+  {% for a in intervention.actions %}
+    {% set del_url = url_for('tickets.intervention_action_delete',
+                             ticket_hex=ticket.id.hex(),
+                             intervention_hex=intervention.id.hex(),
+                             action_hex=a.id.hex()) %}
+    {% set del_html %}
+      <form method="post" action="{{ del_url }}" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-ghost btn-danger-ghost"
+                onclick="return confirm('{{ _("Delete this action?") }}')">{{ icon("trash-2") }}</button>
+      </form>
+    {% endset %}
+    {% set _ = a_rows.append([
+      a.created_at.strftime('%Y-%m-%d %H:%M'),
+      a.description,
+      ((a.duration_minutes|string ~ ' ' ~ _("min")) if a.duration_minutes is not none else '—'),
+      del_html,
+    ]) %}
+  {% endfor %}
+  {{ data_table(a_cols, a_rows, empty=_("No actions yet.")) }}
+
+  <form method="post"
+        action="{{ url_for('tickets.intervention_action_create', ticket_hex=ticket.id.hex(), intervention_hex=intervention.id.hex()) }}"
+        class="inline-compose">
+    {{ action_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <textarea name="description" class="input textarea" rows="2" maxlength="4000"
+              placeholder="{{ _('Add an action…') }}" required></textarea>
+    <input type="number" name="duration_minutes" class="input input-sm" min="0" max="10000"
+           inputmode="numeric" placeholder="{{ _('min') }}">
+    <button type="submit" class="btn btn-primary btn-sm">{{ _("Add") }}</button>
+  </form>
+</section>
+
+<section class="intervention-section">
+  <h3>{{ _("Findings") }}</h3>
+  {% set f_cols = [_("When"), _("Kind"), _("Finding"), ""] %}
+  {% set f_rows = [] %}
+  {% for f in intervention.findings %}
+    {% set del_url = url_for('tickets.intervention_finding_delete',
+                             ticket_hex=ticket.id.hex(),
+                             intervention_hex=intervention.id.hex(),
+                             finding_hex=f.id.hex()) %}
+    {% set del_html %}
+      <form method="post" action="{{ del_url }}" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-ghost btn-danger-ghost"
+                onclick="return confirm('{{ _("Delete this finding?") }}')">{{ icon("trash-2") }}</button>
+      </form>
+    {% endset %}
+    {% set kind_html %}
+      <span class="badge badge-{% if f.is_root_cause %}first-off{% else %}muted{% endif %}">
+        {{ finding_kind_label(f.is_root_cause) }}
+      </span>
+    {% endset %}
+    {% set _ = f_rows.append([
+      f.created_at.strftime('%Y-%m-%d %H:%M'),
+      kind_html,
+      f.description,
+      del_html,
+    ]) %}
+  {% endfor %}
+  {{ data_table(f_cols, f_rows, empty=_("No findings yet.")) }}
+
+  <form method="post"
+        action="{{ url_for('tickets.intervention_finding_create', ticket_hex=ticket.id.hex(), intervention_hex=intervention.id.hex()) }}"
+        class="inline-compose">
+    {{ finding_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <textarea name="description" class="input textarea" rows="2" maxlength="4000"
+              placeholder="{{ _('Add a finding…') }}" required></textarea>
+    <label class="inline-check">
+      <input type="checkbox" name="is_root_cause" value="y">
+      {{ _("Root cause") }}
+    </label>
+    <button type="submit" class="btn btn-primary btn-sm">{{ _("Add") }}</button>
+  </form>
+</section>
+
+<section class="intervention-section">
+  <h3>{{ _("Parts used") }}</h3>
+  {% set p_cols = [_("Code"), _("Description"), _("Quantity"), _("Unit")] %}
+  {% set p_rows = [] %}
+  {% for code, descr, qty, unit in grouped_parts %}
+    {% set _ = p_rows.append([code, descr or '—', qty, unit]) %}
+  {% endfor %}
+  {{ data_table(p_cols, p_rows, empty=_("No parts used yet.")) }}
+
+  <form method="post"
+        action="{{ url_for('tickets.intervention_part_create', ticket_hex=ticket.id.hex(), intervention_hex=intervention.id.hex()) }}"
+        class="inline-compose">
+    {{ part_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <select name="part_id" class="input input-sm">
+      {% for value, label in part_form.part_id.choices %}
+        <option value="{{ value }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="part_code" class="input input-sm" maxlength="80"
+           placeholder="{{ _('Or type a code') }}" autocomplete="off">
+    <input type="number" name="quantity" class="input input-sm" min="1" max="10000" value="1"
+           inputmode="numeric" required>
+    <button type="submit" class="btn btn-primary btn-sm">{{ _("Add") }}</button>
+  </form>
+</section>
+
+<section class="intervention-section">
+  <h3>{{ _("Photos") }}</h3>
+  <form method="post" enctype="multipart/form-data"
+        action="{{ url_for('tickets.intervention_photo_create', ticket_hex=ticket.id.hex(), intervention_hex=intervention.id.hex()) }}"
+        class="inline-compose">
+    {{ photo_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <input type="file" name="upload" accept="image/*" capture="environment" required>
+    <button type="submit" class="btn btn-primary btn-sm">{{ _("Upload") }}</button>
+  </form>
+  <div class="photo-grid">
+    {% for p in photos %}
+      <a class="photo-tile"
+         href="{{ url_for('tickets.intervention_photo_download', ticket_hex=ticket.id.hex(), intervention_hex=intervention.id.hex(), photo_hex=p.id.hex()) }}">
+        <img loading="lazy"
+             src="{{ url_for('tickets.intervention_photo_download', ticket_hex=ticket.id.hex(), intervention_hex=intervention.id.hex(), photo_hex=p.id.hex()) }}"
+             alt="{{ p.filename }}">
+      </a>
+    {% else %}
+      <p class="empty">{{ _("No photos yet.") }}</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

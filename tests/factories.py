@@ -28,6 +28,21 @@ from service_crm.equipment.models import (
     EquipmentWarranty,
 )
 from service_crm.extensions import db
+from service_crm.knowledge.models import (
+    ChecklistRun,
+    ChecklistRunItem,
+    ChecklistTemplate,
+    ChecklistTemplateItem,
+    ProcedureDocument,
+    ProcedureTag,
+)
+from service_crm.tickets.intervention_models import (
+    InterventionAction,
+    InterventionFinding,
+    PartMaster,
+    ServiceIntervention,
+    ServicePartUsage,
+)
 from service_crm.tickets.models import (
     ServiceTicket,
     TicketAttachment,
@@ -355,3 +370,201 @@ class TicketAttachmentFactory(SQLAlchemyModelFactory):
     @factory.lazy_attribute
     def uploader_user_id(self) -> bytes | None:
         return self.uploader.id if self.uploader else None  # type: ignore[return-value]
+
+
+# ── Interventions / parts ─────────────────────────────────────────────────────
+
+
+class ServiceInterventionFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = ServiceIntervention
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    ticket = factory.SubFactory(ServiceTicketFactory)
+    technician = None
+    # An hour in the past so ``stop_intervention(clock.now())`` is never
+    # rejected for ``ended_at < started_at`` on hosts where wall-clock
+    # time differs from the test's frozen fixture.
+    started_at = factory.LazyFunction(
+        lambda: (
+            __import__("service_crm.shared.clock", fromlist=["now"]).now()
+            - __import__("datetime").timedelta(hours=1)
+        )
+    )
+    ended_at = None
+    summary = ""
+
+    @factory.lazy_attribute
+    def ticket_id(self) -> bytes:
+        return self.ticket.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def technician_user_id(self) -> bytes | None:
+        return self.technician.id if self.technician else None  # type: ignore[return-value]
+
+
+class InterventionActionFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = InterventionAction
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    intervention = factory.SubFactory(ServiceInterventionFactory)
+    description = factory.Sequence(lambda n: f"Action {n}")
+    duration_minutes = None
+
+    @factory.lazy_attribute
+    def intervention_id(self) -> bytes:
+        return self.intervention.id  # type: ignore[return-value]
+
+
+class InterventionFindingFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = InterventionFinding
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    intervention = factory.SubFactory(ServiceInterventionFactory)
+    description = factory.Sequence(lambda n: f"Finding {n}")
+    is_root_cause = False
+
+    @factory.lazy_attribute
+    def intervention_id(self) -> bytes:
+        return self.intervention.id  # type: ignore[return-value]
+
+
+class PartMasterFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = PartMaster
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    code = factory.Sequence(lambda n: f"PART-{n:04d}")
+    description = factory.Sequence(lambda n: f"Part {n}")
+    unit = "pcs"
+    notes = ""
+    is_active = True
+
+
+class ServicePartUsageFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = ServicePartUsage
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    intervention = factory.SubFactory(ServiceInterventionFactory)
+    part = None
+    part_code = factory.Sequence(lambda n: f"PART-{n:04d}")
+    description = ""
+    quantity = 1
+    unit = "pcs"
+
+    @factory.lazy_attribute
+    def intervention_id(self) -> bytes:
+        return self.intervention.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def part_id(self) -> bytes | None:
+        return self.part.id if self.part else None  # type: ignore[return-value]
+
+
+# ── Knowledge ─────────────────────────────────────────────────────────────────
+
+
+class ChecklistTemplateFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = ChecklistTemplate
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    name = factory.Sequence(lambda n: f"Checklist {n}")
+    description = ""
+    is_active = True
+
+
+class ChecklistTemplateItemFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = ChecklistTemplateItem
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    template = factory.SubFactory(ChecklistTemplateFactory)
+    position = factory.Sequence(lambda n: n)
+    key = factory.Sequence(lambda n: f"item_{n}")
+    label = factory.Sequence(lambda n: f"Item {n}")
+    kind = "bool"
+    is_required = True
+    choice_options = None
+
+    @factory.lazy_attribute
+    def template_id(self) -> bytes:
+        return self.template.id  # type: ignore[return-value]
+
+
+class ChecklistRunFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = ChecklistRun
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    template = factory.SubFactory(ChecklistTemplateFactory)
+    intervention = None
+    snapshot = factory.LazyAttribute(
+        lambda o: {"template_id": o.template.id.hex(), "name": o.template.name, "items": []}
+    )
+    completed_at = None
+
+    @factory.lazy_attribute
+    def template_id(self) -> bytes:
+        return self.template.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def intervention_id(self) -> bytes | None:
+        return self.intervention.id if self.intervention else None  # type: ignore[return-value]
+
+
+class ChecklistRunItemFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = ChecklistRunItem
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    run = factory.SubFactory(ChecklistRunFactory)
+    template_item_id = factory.LazyFunction(
+        lambda: __import__("service_crm.shared.ulid", fromlist=["new"]).new()
+    )
+    position = factory.Sequence(lambda n: n)
+    key = factory.Sequence(lambda n: f"item_{n}")
+    label = factory.Sequence(lambda n: f"Item {n}")
+    kind = "bool"
+    is_required = True
+    answer = None
+    notes = ""
+
+    @factory.lazy_attribute
+    def run_id(self) -> bytes:
+        return self.run.id  # type: ignore[return-value]
+
+
+class ProcedureTagFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = ProcedureTag
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    code = factory.Sequence(lambda n: f"tag-{n}")
+    name = factory.Sequence(lambda n: f"Tag {n}")
+    is_active = True
+
+
+class ProcedureDocumentFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = ProcedureDocument
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    title = factory.Sequence(lambda n: f"Procedure {n}")
+    summary = ""
+    body = ""
+    is_active = True

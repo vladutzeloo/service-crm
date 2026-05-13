@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Parts") }} — Service-CRM{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('tickets.list_tickets') }}">{{ _("Tickets") }}</a>
+  </div>
+{% endblock %}
+{% block page_title %}{{ _("Parts") }}{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+  <form method="get" action="{{ url_for('tickets.parts_list') }}" class="filter-form">
+    <input type="search" name="q" class="input" value="{{ q }}"
+           placeholder="{{ _('Search code or description…') }}" autocomplete="off">
+    <select name="show" class="input">
+      <option value="active" {% if show != 'all' %}selected{% endif %}>{{ _("Active") }}</option>
+      <option value="all" {% if show == 'all' %}selected{% endif %}>{{ _("All") }}</option>
+    </select>
+    <button type="submit" class="btn btn-sm btn-secondary">{{ _("Filter") }}</button>
+  </form>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('tickets.part_new') }}">
+    {{ icon("plus") }} {{ _("New part") }}
+  </a>
+</div>
+
+{% set cols = [_("Code"), _("Description"), _("Unit"), _("Active"), ""] %}
+{% set rows = [] %}
+{% for p in items %}
+  {% set edit_url = url_for('tickets.part_edit', part_hex=p.id.hex()) %}
+  {% set actions %}
+    <a href="{{ edit_url }}" class="btn btn-sm btn-ghost">{{ icon("edit-2") }}</a>
+  {% endset %}
+  {% set _ = rows.append([
+    p.code,
+    p.description or '—',
+    p.unit,
+    (_("Yes") if p.is_active else _("No")),
+    actions,
+  ]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No parts yet.")) }}
+{% endblock %}

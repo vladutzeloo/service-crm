@@ -180,19 +180,19 @@ Core ticket workflow. Splits the ticket domain across two milestones so
 Phone-first slice: the technician must be able to do their whole job
 from a phone in the field.
 
-- [ ] `ServiceIntervention`, `InterventionAction`, `InterventionFinding`.
-- [ ] `PartMaster` lookup, `ServicePartUsage` per intervention.
-- [ ] `ChecklistTemplate`, `ChecklistTemplateItem`, `ChecklistRun`,
+- [x] `ServiceIntervention`, `InterventionAction`, `InterventionFinding`.
+- [x] `PartMaster` lookup, `ServicePartUsage` per intervention.
+- [x] `ChecklistTemplate`, `ChecklistTemplateItem`, `ChecklistRun`,
       `ChecklistRunItem` — frozen snapshot pattern; property-based test
       that historical runs survive template edits.
-- [ ] `ProcedureDocument`, `ProcedureTag`.
-- [ ] Intervention create/edit form built for one-handed phone use:
+- [x] `ProcedureDocument`, `ProcedureTag`.
+- [x] Intervention create/edit form built for one-handed phone use:
       ≥ 44 pt taps, mobile keyboards (`type`/`inputmode`/`autocomplete`),
       camera capture
       (`<input type="file" accept="image/*" capture="environment">`).
-- [ ] Server-side photo compression (Pillow): long edge ≤ 2048 px, WebP q85.
-- [ ] Procedure search (PG `tsvector` / SQLite FTS5).
-- [ ] All form labels, status labels, intervention-action templates
+- [x] Server-side photo compression (Pillow): long edge ≤ 2048 px, WebP q85.
+- [x] Procedure search (PG `tsvector` / SQLite FTS5).
+- [x] All form labels, status labels, intervention-action templates
       translated.
 
 ## 0.7.0 — "Maintenance + planning"

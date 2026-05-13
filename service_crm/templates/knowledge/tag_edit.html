@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% set is_new = tag is none %}
+{% block title %}{{ _("New tag") if is_new else _("Edit tag") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('knowledge.tags_list') }}">{{ _("Tags") }}</a></div>{% endblock %}
+{% block page_title %}{{ _("New tag") if is_new else _("Edit tag") }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('knowledge.tag_new') if is_new else url_for('knowledge.tag_edit', tag_hex=tag.id.hex()) }}"
+        novalidate>
+    <h2 class="form-title">{{ _("Tag") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      {% if is_new %}
+      <div class="field{% if form.code.errors %} field-error{% endif %}">
+        {{ form.code.label }}
+        {{ form.code(class="input", autocomplete="off") }}
+      </div>
+      {% endif %}
+      <div class="field{% if form.name.errors %} field-error{% endif %}">
+        {{ form.name.label }}
+        {{ form.name(class="input") }}
+      </div>
+      {% if not is_new %}
+      <div class="field">
+        {{ form.is_active.label }}
+        {{ form.is_active() }}
+      </div>
+      {% endif %}
+    </div>
+    <div class="form-actions">
+      <a href="{{ url_for('knowledge.tags_list') }}" class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

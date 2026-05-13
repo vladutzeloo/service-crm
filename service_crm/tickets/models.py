@@ -46,7 +46,7 @@ from . import _translations as _t
 from .state import TicketStatus
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
-    pass
+    from .intervention_models import ServiceIntervention
 
 
 class TicketType(db.Model, Auditable):  # type: ignore[name-defined,misc]
@@ -194,6 +194,12 @@ class ServiceTicket(db.Model, Auditable):  # type: ignore[name-defined,misc]
         cascade="all, delete-orphan",
         order_by="desc(TicketAttachment.created_at)",
     )
+    interventions: Mapped[list[ServiceIntervention]] = relationship(
+        "ServiceIntervention",
+        back_populates="ticket",
+        cascade="all, delete-orphan",
+        order_by="desc(ServiceIntervention.started_at)",
+    )
 
     @property
     def status_enum(self) -> TicketStatus:
@@ -301,6 +307,12 @@ class TicketAttachment(db.Model, Auditable):  # type: ignore[name-defined,misc]
         ulid.ULID,
         ForeignKey("service_ticket.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
+    )
+    intervention_id: Mapped[bytes | None] = mapped_column(
+        ulid.ULID,
+        ForeignKey("service_intervention.id", ondelete="SET NULL"),
+        nullable=True,
         index=True,
     )
     uploader_user_id: Mapped[bytes | None] = mapped_column(

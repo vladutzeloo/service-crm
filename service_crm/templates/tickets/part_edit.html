@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% set is_new = part is none %}
+{% block title %}
+  {{ _("New part") if is_new else _("Edit part") }} — Service-CRM
+{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('tickets.parts_list') }}">{{ _("Parts") }}</a>
+  </div>
+{% endblock %}
+{% block page_title %}
+  {{ _("New part") if is_new else _("Edit part") }}
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('tickets.part_new') if is_new else url_for('tickets.part_edit', part_hex=part.id.hex()) }}"
+        novalidate>
+    <h2 class="form-title">{{ _("Part") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      {% if is_new %}
+      <div class="field{% if form.code.errors %} field-error{% endif %}">
+        {{ form.code.label }}
+        {{ form.code(class="input", autocomplete="off") }}
+      </div>
+      {% endif %}
+      <div class="field field-full{% if form.description.errors %} field-error{% endif %}">
+        {{ form.description.label }}
+        {{ form.description(class="input") }}
+      </div>
+      <div class="field{% if form.unit.errors %} field-error{% endif %}">
+        {{ form.unit.label }}
+        {{ form.unit(class="input") }}
+      </div>
+      {% if not is_new %}
+      <div class="field">
+        {{ form.is_active.label }}
+        {{ form.is_active() }}
+      </div>
+      {% endif %}
+      <div class="field field-full{% if form.notes.errors %} field-error{% endif %}">
+        {{ form.notes.label }}
+        {{ form.notes(class="input textarea", rows=3) }}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('tickets.parts_list') }}" class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

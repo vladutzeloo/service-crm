@@ -1,9 +1,12 @@
 """Tickets blueprint.
 
-Owns the ticket workflow for ROADMAP 0.5.0: ``ServiceTicket``, the
-append-only ``TicketStatusHistory``, ``TicketComment`` /
-``TicketAttachment``, and the ``TicketType`` / ``TicketPriority``
-lookups. Mounted under ``/tickets``.
+Owns the ticket workflow:
+
+- v0.5.0: ``ServiceTicket``, append-only ``TicketStatusHistory``,
+  ``TicketComment`` / ``TicketAttachment``, and the ``TicketType`` /
+  ``TicketPriority`` lookups.
+- v0.6.0: ``ServiceIntervention``, ``InterventionAction``,
+  ``InterventionFinding``, ``PartMaster``, ``ServicePartUsage``.
 
 The state machine in ``state.py`` is pure Python so it can be exercised
 with Hypothesis without a session. The audit-of-record for status
@@ -23,6 +26,6 @@ bp = Blueprint(
     template_folder="../templates/tickets",
 )
 
-from . import models, routes  # noqa: E402, F401
+from . import intervention_models, intervention_routes, models, routes  # noqa: E402, F401
 
 __all__ = ["bp"]

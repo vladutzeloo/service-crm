@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% set is_new = template is none %}
+{% block title %}{{ _("New template") if is_new else _("Edit template") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('knowledge.templates_list') }}">{{ _("Checklist templates") }}</a></div>{% endblock %}
+{% block page_title %}{{ _("New template") if is_new else template.name }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('knowledge.template_new') if is_new else url_for('knowledge.template_edit', template_hex=template.id.hex()) }}"
+        novalidate>
+    <h2 class="form-title">{{ _("Template") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      <div class="field field-full{% if form.name.errors %} field-error{% endif %}">
+        {{ form.name.label }}
+        {{ form.name(class="input", autocomplete="off") }}
+      </div>
+      <div class="field field-full{% if form.description.errors %} field-error{% endif %}">
+        {{ form.description.label }}
+        {{ form.description(class="input textarea", rows=3) }}
+      </div>
+      {% if not is_new %}
+      <div class="field">
+        {{ form.is_active.label }}
+        {{ form.is_active() }}
+      </div>
+      {% endif %}
+    </div>
+    <div class="form-actions">
+      <a href="{{ url_for('knowledge.templates_list') }}" class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+
+{% if not is_new %}
+<section class="intervention-section">
+  <h3>{{ _("Items") }}</h3>
+  {% set i_cols = [_("Position"), _("Key"), _("Label"), _("Kind"), _("Required"), ""] %}
+  {% set i_rows = [] %}
+  {% for it in template.items %}
+    {% set del_url = url_for('knowledge.template_item_delete', template_hex=template.id.hex(), item_hex=it.id.hex()) %}
+    {% set del_html %}
+      <form method="post" action="{{ del_url }}" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-ghost btn-danger-ghost"
+                onclick="return confirm('{{ _("Delete this item?") }}')">{{ icon("trash-2") }}</button>
+      </form>
+    {% endset %}
+    {% set _ = i_rows.append([
+      it.position,
+      it.key,
+      it.label,
+      kind_label(it.kind),
+      (_("Yes") if it.is_required else _("No")),
+      del_html,
+    ]) %}
+  {% endfor %}
+  {{ data_table(i_cols, i_rows, empty=_("No items yet.")) }}
+
+  <form method="post"
+        action="{{ url_for('knowledge.template_item_create', template_hex=template.id.hex()) }}"
+        class="inline-compose">
+    {{ item_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <input type="text" name="key" class="input input-sm" maxlength="80" placeholder="{{ _('key') }}" required>
+    <input type="text" name="label" class="input input-sm" maxlength="200" placeholder="{{ _('label') }}" required>
+    <select name="kind" class="input input-sm">
+      {% for value, label in item_form.kind.choices %}
+        <option value="{{ value }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="choice_options" class="input input-sm" placeholder="{{ _('a, b, c') }}">
+    <label class="inline-check">
+      <input type="checkbox" name="is_required" value="y" checked>
+      {{ _("Required") }}
+    </label>
+    <button type="submit" class="btn btn-primary btn-sm">{{ _("Add") }}</button>
+  </form>
+</section>
+{% endif %}
+{% endblock %}
