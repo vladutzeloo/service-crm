@@ -137,9 +137,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["plan_id"], ["maintenance_plan.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(
-            ["assigned_technician_id"], ["technician.id"], ondelete="SET NULL"
-        ),
+        sa.ForeignKeyConstraint(["assigned_technician_id"], ["technician.id"], ondelete="SET NULL"),
         sa.ForeignKeyConstraint(["ticket_id"], ["service_ticket.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -229,9 +227,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["technician_id"], ["technician.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint(
-            "technician_id", "day", name="uq_technician_capacity_slot_day"
-        ),
+        sa.UniqueConstraint("technician_id", "day", name="uq_technician_capacity_slot_day"),
         sa.CheckConstraint(
             "capacity_minutes >= 0",
             name="ck_technician_capacity_slot_non_negative",
@@ -243,9 +239,7 @@ def upgrade() -> None:
             ["technician_id"],
             unique=False,
         )
-        batch_op.create_index(
-            batch_op.f("ix_technician_capacity_slot_day"), ["day"], unique=False
-        )
+        batch_op.create_index(batch_op.f("ix_technician_capacity_slot_day"), ["day"], unique=False)
 
 
 def downgrade() -> None:
