@@ -53,12 +53,14 @@ def _register_blueprints(app: Flask) -> None:
     from . import (
         auth,
         clients,
+        dashboard,
         dev,
         equipment,
         health,
         knowledge,
         maintenance,
         planning,
+        reports,
         tickets,
     )
 
@@ -70,6 +72,10 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(knowledge.bp)
     app.register_blueprint(maintenance.bp)
     app.register_blueprint(planning.bp)
+    app.register_blueprint(reports.bp)
+    # ``dashboard`` owns ``/`` and registers last so its root rule wins
+    # over any other blueprint that might mount at the same prefix.
+    app.register_blueprint(dashboard.bp)
     dev.register(app)
 
 

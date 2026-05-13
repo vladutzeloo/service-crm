@@ -24,8 +24,11 @@
       <a href="#" class="brand">{{ _("Service-CRM") }}</a>
 
       <div class="nav-section-title">{{ _("Overview") }}</div>
-      <a href="#" class="nav-link is-active">
+      <a href="{{ url_for('dashboard.admin') }}" class="nav-link">
         {{ icon("layout-dashboard") }} {{ _("Dashboard") }}
+      </a>
+      <a href="{{ url_for('dashboard.me') }}" class="nav-link">
+        {{ icon("zap") }} {{ _("My queue") }}
       </a>
 
       <div class="nav-section-title">{{ _("Operations") }}</div>
@@ -40,6 +43,7 @@
       <a href="{{ url_for('tickets.parts_list') }}" class="nav-link">{{ icon("package") }} {{ _("Parts") }}</a>
 
       <div class="nav-section-title">{{ _("Admin") }}</div>
+      <a href="{{ url_for('reports.index') }}" class="nav-link">{{ icon("file-text") }} {{ _("Reports") }}</a>
       <a href="#" class="nav-link">{{ icon("user-cog") }} {{ _("Users") }}</a>
       <a href="#" class="nav-link">{{ icon("file-text") }} {{ _("Audit Log") }}</a>
       <a href="#" class="nav-link">{{ icon("settings") }} {{ _("Settings") }}</a>

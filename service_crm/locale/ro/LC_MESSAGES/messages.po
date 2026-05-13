@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-13 07:22+0000\n"
+"POT-Creation-Date: 2026-05-13 09:36+0000\n"
 "PO-Revision-Date: 2026-05-11 07:22+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ro\n"
@@ -319,6 +319,69 @@ msgstr "Contract șters."
 msgid "%(count)s clients imported."
 msgstr "%(count)s clienți importați."
 
+#: service_crm/dashboard/_translations.py:13
+#: service_crm/templates/dev/macro_smoke.html:29
+msgid "Active clients"
+msgstr "Clienți activi"
+
+#: service_crm/dashboard/_translations.py:14
+#: service_crm/templates/dev/macro_smoke.html:30
+msgid "Open tickets"
+msgstr "Tichete deschise"
+
+#: service_crm/dashboard/_translations.py:15
+msgid "Overdue tickets"
+msgstr "Tichete restante"
+
+#: service_crm/dashboard/_translations.py:16
+msgid "Due maintenance this week"
+msgstr "Mentenanță scadentă săptămâna aceasta"
+
+#: service_crm/dashboard/_translations.py:17
+msgid "Tickets waiting parts"
+msgstr "Tichete care așteaptă piese"
+
+#: service_crm/dashboard/_translations.py:18
+msgid "Technician utilization"
+msgstr "Grad de utilizare tehnicieni"
+
+#: service_crm/dashboard/_translations.py:22
+#: service_crm/reports/_translations.py:14
+msgid "Tickets by status"
+msgstr "Tichete după stare"
+
+#: service_crm/dashboard/_translations.py:23
+msgid "Upcoming maintenance"
+msgstr "Mentenanță apropiată"
+
+#: service_crm/dashboard/_translations.py:24
+msgid "Recent interventions"
+msgstr "Intervenții recente"
+
+#: service_crm/dashboard/_translations.py:25
+msgid "High-risk machines"
+msgstr "Echipamente cu risc ridicat"
+
+#: service_crm/dashboard/_translations.py:26
+msgid "Technician load this week"
+msgstr "Încărcare tehnicieni săptămâna aceasta"
+
+#: service_crm/dashboard/_translations.py:27 service_crm/templates/base.html:31
+#: service_crm/templates/dashboard/admin.html:13
+#: service_crm/templates/dashboard/me.html:10
+#: service_crm/templates/dashboard/me.html:12
+#: service_crm/templates/tickets/list.html:33
+msgid "My queue"
+msgstr "Coada mea"
+
+#: service_crm/dashboard/_translations.py:28
+msgid "My overdue tickets"
+msgstr "Tichetele mele restante"
+
+#: service_crm/dashboard/_translations.py:29
+msgid "My maintenance tasks"
+msgstr "Sarcinile mele de mentenanță"
+
 #: service_crm/equipment/forms.py:24 service_crm/knowledge/forms.py:50
 #: service_crm/templates/equipment/controllers_list.html:28
 #: service_crm/templates/equipment/controllers_list.html:47
@@ -355,6 +418,7 @@ msgstr "Tip controler"
 #: service_crm/equipment/forms.py:48
 #: service_crm/templates/dev/macro_smoke.html:76
 #: service_crm/templates/equipment/list.html:57
+#: service_crm/templates/reports/repeat_issues.html:5
 #: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:28
 msgid "Client"
 msgstr "Client"
@@ -389,7 +453,7 @@ msgstr "Furnizor"
 
 #: service_crm/equipment/routes.py:65 service_crm/equipment/routes.py:76
 #: service_crm/equipment/routes.py:80 service_crm/equipment/routes.py:86
-#: service_crm/maintenance/routes.py:86 service_crm/tickets/forms.py:63
+#: service_crm/maintenance/routes.py:92 service_crm/tickets/forms.py:63
 #: service_crm/tickets/routes.py:99 service_crm/tickets/routes.py:113
 #: service_crm/tickets/routes.py:119
 msgid "— none —"
@@ -536,6 +600,7 @@ msgstr "Cod"
 
 #: service_crm/knowledge/forms.py:20 service_crm/maintenance/forms.py:21
 #: service_crm/templates/knowledge/templates_list.html:16
+#: service_crm/templates/reports/parts_used.html:5
 #: service_crm/templates/tickets/intervention_detail.html:134
 #: service_crm/templates/tickets/parts_list.html:29
 #: service_crm/tickets/forms.py:41 service_crm/tickets/intervention_forms.py:90
@@ -629,13 +694,13 @@ msgstr "Clientul nu a fost găsit."
 #: service_crm/knowledge/routes.py:120 service_crm/knowledge/routes.py:165
 #: service_crm/knowledge/routes.py:209 service_crm/knowledge/routes.py:241
 #: service_crm/knowledge/routes.py:284 service_crm/knowledge/routes.py:323
-#: service_crm/knowledge/routes.py:364 service_crm/maintenance/routes.py:99
-#: service_crm/maintenance/routes.py:145 service_crm/maintenance/routes.py:220
-#: service_crm/maintenance/routes.py:280 service_crm/maintenance/routes.py:314
-#: service_crm/maintenance/routes.py:425 service_crm/maintenance/routes.py:457
-#: service_crm/maintenance/routes.py:489 service_crm/planning/routes.py:83
-#: service_crm/planning/routes.py:153 service_crm/planning/routes.py:224
-#: service_crm/planning/routes.py:255
+#: service_crm/knowledge/routes.py:364 service_crm/maintenance/routes.py:105
+#: service_crm/maintenance/routes.py:151 service_crm/maintenance/routes.py:230
+#: service_crm/maintenance/routes.py:292 service_crm/maintenance/routes.py:328
+#: service_crm/maintenance/routes.py:445 service_crm/maintenance/routes.py:481
+#: service_crm/maintenance/routes.py:517 service_crm/planning/routes.py:94
+#: service_crm/planning/routes.py:168 service_crm/planning/routes.py:240
+#: service_crm/planning/routes.py:271
 #: service_crm/tickets/intervention_routes.py:90
 #: service_crm/tickets/intervention_routes.py:189
 #: service_crm/tickets/intervention_routes.py:251
@@ -682,7 +747,7 @@ msgid "Template created."
 msgstr "Client creat."
 
 #: service_crm/knowledge/routes.py:313 service_crm/knowledge/routes.py:354
-#: service_crm/maintenance/routes.py:129
+#: service_crm/maintenance/routes.py:135
 #, fuzzy
 msgid "Template not found."
 msgstr "Clientul nu a fost găsit."
@@ -740,7 +805,10 @@ msgstr "Minute estimate"
 msgid "Checklist template"
 msgstr "Șabloane checklist"
 
-#: service_crm/maintenance/forms.py:46 service_crm/templates/base.html:38
+#: service_crm/maintenance/forms.py:46 service_crm/templates/base.html:41
+#: service_crm/templates/dashboard/admin.html:79
+#: service_crm/templates/dashboard/admin.html:121
+#: service_crm/templates/dashboard/me.html:112
 #: service_crm/templates/dev/macro_smoke.html:76
 #: service_crm/templates/equipment/controllers_list.html:8
 #: service_crm/templates/equipment/detail.html:10
@@ -753,11 +821,15 @@ msgstr "Șabloane checklist"
 #: service_crm/templates/maintenance/plans_list.html:37
 #: service_crm/templates/maintenance/task_detail.html:14
 #: service_crm/templates/maintenance/tasks_list.html:26
+#: service_crm/templates/reports/interventions_by_machine.html:5
+#: service_crm/templates/reports/repeat_issues.html:5
 #: service_crm/tickets/forms.py:31
 msgid "Equipment"
 msgstr "Echipamente"
 
 #: service_crm/maintenance/forms.py:52
+#: service_crm/templates/dashboard/admin.html:79
+#: service_crm/templates/dashboard/me.html:112
 #: service_crm/templates/knowledge/template_edit.html:15
 #: service_crm/templates/maintenance/plans_list.html:37
 msgid "Template"
@@ -769,15 +841,17 @@ msgid "Last done on"
 msgstr "Ultima dată efectuată"
 
 #: service_crm/maintenance/forms.py:79
+#: service_crm/templates/dashboard/admin.html:107
+#: service_crm/templates/dashboard/admin.html:138
 #: service_crm/templates/planning/capacity.html:33
 #: service_crm/templates/planning/technician_edit.html:6
 #: service_crm/templates/planning/technician_edit.html:13
+#: service_crm/templates/reports/technician_workload.html:5
 #: service_crm/templates/tickets/detail.html:117
 #: service_crm/tickets/intervention_forms.py:22
 #: service_crm/tickets/intervention_forms.py:38
-#, fuzzy
 msgid "Technician"
-msgstr "Tehnicieni în tură"
+msgstr "Tehnician"
 
 #: service_crm/maintenance/forms.py:89
 #, fuzzy
@@ -807,69 +881,72 @@ msgstr "Descriere"
 msgid "Open ticket"
 msgstr "Tichete deschise"
 
-#: service_crm/maintenance/routes.py:111
+#: service_crm/maintenance/routes.py:117
 #, fuzzy
 msgid "Maintenance template created."
 msgstr "Client creat."
 
-#: service_crm/maintenance/routes.py:159
+#: service_crm/maintenance/routes.py:165
 #, fuzzy
 msgid "Maintenance template updated."
 msgstr "Client actualizat."
 
-#: service_crm/maintenance/routes.py:232
+#: service_crm/maintenance/routes.py:242
 #, fuzzy
 msgid "Maintenance plan created."
 msgstr "Planurile de mentenanță apar în v0.7."
 
-#: service_crm/maintenance/routes.py:250 service_crm/maintenance/routes.py:269
-#: service_crm/maintenance/routes.py:310
+#: service_crm/maintenance/routes.py:260 service_crm/maintenance/routes.py:279
+#: service_crm/maintenance/routes.py:322
 #, fuzzy
 msgid "Plan not found."
 msgstr "Garanție inexistentă."
 
-#: service_crm/maintenance/routes.py:292
+#: service_crm/maintenance/routes.py:304
 #, fuzzy
 msgid "Maintenance plan updated."
 msgstr "Planurile de mentenanță apar în v0.7."
 
-#: service_crm/maintenance/routes.py:320
+#: service_crm/maintenance/routes.py:334
 #, python-format
 msgid "Generated %(count)s task(s)."
 msgstr "S-au generat %(count)s sarcină(i)."
 
-#: service_crm/maintenance/routes.py:359 service_crm/maintenance/routes.py:414
-#: service_crm/maintenance/routes.py:446 service_crm/maintenance/routes.py:479
+#: service_crm/maintenance/routes.py:373 service_crm/maintenance/routes.py:430
+#: service_crm/maintenance/routes.py:466 service_crm/maintenance/routes.py:503
 #, fuzzy
 msgid "Task not found."
 msgstr "Contact inexistent."
 
-#: service_crm/maintenance/routes.py:386
+#: service_crm/maintenance/routes.py:402
 #: service_crm/tickets/intervention_routes.py:58
 #: service_crm/tickets/routes.py:125
 #, fuzzy
 msgid "— unassigned —"
 msgstr "— niciuna —"
 
-#: service_crm/maintenance/routes.py:402
+#: service_crm/maintenance/routes.py:418
 #, fuzzy
 msgid "— no linked intervention —"
 msgstr "Editează clientul"
 
-#: service_crm/maintenance/routes.py:434
+#: service_crm/maintenance/routes.py:454
 #, fuzzy
 msgid "Task assigned."
 msgstr "— niciuna —"
 
-#: service_crm/maintenance/routes.py:467
+#: service_crm/maintenance/routes.py:491
 msgid "Task marked done."
 msgstr "Sarcină marcată ca finalizată."
 
-#: service_crm/maintenance/routes.py:499
+#: service_crm/maintenance/routes.py:527
 msgid "Ticket opened from maintenance task."
 msgstr "Tichet deschis din sarcina de mentenanță."
 
 #: service_crm/planning/_translations.py:8
+#: service_crm/templates/dashboard/admin.html:107
+#: service_crm/templates/dashboard/me.html:76
+#: service_crm/templates/dashboard/me.html:94
 #: service_crm/templates/dev/macro_smoke.html:76
 #: service_crm/templates/equipment/detail.html:150
 #: service_crm/templates/maintenance/plan_detail.html:47
@@ -908,7 +985,7 @@ msgstr "Fus orar"
 msgid "Weekly capacity (minutes)"
 msgstr "Capacitate săptămânală (minute)"
 
-#: service_crm/planning/forms.py:54
+#: service_crm/planning/forms.py:54 service_crm/reports/_translations.py:34
 #: service_crm/templates/planning/technician_detail.html:44
 msgid "Day"
 msgstr "Zi"
@@ -919,11 +996,10 @@ msgstr "Zi"
 msgid "Capacity (minutes)"
 msgstr "Durată (minute)"
 
-#: service_crm/planning/forms.py:64
+#: service_crm/planning/forms.py:64 service_crm/templates/dashboard/me.html:71
 #: service_crm/templates/planning/capacity.html:12
-#, fuzzy
 msgid "Start"
-msgstr "Începe"
+msgstr "Pornește"
 
 #: service_crm/planning/forms.py:65
 #: service_crm/templates/planning/capacity.html:16
@@ -938,40 +1014,95 @@ msgstr "Expiră"
 #: service_crm/templates/maintenance/templates_list.html:16
 #: service_crm/templates/planning/capacity.html:19
 #: service_crm/templates/planning/technicians_list.html:16
+#: service_crm/templates/reports/_layout.html:23
+#: service_crm/templates/reports/index.html:18
 #: service_crm/templates/tickets/parts_list.html:22
 #: service_crm/tickets/forms.py:91
 msgid "Filter"
 msgstr "Filtrează"
 
-#: service_crm/planning/routes.py:96
+#: service_crm/planning/routes.py:107
 #, fuzzy
 msgid "Technician added."
 msgstr "Tehnicieni în tură"
 
-#: service_crm/planning/routes.py:114 service_crm/planning/routes.py:141
-#: service_crm/planning/routes.py:214
+#: service_crm/planning/routes.py:125 service_crm/planning/routes.py:154
+#: service_crm/planning/routes.py:230
 #, fuzzy
 msgid "Technician not found."
 msgstr "Contact inexistent."
 
-#: service_crm/planning/routes.py:167
+#: service_crm/planning/routes.py:182
 #, fuzzy
 msgid "Technician updated."
 msgstr "Contact actualizat."
 
-#: service_crm/planning/routes.py:235
+#: service_crm/planning/routes.py:251
 msgid "Capacity slot saved."
 msgstr "Interval de capacitate salvat."
 
-#: service_crm/planning/routes.py:248 service_crm/planning/routes.py:251
+#: service_crm/planning/routes.py:264 service_crm/planning/routes.py:267
 #, fuzzy
 msgid "Capacity slot not found."
 msgstr "Locație inexistentă."
 
-#: service_crm/planning/routes.py:259
+#: service_crm/planning/routes.py:275
 #, fuzzy
 msgid "Capacity slot removed."
 msgstr "Atașament eliminat."
+
+#: service_crm/reports/_translations.py:15
+msgid "Interventions by machine"
+msgstr "Intervenții per echipament"
+
+#: service_crm/reports/_translations.py:16
+#: service_crm/templates/tickets/intervention_detail.html:133
+msgid "Parts used"
+msgstr "Piese folosite"
+
+#: service_crm/reports/_translations.py:17
+msgid "Maintenance: due vs. completed"
+msgstr "Mentenanță: scadent vs. finalizat"
+
+#: service_crm/reports/_translations.py:18
+msgid "Technician workload"
+msgstr "Volum de muncă tehnicieni"
+
+#: service_crm/reports/_translations.py:19
+msgid "Repeat-issue machines"
+msgstr "Echipamente cu defecte repetate"
+
+#: service_crm/reports/_translations.py:23
+msgid "How many tickets are sitting in each status, bucketed by period."
+msgstr "Câte tichete sunt în fiecare stare, grupate pe perioadă."
+
+#: service_crm/reports/_translations.py:24
+msgid "Field-job count and time spent, grouped by equipment."
+msgstr "Număr de intervenții și timp petrecut, grupate pe echipament."
+
+#: service_crm/reports/_translations.py:25
+msgid "Quantity of each part consumed inside the window."
+msgstr "Cantitatea fiecărei piese consumate în interval."
+
+#: service_crm/reports/_translations.py:26
+msgid "Planned vs. actual maintenance throughput."
+msgstr "Mentenanță planificată vs. realizată."
+
+#: service_crm/reports/_translations.py:27
+msgid "Interventions, minutes, and completion counts per technician."
+msgstr "Intervenții, minute și sarcini finalizate per tehnician."
+
+#: service_crm/reports/_translations.py:28
+msgid "Equipment that opened more than one ticket inside the window."
+msgstr "Echipamente cu mai mult de un tichet deschis în interval."
+
+#: service_crm/reports/_translations.py:35
+msgid "Week"
+msgstr "Săptămână"
+
+#: service_crm/reports/_translations.py:36
+msgid "Month"
+msgstr "Lună"
 
 #: service_crm/templates/base.html:23
 msgid "Primary navigation"
@@ -981,22 +1112,28 @@ msgstr "Navigare principală"
 msgid "Service-CRM"
 msgstr "Service-CRM"
 
-#: service_crm/templates/base.html:26 service_crm/templates/base.html:77
+#: service_crm/templates/base.html:26 service_crm/templates/base.html:81
+#: service_crm/templates/dashboard/admin.html:7
 #: service_crm/templates/dev/macro_smoke.html:55
 msgid "Overview"
 msgstr "Prezentare"
 
-#: service_crm/templates/base.html:28 service_crm/templates/base.html:78
+#: service_crm/templates/base.html:28 service_crm/templates/base.html:82
+#: service_crm/templates/dashboard/admin.html:6
 msgid "Dashboard"
 msgstr "Tablou de bord"
 
-#: service_crm/templates/base.html:31 service_crm/templates/tickets/list.html:9
+#: service_crm/templates/base.html:34 service_crm/templates/tickets/list.html:9
 msgid "Operations"
 msgstr "Operațiuni"
 
-#: service_crm/templates/base.html:32
+#: service_crm/templates/base.html:35
+#: service_crm/templates/dashboard/admin.html:60
+#: service_crm/templates/dashboard/admin.html:121
 #: service_crm/templates/dev/macro_smoke.html:56
 #: service_crm/templates/equipment/detail.html:70
+#: service_crm/templates/reports/repeat_issues.html:5
+#: service_crm/templates/reports/tickets_by_status.html:5
 #: service_crm/templates/tickets/detail.html:9
 #: service_crm/templates/tickets/edit.html:10
 #: service_crm/templates/tickets/intervention_detail.html:8
@@ -1010,7 +1147,7 @@ msgstr "Operațiuni"
 msgid "Tickets"
 msgstr "Tichete"
 
-#: service_crm/templates/base.html:33
+#: service_crm/templates/base.html:36
 #: service_crm/templates/equipment/detail.html:72
 #: service_crm/templates/maintenance/plans_list.html:6
 #: service_crm/templates/maintenance/tasks_list.html:6
@@ -1018,18 +1155,18 @@ msgstr "Tichete"
 msgid "Maintenance"
 msgstr "Mentenanță"
 
-#: service_crm/templates/base.html:34
+#: service_crm/templates/base.html:37
 #: service_crm/templates/planning/capacity.html:5
 #: service_crm/templates/planning/technicians_list.html:6
 msgid "Planning"
 msgstr "Planificare"
 
-#: service_crm/templates/base.html:36 service_crm/templates/clients/list.html:7
+#: service_crm/templates/base.html:39 service_crm/templates/clients/list.html:7
 #: service_crm/templates/equipment/list.html:9
 msgid "Catalogue"
 msgstr "Catalog"
 
-#: service_crm/templates/base.html:37
+#: service_crm/templates/base.html:40
 #: service_crm/templates/clients/detail.html:10
 #: service_crm/templates/clients/edit.html:10
 #: service_crm/templates/clients/import.html:6
@@ -1038,14 +1175,14 @@ msgstr "Catalog"
 msgid "Clients"
 msgstr "Clienți"
 
-#: service_crm/templates/base.html:39
+#: service_crm/templates/base.html:42
 #: service_crm/templates/knowledge/procedures_list.html:6
 #: service_crm/templates/knowledge/tags_list.html:6
 #: service_crm/templates/knowledge/templates_list.html:6
 msgid "Knowledge"
 msgstr "Cunoștințe"
 
-#: service_crm/templates/base.html:40
+#: service_crm/templates/base.html:43
 #: service_crm/templates/tickets/part_edit.html:9
 #: service_crm/templates/tickets/parts_list.html:5
 #: service_crm/templates/tickets/parts_list.html:11
@@ -1053,43 +1190,54 @@ msgstr "Cunoștințe"
 msgid "Parts"
 msgstr "Începe"
 
-#: service_crm/templates/base.html:42
+#: service_crm/templates/base.html:45
+#: service_crm/templates/reports/index.html:5
 msgid "Admin"
 msgstr "Administrare"
 
-#: service_crm/templates/base.html:43
+#: service_crm/templates/base.html:46
+#: service_crm/templates/dashboard/admin.html:16
+#: service_crm/templates/reports/_layout.html:8
+#: service_crm/templates/reports/_layout.html:9
+#: service_crm/templates/reports/index.html:4
+#: service_crm/templates/reports/index.html:6
+msgid "Reports"
+msgstr "Rapoarte"
+
+#: service_crm/templates/base.html:47
 msgid "Users"
 msgstr "Utilizatori"
 
-#: service_crm/templates/base.html:44
+#: service_crm/templates/base.html:48
 msgid "Audit Log"
 msgstr "Jurnal de audit"
 
-#: service_crm/templates/base.html:45
+#: service_crm/templates/base.html:49
 msgid "Settings"
 msgstr "Setări"
 
-#: service_crm/templates/base.html:60
+#: service_crm/templates/base.html:64
 msgid "Guest"
 msgstr "Invitat"
 
-#: service_crm/templates/base.html:63
+#: service_crm/templates/base.html:67
+#: service_crm/templates/dashboard/me.html:11
 msgid "Operator"
 msgstr "Operator"
 
-#: service_crm/templates/base.html:72
+#: service_crm/templates/base.html:76
 msgid "Toggle navigation"
 msgstr "Comută navigarea"
 
-#: service_crm/templates/base.html:84
+#: service_crm/templates/base.html:88
 msgid "Notifications"
 msgstr "Notificări"
 
-#: service_crm/templates/base.html:88
+#: service_crm/templates/base.html:92
 msgid "Help"
 msgstr "Ajutor"
 
-#: service_crm/templates/base.html:92
+#: service_crm/templates/base.html:96
 msgid "Toggle theme"
 msgstr "Comută tema"
 
@@ -1157,6 +1305,7 @@ msgstr "Principal"
 #: service_crm/templates/clients/detail.html:173
 #: service_crm/templates/clients/detail.html:241
 #: service_crm/templates/clients/list.html:40
+#: service_crm/templates/dashboard/me.html:76
 #: service_crm/templates/equipment/controllers_list.html:47
 #: service_crm/templates/equipment/detail.html:85
 #: service_crm/templates/equipment/list.html:57
@@ -1252,6 +1401,9 @@ msgstr "Expiră"
 #: service_crm/templates/clients/detail.html:241
 #: service_crm/templates/clients/list.html:33
 #: service_crm/templates/clients/list.html:40
+#: service_crm/templates/dashboard/admin.html:60
+#: service_crm/templates/dashboard/me.html:76
+#: service_crm/templates/dashboard/me.html:94
 #: service_crm/templates/dev/macro_smoke.html:76
 #: service_crm/templates/equipment/detail.html:150
 #: service_crm/templates/equipment/list.html:50
@@ -1259,6 +1411,7 @@ msgstr "Expiră"
 #: service_crm/templates/maintenance/plan_detail.html:47
 #: service_crm/templates/maintenance/task_detail.html:18
 #: service_crm/templates/maintenance/tasks_list.html:26
+#: service_crm/templates/reports/tickets_by_status.html:5
 #: service_crm/templates/tickets/list.html:54
 #: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:85
 msgid "Status"
@@ -1348,6 +1501,128 @@ msgstr "Pagina %(p)s"
 msgid "Next"
 msgstr "Următor"
 
+#: service_crm/templates/dashboard/admin.html:8
+msgid "Operational dashboard"
+msgstr "Tablou operațional"
+
+#: service_crm/templates/dashboard/admin.html:29
+msgid "Primary indicators"
+msgstr "Indicatori principali"
+
+#: service_crm/templates/dashboard/admin.html:47
+#: service_crm/templates/dashboard/admin.html:66
+msgid "Open all"
+msgstr "Deschide-le pe toate"
+
+#: service_crm/templates/dashboard/admin.html:60
+msgid "No tickets recorded yet."
+msgstr "Niciun tichet înregistrat încă."
+
+#: service_crm/templates/dashboard/admin.html:79
+#: service_crm/templates/dashboard/me.html:76
+#: service_crm/templates/dashboard/me.html:94
+#: service_crm/templates/dashboard/me.html:112
+#: service_crm/templates/maintenance/plan_detail.html:47
+#: service_crm/templates/maintenance/tasks_list.html:26
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:5
+#: service_crm/templates/tickets/detail.html:40
+msgid "Due"
+msgstr "Scadent"
+
+#: service_crm/templates/dashboard/admin.html:79
+msgid "No upcoming maintenance plans."
+msgstr "Niciun plan de mentenanță apropiat."
+
+#: service_crm/templates/dashboard/admin.html:95
+#: service_crm/templates/dashboard/me.html:70
+#: service_crm/templates/reports/index.html:32
+#: service_crm/templates/reports/technician_workload.html:5
+#: service_crm/templates/tickets/detail.html:121
+#: service_crm/templates/tickets/list.html:47
+msgid "Open"
+msgstr "Deschise"
+
+#: service_crm/templates/dashboard/admin.html:97
+#: service_crm/templates/dev/macro_smoke.html:68
+#: service_crm/tickets/_translations.py:31
+msgid "Closed"
+msgstr "Închise"
+
+#: service_crm/templates/dashboard/admin.html:107
+#: service_crm/templates/tickets/detail.html:117
+msgid "Started"
+msgstr "Început"
+
+#: service_crm/templates/dashboard/admin.html:107
+msgid "State"
+msgstr "Stare"
+
+#: service_crm/templates/dashboard/admin.html:107
+msgid "No interventions recorded yet."
+msgstr "Nicio intervenție înregistrată încă."
+
+#: service_crm/templates/dashboard/admin.html:113
+msgid "In the last %(days)s days."
+msgstr "În ultimele %(days)s zile."
+
+#: service_crm/templates/dashboard/admin.html:121
+msgid "No equipment flagged as high-risk."
+msgstr "Niciun echipament marcat cu risc ridicat."
+
+#: service_crm/templates/dashboard/admin.html:127
+msgid "Open capacity grid"
+msgstr "Deschide grila de capacitate"
+
+#: service_crm/templates/dashboard/admin.html:138
+msgid "Assignments"
+msgstr "Atribuiri"
+
+#: service_crm/templates/dashboard/admin.html:138
+msgid "Scheduled / capacity"
+msgstr "Programat / capacitate"
+
+#: service_crm/templates/dashboard/admin.html:138
+msgid "No active technicians on the roster."
+msgstr "Niciun tehnician activ."
+
+#: service_crm/templates/dashboard/me.html:17
+msgid "Manager overview"
+msgstr "Vedere manager"
+
+#: service_crm/templates/dashboard/me.html:25
+msgid ""
+"Ask an admin to add you to the technician roster to see assigned "
+"maintenance tasks."
+msgstr ""
+
+#: service_crm/templates/dashboard/me.html:29
+msgid "My indicators"
+msgstr "Indicatorii mei"
+
+#: service_crm/templates/dashboard/me.html:31
+msgid "My open tickets"
+msgstr "Tichetele mele deschise"
+
+#: service_crm/templates/dashboard/me.html:36
+msgid "My overdue"
+msgstr "Restante"
+
+#: service_crm/templates/dashboard/me.html:41
+msgid "Pending tasks"
+msgstr "Sarcini în așteptare"
+
+#: service_crm/templates/dashboard/me.html:46
+msgid "Overdue tasks"
+msgstr "Sarcini restante"
+
+#: service_crm/templates/dashboard/me.html:78
+msgid "No tickets assigned to you yet."
+msgstr "Niciun tichet atribuit vouă încă."
+
+#: service_crm/templates/dashboard/me.html:114
+msgid "No pending maintenance tasks."
+msgstr "Nicio sarcină de mentenanță în așteptare."
+
 #: service_crm/templates/dev/macro_smoke.html:10
 #: service_crm/templates/dev/macro_smoke.html:12
 msgid "Macro smoke"
@@ -1370,16 +1645,8 @@ msgid "Primary action"
 msgstr "Acțiune principală"
 
 #: service_crm/templates/dev/macro_smoke.html:29
-msgid "Active clients"
-msgstr "Clienți activi"
-
-#: service_crm/templates/dev/macro_smoke.html:29
 msgid "Clients with open tickets."
 msgstr "Clienți cu tichete deschise."
-
-#: service_crm/templates/dev/macro_smoke.html:30
-msgid "Open tickets"
-msgstr "Tichete deschise"
 
 #: service_crm/templates/dev/macro_smoke.html:30
 msgid "In progress or scheduled."
@@ -1453,11 +1720,6 @@ msgstr "În lucru"
 #: service_crm/tickets/_translations.py:28
 msgid "Waiting parts"
 msgstr "Așteaptă piese"
-
-#: service_crm/templates/dev/macro_smoke.html:68
-#: service_crm/tickets/_translations.py:31
-msgid "Closed"
-msgstr "Închise"
 
 #: service_crm/templates/dev/macro_smoke.html:76
 #: service_crm/templates/equipment/detail.html:150
@@ -1825,12 +2087,16 @@ msgstr "Nu există înregistrări de afișat."
 
 #: service_crm/templates/macros/filter_bar.html:39
 #: service_crm/templates/macros/filter_bar.html:50
+#: service_crm/templates/reports/_layout.html:16
+#: service_crm/templates/reports/index.html:11
 #: service_crm/templates/tickets/detail.html:95
 msgid "From"
 msgstr "De la"
 
 #: service_crm/templates/macros/filter_bar.html:43
 #: service_crm/templates/macros/filter_bar.html:54
+#: service_crm/templates/reports/_layout.html:20
+#: service_crm/templates/reports/index.html:15
 #: service_crm/templates/tickets/detail.html:95
 msgid "To"
 msgstr "Până la"
@@ -1871,13 +2137,6 @@ msgstr "Generează sarcini"
 #, fuzzy
 msgid "Tasks"
 msgstr "Stare"
-
-#: service_crm/templates/maintenance/plan_detail.html:47
-#: service_crm/templates/maintenance/tasks_list.html:26
-#: service_crm/templates/tickets/detail.html:40
-#, fuzzy
-msgid "Due"
-msgstr "Dev"
 
 #: service_crm/templates/maintenance/plan_detail.html:47
 #, fuzzy
@@ -2073,6 +2332,139 @@ msgstr "Tehnicieni în tură"
 msgid "No technicians yet."
 msgstr "Nu există modele de echipament."
 
+#: service_crm/templates/reports/_layout.html:26
+msgid "Download CSV"
+msgstr "Descarcă CSV"
+
+#: service_crm/templates/reports/_layout.html:27
+msgid "All reports"
+msgstr "Toate rapoartele"
+
+#: service_crm/templates/reports/_layout.html:30
+#, python-format
+msgid "Window: %(start)s → %(end)s"
+msgstr ""
+
+#: service_crm/templates/reports/index.html:21
+msgid ""
+"Default window: this month. Pick a range above; it flows to every report "
+"below."
+msgstr ""
+
+#: service_crm/templates/reports/index.html:34
+msgid "CSV"
+msgstr "CSV"
+
+#: service_crm/templates/reports/interventions_by_machine.html:5
+#: service_crm/templates/reports/technician_workload.html:5
+#: service_crm/templates/tickets/detail.html:84
+msgid "Interventions"
+msgstr "Intervenții"
+
+#: service_crm/templates/reports/interventions_by_machine.html:5
+#: service_crm/templates/reports/technician_workload.html:5
+msgid "Minutes"
+msgstr "Minute"
+
+#: service_crm/templates/reports/interventions_by_machine.html:5
+msgid "Still open"
+msgstr "Încă deschise"
+
+#: service_crm/templates/reports/interventions_by_machine.html:15
+msgid "No interventions recorded in this window."
+msgstr "Nicio intervenție înregistrată în acest interval."
+
+#: service_crm/templates/reports/interventions_by_machine.html:19
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:18
+#: service_crm/templates/reports/technician_workload.html:19
+#: service_crm/templates/reports/tickets_by_status.html:16
+msgid "Total:"
+msgstr "Total:"
+
+#: service_crm/templates/reports/interventions_by_machine.html:20
+#: service_crm/templates/reports/technician_workload.html:20
+msgid "interventions"
+msgstr "intervenții"
+
+#: service_crm/templates/reports/interventions_by_machine.html:21
+#: service_crm/templates/reports/technician_workload.html:21
+#: service_crm/templates/tickets/intervention_detail.html:23
+#: service_crm/templates/tickets/intervention_detail.html:68
+#: service_crm/templates/tickets/intervention_detail.html:82
+msgid "min"
+msgstr "min"
+
+#: service_crm/templates/reports/interventions_by_machine.html:22
+msgid "still open"
+msgstr "încă deschise"
+
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:5
+#: service_crm/tickets/_translations.py:30
+msgid "Completed"
+msgstr "Finalizat"
+
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:5
+msgid "Delta"
+msgstr "Diferență"
+
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:14
+msgid "No maintenance activity in this window."
+msgstr "Nicio activitate de mentenanță în acest interval."
+
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:19
+msgid "due"
+msgstr "scadent"
+
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:19
+msgid "completed"
+msgstr "finalizat"
+
+#: service_crm/templates/reports/parts_used.html:5
+msgid "Part code"
+msgstr "Cod piesă"
+
+#: service_crm/templates/reports/parts_used.html:5
+#: service_crm/templates/tickets/intervention_detail.html:134
+#: service_crm/tickets/intervention_forms.py:92
+msgid "Quantity"
+msgstr "Cantitate"
+
+#: service_crm/templates/reports/parts_used.html:10
+msgid "No parts consumed in this window."
+msgstr "Nicio piesă consumată în acest interval."
+
+#: service_crm/templates/reports/parts_used.html:13
+msgid "Total parts:"
+msgstr "Total piese:"
+
+#: service_crm/templates/reports/repeat_issues.html:15
+msgid "No equipment opened multiple tickets in this window."
+msgstr "Niciun echipament cu mai multe tichete în acest interval."
+
+#: service_crm/templates/reports/repeat_issues.html:18
+msgid "Total tickets:"
+msgstr "Total tichete:"
+
+#: service_crm/templates/reports/technician_workload.html:5
+msgid "Maintenance done"
+msgstr "Mentenanță finalizată"
+
+#: service_crm/templates/reports/technician_workload.html:15
+msgid "No technician activity in this window."
+msgstr "Nicio activitate a tehnicienilor în acest interval."
+
+#: service_crm/templates/reports/technician_workload.html:22
+msgid "open"
+msgstr "deschise"
+
+#: service_crm/templates/reports/technician_workload.html:23
+msgid "maintenance done"
+msgstr "mentenanță finalizată"
+
+#: service_crm/templates/reports/tickets_by_status.html:13
+msgid "No tickets opened in this window."
+msgstr "Niciun tichet deschis în acest interval."
+
 #: service_crm/templates/tickets/detail.html:58 service_crm/tickets/forms.py:57
 msgid "Move to"
 msgstr "Trecere la"
@@ -2118,11 +2510,6 @@ msgstr "Notițe"
 #, fuzzy
 msgid "Reason (required for cancellation)"
 msgstr "Confirmă anularea"
-
-#: service_crm/templates/tickets/detail.html:84
-#, fuzzy
-msgid "Interventions"
-msgstr "Operațiuni"
 
 #: service_crm/templates/tickets/detail.html:86
 #, fuzzy
@@ -2171,18 +2558,8 @@ msgstr "Începe intervenția"
 
 #: service_crm/templates/tickets/detail.html:117
 #, fuzzy
-msgid "Started"
-msgstr "Începe"
-
-#: service_crm/templates/tickets/detail.html:117
-#, fuzzy
 msgid "Ended"
 msgstr "Expiră"
-
-#: service_crm/templates/tickets/detail.html:121
-#: service_crm/templates/tickets/list.html:47
-msgid "Open"
-msgstr "Deschise"
 
 #: service_crm/templates/tickets/detail.html:122
 #, fuzzy
@@ -2267,13 +2644,6 @@ msgstr "Editează clientul"
 msgid "Ticket details"
 msgstr "Detalii client"
 
-#: service_crm/templates/tickets/intervention_detail.html:23
-#: service_crm/templates/tickets/intervention_detail.html:68
-#: service_crm/templates/tickets/intervention_detail.html:82
-#, fuzzy
-msgid "min"
-msgstr "Administrare"
-
 #: service_crm/templates/tickets/intervention_detail.html:39
 #: service_crm/tickets/intervention_forms.py:58
 #, fuzzy
@@ -2335,15 +2705,6 @@ msgstr "Adaugă o constatare…"
 msgid "Root cause"
 msgstr "Cauză rădăcină"
 
-#: service_crm/templates/tickets/intervention_detail.html:133
-msgid "Parts used"
-msgstr "Piese folosite"
-
-#: service_crm/templates/tickets/intervention_detail.html:134
-#: service_crm/tickets/intervention_forms.py:92
-msgid "Quantity"
-msgstr "Cantitate"
-
 #: service_crm/templates/tickets/intervention_detail.html:134
 #: service_crm/templates/tickets/parts_list.html:29
 #: service_crm/tickets/intervention_forms.py:96
@@ -2395,10 +2756,6 @@ msgstr "Caută clienți"
 #: service_crm/templates/tickets/list.html:26
 msgid "Search title / description…"
 msgstr "Caută titlu / descriere…"
-
-#: service_crm/templates/tickets/list.html:33
-msgid "My queue"
-msgstr "Coada mea"
 
 #: service_crm/templates/tickets/list.html:35
 #, fuzzy
@@ -2507,10 +2864,6 @@ msgstr "Programat"
 #: service_crm/tickets/_translations.py:29
 msgid "Monitoring"
 msgstr "Monitorizare"
-
-#: service_crm/tickets/_translations.py:30
-msgid "Completed"
-msgstr "Finalizat"
 
 #: service_crm/tickets/_translations.py:32
 #, fuzzy

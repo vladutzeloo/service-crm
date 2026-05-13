@@ -1,0 +1,20 @@
+{% extends "reports/_layout.html" %}
+{% from "macros/data_table.html" import data_table %}
+
+{% block report_body %}
+{% set cols = [_("Equipment"), _("Client"), _("Tickets")] %}
+{% set rows = [] %}
+{% for code, label, client, ticket_count in result.rows %}
+  {% set name_cell %}
+    {% if code %}
+      <a href="{{ url_for('tickets.list_tickets', equipment=code) }}" class="cell-link">{{ label }}</a>
+    {% else %}{{ label }}{% endif %}
+  {% endset %}
+  {% set _ = rows.append([name_cell, client, ticket_count]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No equipment opened multiple tickets in this window.")) }}
+
+{% if result.total_row %}
+<p class="report-total"><strong>{{ _("Total tickets:") }}</strong> {{ result.total_row[-1] }}</p>
+{% endif %}
+{% endblock %}

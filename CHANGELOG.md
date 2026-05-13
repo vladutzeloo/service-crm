@@ -12,6 +12,71 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-05-13
+
+### Added
+
+- **Operational dashboard + reporting** — ROADMAP 0.8.0.
+  - New `service_crm/dashboard/` blueprint with two surfaces in a
+    single blueprint per architecture-plan §6:
+    - `GET /` (`dashboard.admin`) — manager view modelled on
+      `oee-calculator2.0/templates/admin/dashboard.html`. Six
+      primary KPI tiles (active clients, open tickets, overdue
+      tickets, due maintenance this week, tickets waiting parts,
+      technician utilization) — every tile drillable to a
+      filtered list. Secondary panels: tickets by status,
+      upcoming maintenance, recent interventions, high-risk
+      machines, technician load by week.
+    - `GET /dashboard/me` (`dashboard.me`) — technician view
+      modelled on `oee-calculator2.0/templates/operator/dashboard.html`.
+      Today's queue (tickets + pending maintenance tasks),
+      one-tap "start intervention", four-tile KPI strip
+      (open / overdue / pending tasks / overdue tasks). Users
+      without a `Technician` row see a roster hint instead of
+      an empty maintenance section.
+  - New `service_crm/reports/` blueprint covering the six v1
+    reports from `docs/blueprint.md` §14: `tickets_by_status`,
+    `interventions_by_machine`, `parts_used`,
+    `maintenance_due_vs_completed`, `technician_workload`,
+    `repeat_issues`. Each report ships an HTML view plus a
+    `.csv` sibling with RFC-4180 line endings, UTF-8 (no BOM),
+    and a stable filename pattern
+    (`<report-code>-<from>-<to>.csv`).
+  - `service_crm/shared/date_window.py` — half-open
+    `[start, end_exclusive)` window helper with `parse_window`,
+    `this_week`, `this_month`, and `last_n_days` presets. Used
+    by every dashboard + reports route so query-arg parsing has
+    one home.
+  - Period bucketing for time-series reports: day for windows
+    ≤ 31 days, week for 32-180 days, month for everything
+    longer.
+  - Manager-dashboard "high-risk machines" panel: equipment with
+    ≥ 3 tickets opened inside the 30-day rolling window
+    (threshold lives in `dashboard/services.py`).
+  - Sidebar `Dashboard` link now points at `dashboard.admin`;
+    new `My queue` entry under Overview; new `Reports` entry
+    under Admin.
+  - **132 new tests** across `tests/dashboard/`, `tests/reports/`,
+    and `tests/shared/test_date_window.py`: KPI aggregation,
+    drill-down endpoints, technician/manager view paths,
+    half-open window math, RFC-4180 CSV writer, six report
+    aggregation queries with bucket boundaries.
+  - **RO + EN translations** for every new label, KPI title,
+    panel header, report name, and CSV header. Catalogs compiled
+    into the wheel.
+
+### Changed
+
+- `service_crm/__init__.py` registers the new `dashboard` and
+  `reports` blueprints. `dashboard` registers last so its `/`
+  rule wins.
+- `service_crm/templates/base.html` sidebar: `Dashboard` and
+  `My queue` link to the new blueprint; `Reports` link added
+  under Admin.
+- `pyproject.toml` mypy override extends the `arg-type`
+  suppression list to `dashboard.routes`, `dashboard.services`,
+  `reports.routes`, and `reports.services`.
+
 ## [0.7.0] - 2026-05-13
 
 ### Added

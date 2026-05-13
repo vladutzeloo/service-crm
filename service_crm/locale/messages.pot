@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-13 07:22+0000\n"
+"POT-Creation-Date: 2026-05-13 09:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -317,6 +317,69 @@ msgstr ""
 msgid "%(count)s clients imported."
 msgstr ""
 
+#: service_crm/dashboard/_translations.py:13
+#: service_crm/templates/dev/macro_smoke.html:29
+msgid "Active clients"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:14
+#: service_crm/templates/dev/macro_smoke.html:30
+msgid "Open tickets"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:15
+msgid "Overdue tickets"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:16
+msgid "Due maintenance this week"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:17
+msgid "Tickets waiting parts"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:18
+msgid "Technician utilization"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:22
+#: service_crm/reports/_translations.py:14
+msgid "Tickets by status"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:23
+msgid "Upcoming maintenance"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:24
+msgid "Recent interventions"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:25
+msgid "High-risk machines"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:26
+msgid "Technician load this week"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:27 service_crm/templates/base.html:31
+#: service_crm/templates/dashboard/admin.html:13
+#: service_crm/templates/dashboard/me.html:10
+#: service_crm/templates/dashboard/me.html:12
+#: service_crm/templates/tickets/list.html:33
+msgid "My queue"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:28
+msgid "My overdue tickets"
+msgstr ""
+
+#: service_crm/dashboard/_translations.py:29
+msgid "My maintenance tasks"
+msgstr ""
+
 #: service_crm/equipment/forms.py:24 service_crm/knowledge/forms.py:50
 #: service_crm/templates/equipment/controllers_list.html:28
 #: service_crm/templates/equipment/controllers_list.html:47
@@ -353,6 +416,7 @@ msgstr ""
 #: service_crm/equipment/forms.py:48
 #: service_crm/templates/dev/macro_smoke.html:76
 #: service_crm/templates/equipment/list.html:57
+#: service_crm/templates/reports/repeat_issues.html:5
 #: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:28
 msgid "Client"
 msgstr ""
@@ -387,7 +451,7 @@ msgstr ""
 
 #: service_crm/equipment/routes.py:65 service_crm/equipment/routes.py:76
 #: service_crm/equipment/routes.py:80 service_crm/equipment/routes.py:86
-#: service_crm/maintenance/routes.py:86 service_crm/tickets/forms.py:63
+#: service_crm/maintenance/routes.py:92 service_crm/tickets/forms.py:63
 #: service_crm/tickets/routes.py:99 service_crm/tickets/routes.py:113
 #: service_crm/tickets/routes.py:119
 msgid "— none —"
@@ -526,6 +590,7 @@ msgstr ""
 
 #: service_crm/knowledge/forms.py:20 service_crm/maintenance/forms.py:21
 #: service_crm/templates/knowledge/templates_list.html:16
+#: service_crm/templates/reports/parts_used.html:5
 #: service_crm/templates/tickets/intervention_detail.html:134
 #: service_crm/templates/tickets/parts_list.html:29
 #: service_crm/tickets/forms.py:41 service_crm/tickets/intervention_forms.py:90
@@ -616,13 +681,13 @@ msgstr ""
 #: service_crm/knowledge/routes.py:120 service_crm/knowledge/routes.py:165
 #: service_crm/knowledge/routes.py:209 service_crm/knowledge/routes.py:241
 #: service_crm/knowledge/routes.py:284 service_crm/knowledge/routes.py:323
-#: service_crm/knowledge/routes.py:364 service_crm/maintenance/routes.py:99
-#: service_crm/maintenance/routes.py:145 service_crm/maintenance/routes.py:220
-#: service_crm/maintenance/routes.py:280 service_crm/maintenance/routes.py:314
-#: service_crm/maintenance/routes.py:425 service_crm/maintenance/routes.py:457
-#: service_crm/maintenance/routes.py:489 service_crm/planning/routes.py:83
-#: service_crm/planning/routes.py:153 service_crm/planning/routes.py:224
-#: service_crm/planning/routes.py:255
+#: service_crm/knowledge/routes.py:364 service_crm/maintenance/routes.py:105
+#: service_crm/maintenance/routes.py:151 service_crm/maintenance/routes.py:230
+#: service_crm/maintenance/routes.py:292 service_crm/maintenance/routes.py:328
+#: service_crm/maintenance/routes.py:445 service_crm/maintenance/routes.py:481
+#: service_crm/maintenance/routes.py:517 service_crm/planning/routes.py:94
+#: service_crm/planning/routes.py:168 service_crm/planning/routes.py:240
+#: service_crm/planning/routes.py:271
 #: service_crm/tickets/intervention_routes.py:90
 #: service_crm/tickets/intervention_routes.py:189
 #: service_crm/tickets/intervention_routes.py:251
@@ -663,7 +728,7 @@ msgid "Template created."
 msgstr ""
 
 #: service_crm/knowledge/routes.py:313 service_crm/knowledge/routes.py:354
-#: service_crm/maintenance/routes.py:129
+#: service_crm/maintenance/routes.py:135
 msgid "Template not found."
 msgstr ""
 
@@ -712,7 +777,10 @@ msgstr ""
 msgid "Checklist template"
 msgstr ""
 
-#: service_crm/maintenance/forms.py:46 service_crm/templates/base.html:38
+#: service_crm/maintenance/forms.py:46 service_crm/templates/base.html:41
+#: service_crm/templates/dashboard/admin.html:79
+#: service_crm/templates/dashboard/admin.html:121
+#: service_crm/templates/dashboard/me.html:112
 #: service_crm/templates/dev/macro_smoke.html:76
 #: service_crm/templates/equipment/controllers_list.html:8
 #: service_crm/templates/equipment/detail.html:10
@@ -725,11 +793,15 @@ msgstr ""
 #: service_crm/templates/maintenance/plans_list.html:37
 #: service_crm/templates/maintenance/task_detail.html:14
 #: service_crm/templates/maintenance/tasks_list.html:26
+#: service_crm/templates/reports/interventions_by_machine.html:5
+#: service_crm/templates/reports/repeat_issues.html:5
 #: service_crm/tickets/forms.py:31
 msgid "Equipment"
 msgstr ""
 
 #: service_crm/maintenance/forms.py:52
+#: service_crm/templates/dashboard/admin.html:79
+#: service_crm/templates/dashboard/me.html:112
 #: service_crm/templates/knowledge/template_edit.html:15
 #: service_crm/templates/maintenance/plans_list.html:37
 msgid "Template"
@@ -741,9 +813,12 @@ msgid "Last done on"
 msgstr ""
 
 #: service_crm/maintenance/forms.py:79
+#: service_crm/templates/dashboard/admin.html:107
+#: service_crm/templates/dashboard/admin.html:138
 #: service_crm/templates/planning/capacity.html:33
 #: service_crm/templates/planning/technician_edit.html:6
 #: service_crm/templates/planning/technician_edit.html:13
+#: service_crm/templates/reports/technician_workload.html:5
 #: service_crm/templates/tickets/detail.html:117
 #: service_crm/tickets/intervention_forms.py:22
 #: service_crm/tickets/intervention_forms.py:38
@@ -773,60 +848,63 @@ msgstr ""
 msgid "Open ticket"
 msgstr ""
 
-#: service_crm/maintenance/routes.py:111
+#: service_crm/maintenance/routes.py:117
 msgid "Maintenance template created."
 msgstr ""
 
-#: service_crm/maintenance/routes.py:159
+#: service_crm/maintenance/routes.py:165
 msgid "Maintenance template updated."
 msgstr ""
 
-#: service_crm/maintenance/routes.py:232
+#: service_crm/maintenance/routes.py:242
 msgid "Maintenance plan created."
 msgstr ""
 
-#: service_crm/maintenance/routes.py:250 service_crm/maintenance/routes.py:269
-#: service_crm/maintenance/routes.py:310
+#: service_crm/maintenance/routes.py:260 service_crm/maintenance/routes.py:279
+#: service_crm/maintenance/routes.py:322
 msgid "Plan not found."
 msgstr ""
 
-#: service_crm/maintenance/routes.py:292
+#: service_crm/maintenance/routes.py:304
 msgid "Maintenance plan updated."
 msgstr ""
 
-#: service_crm/maintenance/routes.py:320
+#: service_crm/maintenance/routes.py:334
 #, python-format
 msgid "Generated %(count)s task(s)."
 msgstr ""
 
-#: service_crm/maintenance/routes.py:359 service_crm/maintenance/routes.py:414
-#: service_crm/maintenance/routes.py:446 service_crm/maintenance/routes.py:479
+#: service_crm/maintenance/routes.py:373 service_crm/maintenance/routes.py:430
+#: service_crm/maintenance/routes.py:466 service_crm/maintenance/routes.py:503
 msgid "Task not found."
 msgstr ""
 
-#: service_crm/maintenance/routes.py:386
+#: service_crm/maintenance/routes.py:402
 #: service_crm/tickets/intervention_routes.py:58
 #: service_crm/tickets/routes.py:125
 msgid "— unassigned —"
 msgstr ""
 
-#: service_crm/maintenance/routes.py:402
+#: service_crm/maintenance/routes.py:418
 msgid "— no linked intervention —"
 msgstr ""
 
-#: service_crm/maintenance/routes.py:434
+#: service_crm/maintenance/routes.py:454
 msgid "Task assigned."
 msgstr ""
 
-#: service_crm/maintenance/routes.py:467
+#: service_crm/maintenance/routes.py:491
 msgid "Task marked done."
 msgstr ""
 
-#: service_crm/maintenance/routes.py:499
+#: service_crm/maintenance/routes.py:527
 msgid "Ticket opened from maintenance task."
 msgstr ""
 
 #: service_crm/planning/_translations.py:8
+#: service_crm/templates/dashboard/admin.html:107
+#: service_crm/templates/dashboard/me.html:76
+#: service_crm/templates/dashboard/me.html:94
 #: service_crm/templates/dev/macro_smoke.html:76
 #: service_crm/templates/equipment/detail.html:150
 #: service_crm/templates/maintenance/plan_detail.html:47
@@ -863,7 +941,7 @@ msgstr ""
 msgid "Weekly capacity (minutes)"
 msgstr ""
 
-#: service_crm/planning/forms.py:54
+#: service_crm/planning/forms.py:54 service_crm/reports/_translations.py:34
 #: service_crm/templates/planning/technician_detail.html:44
 msgid "Day"
 msgstr ""
@@ -873,7 +951,7 @@ msgstr ""
 msgid "Capacity (minutes)"
 msgstr ""
 
-#: service_crm/planning/forms.py:64
+#: service_crm/planning/forms.py:64 service_crm/templates/dashboard/me.html:71
 #: service_crm/templates/planning/capacity.html:12
 msgid "Start"
 msgstr ""
@@ -890,34 +968,89 @@ msgstr ""
 #: service_crm/templates/maintenance/templates_list.html:16
 #: service_crm/templates/planning/capacity.html:19
 #: service_crm/templates/planning/technicians_list.html:16
+#: service_crm/templates/reports/_layout.html:23
+#: service_crm/templates/reports/index.html:18
 #: service_crm/templates/tickets/parts_list.html:22
 #: service_crm/tickets/forms.py:91
 msgid "Filter"
 msgstr ""
 
-#: service_crm/planning/routes.py:96
+#: service_crm/planning/routes.py:107
 msgid "Technician added."
 msgstr ""
 
-#: service_crm/planning/routes.py:114 service_crm/planning/routes.py:141
-#: service_crm/planning/routes.py:214
+#: service_crm/planning/routes.py:125 service_crm/planning/routes.py:154
+#: service_crm/planning/routes.py:230
 msgid "Technician not found."
 msgstr ""
 
-#: service_crm/planning/routes.py:167
+#: service_crm/planning/routes.py:182
 msgid "Technician updated."
 msgstr ""
 
-#: service_crm/planning/routes.py:235
+#: service_crm/planning/routes.py:251
 msgid "Capacity slot saved."
 msgstr ""
 
-#: service_crm/planning/routes.py:248 service_crm/planning/routes.py:251
+#: service_crm/planning/routes.py:264 service_crm/planning/routes.py:267
 msgid "Capacity slot not found."
 msgstr ""
 
-#: service_crm/planning/routes.py:259
+#: service_crm/planning/routes.py:275
 msgid "Capacity slot removed."
+msgstr ""
+
+#: service_crm/reports/_translations.py:15
+msgid "Interventions by machine"
+msgstr ""
+
+#: service_crm/reports/_translations.py:16
+#: service_crm/templates/tickets/intervention_detail.html:133
+msgid "Parts used"
+msgstr ""
+
+#: service_crm/reports/_translations.py:17
+msgid "Maintenance: due vs. completed"
+msgstr ""
+
+#: service_crm/reports/_translations.py:18
+msgid "Technician workload"
+msgstr ""
+
+#: service_crm/reports/_translations.py:19
+msgid "Repeat-issue machines"
+msgstr ""
+
+#: service_crm/reports/_translations.py:23
+msgid "How many tickets are sitting in each status, bucketed by period."
+msgstr ""
+
+#: service_crm/reports/_translations.py:24
+msgid "Field-job count and time spent, grouped by equipment."
+msgstr ""
+
+#: service_crm/reports/_translations.py:25
+msgid "Quantity of each part consumed inside the window."
+msgstr ""
+
+#: service_crm/reports/_translations.py:26
+msgid "Planned vs. actual maintenance throughput."
+msgstr ""
+
+#: service_crm/reports/_translations.py:27
+msgid "Interventions, minutes, and completion counts per technician."
+msgstr ""
+
+#: service_crm/reports/_translations.py:28
+msgid "Equipment that opened more than one ticket inside the window."
+msgstr ""
+
+#: service_crm/reports/_translations.py:35
+msgid "Week"
+msgstr ""
+
+#: service_crm/reports/_translations.py:36
+msgid "Month"
 msgstr ""
 
 #: service_crm/templates/base.html:23
@@ -928,22 +1061,28 @@ msgstr ""
 msgid "Service-CRM"
 msgstr ""
 
-#: service_crm/templates/base.html:26 service_crm/templates/base.html:77
+#: service_crm/templates/base.html:26 service_crm/templates/base.html:81
+#: service_crm/templates/dashboard/admin.html:7
 #: service_crm/templates/dev/macro_smoke.html:55
 msgid "Overview"
 msgstr ""
 
-#: service_crm/templates/base.html:28 service_crm/templates/base.html:78
+#: service_crm/templates/base.html:28 service_crm/templates/base.html:82
+#: service_crm/templates/dashboard/admin.html:6
 msgid "Dashboard"
 msgstr ""
 
-#: service_crm/templates/base.html:31 service_crm/templates/tickets/list.html:9
+#: service_crm/templates/base.html:34 service_crm/templates/tickets/list.html:9
 msgid "Operations"
 msgstr ""
 
-#: service_crm/templates/base.html:32
+#: service_crm/templates/base.html:35
+#: service_crm/templates/dashboard/admin.html:60
+#: service_crm/templates/dashboard/admin.html:121
 #: service_crm/templates/dev/macro_smoke.html:56
 #: service_crm/templates/equipment/detail.html:70
+#: service_crm/templates/reports/repeat_issues.html:5
+#: service_crm/templates/reports/tickets_by_status.html:5
 #: service_crm/templates/tickets/detail.html:9
 #: service_crm/templates/tickets/edit.html:10
 #: service_crm/templates/tickets/intervention_detail.html:8
@@ -957,7 +1096,7 @@ msgstr ""
 msgid "Tickets"
 msgstr ""
 
-#: service_crm/templates/base.html:33
+#: service_crm/templates/base.html:36
 #: service_crm/templates/equipment/detail.html:72
 #: service_crm/templates/maintenance/plans_list.html:6
 #: service_crm/templates/maintenance/tasks_list.html:6
@@ -965,18 +1104,18 @@ msgstr ""
 msgid "Maintenance"
 msgstr ""
 
-#: service_crm/templates/base.html:34
+#: service_crm/templates/base.html:37
 #: service_crm/templates/planning/capacity.html:5
 #: service_crm/templates/planning/technicians_list.html:6
 msgid "Planning"
 msgstr ""
 
-#: service_crm/templates/base.html:36 service_crm/templates/clients/list.html:7
+#: service_crm/templates/base.html:39 service_crm/templates/clients/list.html:7
 #: service_crm/templates/equipment/list.html:9
 msgid "Catalogue"
 msgstr ""
 
-#: service_crm/templates/base.html:37
+#: service_crm/templates/base.html:40
 #: service_crm/templates/clients/detail.html:10
 #: service_crm/templates/clients/edit.html:10
 #: service_crm/templates/clients/import.html:6
@@ -985,57 +1124,68 @@ msgstr ""
 msgid "Clients"
 msgstr ""
 
-#: service_crm/templates/base.html:39
+#: service_crm/templates/base.html:42
 #: service_crm/templates/knowledge/procedures_list.html:6
 #: service_crm/templates/knowledge/tags_list.html:6
 #: service_crm/templates/knowledge/templates_list.html:6
 msgid "Knowledge"
 msgstr ""
 
-#: service_crm/templates/base.html:40
+#: service_crm/templates/base.html:43
 #: service_crm/templates/tickets/part_edit.html:9
 #: service_crm/templates/tickets/parts_list.html:5
 #: service_crm/templates/tickets/parts_list.html:11
 msgid "Parts"
 msgstr ""
 
-#: service_crm/templates/base.html:42
+#: service_crm/templates/base.html:45
+#: service_crm/templates/reports/index.html:5
 msgid "Admin"
 msgstr ""
 
-#: service_crm/templates/base.html:43
+#: service_crm/templates/base.html:46
+#: service_crm/templates/dashboard/admin.html:16
+#: service_crm/templates/reports/_layout.html:8
+#: service_crm/templates/reports/_layout.html:9
+#: service_crm/templates/reports/index.html:4
+#: service_crm/templates/reports/index.html:6
+msgid "Reports"
+msgstr ""
+
+#: service_crm/templates/base.html:47
 msgid "Users"
 msgstr ""
 
-#: service_crm/templates/base.html:44
+#: service_crm/templates/base.html:48
 msgid "Audit Log"
 msgstr ""
 
-#: service_crm/templates/base.html:45
+#: service_crm/templates/base.html:49
 msgid "Settings"
 msgstr ""
 
-#: service_crm/templates/base.html:60
+#: service_crm/templates/base.html:64
 msgid "Guest"
 msgstr ""
 
-#: service_crm/templates/base.html:63
+#: service_crm/templates/base.html:67
+#: service_crm/templates/dashboard/me.html:11
 msgid "Operator"
 msgstr ""
 
-#: service_crm/templates/base.html:72
+#: service_crm/templates/base.html:76
 msgid "Toggle navigation"
 msgstr ""
 
-#: service_crm/templates/base.html:84
+#: service_crm/templates/base.html:88
 msgid "Notifications"
 msgstr ""
 
-#: service_crm/templates/base.html:88
+#: service_crm/templates/base.html:92
 msgid "Help"
 msgstr ""
 
-#: service_crm/templates/base.html:92
+#: service_crm/templates/base.html:96
 msgid "Toggle theme"
 msgstr ""
 
@@ -1103,6 +1253,7 @@ msgstr ""
 #: service_crm/templates/clients/detail.html:173
 #: service_crm/templates/clients/detail.html:241
 #: service_crm/templates/clients/list.html:40
+#: service_crm/templates/dashboard/me.html:76
 #: service_crm/templates/equipment/controllers_list.html:47
 #: service_crm/templates/equipment/detail.html:85
 #: service_crm/templates/equipment/list.html:57
@@ -1198,6 +1349,9 @@ msgstr ""
 #: service_crm/templates/clients/detail.html:241
 #: service_crm/templates/clients/list.html:33
 #: service_crm/templates/clients/list.html:40
+#: service_crm/templates/dashboard/admin.html:60
+#: service_crm/templates/dashboard/me.html:76
+#: service_crm/templates/dashboard/me.html:94
 #: service_crm/templates/dev/macro_smoke.html:76
 #: service_crm/templates/equipment/detail.html:150
 #: service_crm/templates/equipment/list.html:50
@@ -1205,6 +1359,7 @@ msgstr ""
 #: service_crm/templates/maintenance/plan_detail.html:47
 #: service_crm/templates/maintenance/task_detail.html:18
 #: service_crm/templates/maintenance/tasks_list.html:26
+#: service_crm/templates/reports/tickets_by_status.html:5
 #: service_crm/templates/tickets/list.html:54
 #: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:85
 msgid "Status"
@@ -1294,6 +1449,129 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
+#: service_crm/templates/dashboard/admin.html:8
+msgid "Operational dashboard"
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:29
+msgid "Primary indicators"
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:47
+#: service_crm/templates/dashboard/admin.html:66
+msgid "Open all"
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:60
+msgid "No tickets recorded yet."
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:79
+#: service_crm/templates/dashboard/me.html:76
+#: service_crm/templates/dashboard/me.html:94
+#: service_crm/templates/dashboard/me.html:112
+#: service_crm/templates/maintenance/plan_detail.html:47
+#: service_crm/templates/maintenance/tasks_list.html:26
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:5
+#: service_crm/templates/tickets/detail.html:40
+msgid "Due"
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:79
+msgid "No upcoming maintenance plans."
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:95
+#: service_crm/templates/dashboard/me.html:70
+#: service_crm/templates/reports/index.html:32
+#: service_crm/templates/reports/technician_workload.html:5
+#: service_crm/templates/tickets/detail.html:121
+#: service_crm/templates/tickets/list.html:47
+msgid "Open"
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:97
+#: service_crm/templates/dev/macro_smoke.html:68
+#: service_crm/tickets/_translations.py:31
+msgid "Closed"
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:107
+#: service_crm/templates/tickets/detail.html:117
+msgid "Started"
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:107
+msgid "State"
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:107
+msgid "No interventions recorded yet."
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:113
+#, python-format
+msgid "In the last %(days)s days."
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:121
+msgid "No equipment flagged as high-risk."
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:127
+msgid "Open capacity grid"
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:138
+msgid "Assignments"
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:138
+msgid "Scheduled / capacity"
+msgstr ""
+
+#: service_crm/templates/dashboard/admin.html:138
+msgid "No active technicians on the roster."
+msgstr ""
+
+#: service_crm/templates/dashboard/me.html:17
+msgid "Manager overview"
+msgstr ""
+
+#: service_crm/templates/dashboard/me.html:25
+msgid ""
+"Ask an admin to add you to the technician roster to see assigned "
+"maintenance tasks."
+msgstr ""
+
+#: service_crm/templates/dashboard/me.html:29
+msgid "My indicators"
+msgstr ""
+
+#: service_crm/templates/dashboard/me.html:31
+msgid "My open tickets"
+msgstr ""
+
+#: service_crm/templates/dashboard/me.html:36
+msgid "My overdue"
+msgstr ""
+
+#: service_crm/templates/dashboard/me.html:41
+msgid "Pending tasks"
+msgstr ""
+
+#: service_crm/templates/dashboard/me.html:46
+msgid "Overdue tasks"
+msgstr ""
+
+#: service_crm/templates/dashboard/me.html:78
+msgid "No tickets assigned to you yet."
+msgstr ""
+
+#: service_crm/templates/dashboard/me.html:114
+msgid "No pending maintenance tasks."
+msgstr ""
+
 #: service_crm/templates/dev/macro_smoke.html:10
 #: service_crm/templates/dev/macro_smoke.html:12
 msgid "Macro smoke"
@@ -1316,15 +1594,7 @@ msgid "Primary action"
 msgstr ""
 
 #: service_crm/templates/dev/macro_smoke.html:29
-msgid "Active clients"
-msgstr ""
-
-#: service_crm/templates/dev/macro_smoke.html:29
 msgid "Clients with open tickets."
-msgstr ""
-
-#: service_crm/templates/dev/macro_smoke.html:30
-msgid "Open tickets"
 msgstr ""
 
 #: service_crm/templates/dev/macro_smoke.html:30
@@ -1396,11 +1666,6 @@ msgstr ""
 #: service_crm/templates/dev/macro_smoke.html:67
 #: service_crm/tickets/_translations.py:28
 msgid "Waiting parts"
-msgstr ""
-
-#: service_crm/templates/dev/macro_smoke.html:68
-#: service_crm/tickets/_translations.py:31
-msgid "Closed"
 msgstr ""
 
 #: service_crm/templates/dev/macro_smoke.html:76
@@ -1747,12 +2012,16 @@ msgstr ""
 
 #: service_crm/templates/macros/filter_bar.html:39
 #: service_crm/templates/macros/filter_bar.html:50
+#: service_crm/templates/reports/_layout.html:16
+#: service_crm/templates/reports/index.html:11
 #: service_crm/templates/tickets/detail.html:95
 msgid "From"
 msgstr ""
 
 #: service_crm/templates/macros/filter_bar.html:43
 #: service_crm/templates/macros/filter_bar.html:54
+#: service_crm/templates/reports/_layout.html:20
+#: service_crm/templates/reports/index.html:15
 #: service_crm/templates/tickets/detail.html:95
 msgid "To"
 msgstr ""
@@ -1789,12 +2058,6 @@ msgstr ""
 #: service_crm/templates/maintenance/plan_detail.html:46
 #: service_crm/templates/maintenance/plans_list.html:26
 msgid "Tasks"
-msgstr ""
-
-#: service_crm/templates/maintenance/plan_detail.html:47
-#: service_crm/templates/maintenance/tasks_list.html:26
-#: service_crm/templates/tickets/detail.html:40
-msgid "Due"
 msgstr ""
 
 #: service_crm/templates/maintenance/plan_detail.html:47
@@ -1958,6 +2221,139 @@ msgstr ""
 msgid "No technicians yet."
 msgstr ""
 
+#: service_crm/templates/reports/_layout.html:26
+msgid "Download CSV"
+msgstr ""
+
+#: service_crm/templates/reports/_layout.html:27
+msgid "All reports"
+msgstr ""
+
+#: service_crm/templates/reports/_layout.html:30
+#, python-format
+msgid "Window: %(start)s → %(end)s"
+msgstr ""
+
+#: service_crm/templates/reports/index.html:21
+msgid ""
+"Default window: this month. Pick a range above; it flows to every report "
+"below."
+msgstr ""
+
+#: service_crm/templates/reports/index.html:34
+msgid "CSV"
+msgstr ""
+
+#: service_crm/templates/reports/interventions_by_machine.html:5
+#: service_crm/templates/reports/technician_workload.html:5
+#: service_crm/templates/tickets/detail.html:84
+msgid "Interventions"
+msgstr ""
+
+#: service_crm/templates/reports/interventions_by_machine.html:5
+#: service_crm/templates/reports/technician_workload.html:5
+msgid "Minutes"
+msgstr ""
+
+#: service_crm/templates/reports/interventions_by_machine.html:5
+msgid "Still open"
+msgstr ""
+
+#: service_crm/templates/reports/interventions_by_machine.html:15
+msgid "No interventions recorded in this window."
+msgstr ""
+
+#: service_crm/templates/reports/interventions_by_machine.html:19
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:18
+#: service_crm/templates/reports/technician_workload.html:19
+#: service_crm/templates/reports/tickets_by_status.html:16
+msgid "Total:"
+msgstr ""
+
+#: service_crm/templates/reports/interventions_by_machine.html:20
+#: service_crm/templates/reports/technician_workload.html:20
+msgid "interventions"
+msgstr ""
+
+#: service_crm/templates/reports/interventions_by_machine.html:21
+#: service_crm/templates/reports/technician_workload.html:21
+#: service_crm/templates/tickets/intervention_detail.html:23
+#: service_crm/templates/tickets/intervention_detail.html:68
+#: service_crm/templates/tickets/intervention_detail.html:82
+msgid "min"
+msgstr ""
+
+#: service_crm/templates/reports/interventions_by_machine.html:22
+msgid "still open"
+msgstr ""
+
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:5
+#: service_crm/tickets/_translations.py:30
+msgid "Completed"
+msgstr ""
+
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:5
+msgid "Delta"
+msgstr ""
+
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:14
+msgid "No maintenance activity in this window."
+msgstr ""
+
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:19
+msgid "due"
+msgstr ""
+
+#: service_crm/templates/reports/maintenance_due_vs_completed.html:19
+msgid "completed"
+msgstr ""
+
+#: service_crm/templates/reports/parts_used.html:5
+msgid "Part code"
+msgstr ""
+
+#: service_crm/templates/reports/parts_used.html:5
+#: service_crm/templates/tickets/intervention_detail.html:134
+#: service_crm/tickets/intervention_forms.py:92
+msgid "Quantity"
+msgstr ""
+
+#: service_crm/templates/reports/parts_used.html:10
+msgid "No parts consumed in this window."
+msgstr ""
+
+#: service_crm/templates/reports/parts_used.html:13
+msgid "Total parts:"
+msgstr ""
+
+#: service_crm/templates/reports/repeat_issues.html:15
+msgid "No equipment opened multiple tickets in this window."
+msgstr ""
+
+#: service_crm/templates/reports/repeat_issues.html:18
+msgid "Total tickets:"
+msgstr ""
+
+#: service_crm/templates/reports/technician_workload.html:5
+msgid "Maintenance done"
+msgstr ""
+
+#: service_crm/templates/reports/technician_workload.html:15
+msgid "No technician activity in this window."
+msgstr ""
+
+#: service_crm/templates/reports/technician_workload.html:22
+msgid "open"
+msgstr ""
+
+#: service_crm/templates/reports/technician_workload.html:23
+msgid "maintenance done"
+msgstr ""
+
+#: service_crm/templates/reports/tickets_by_status.html:13
+msgid "No tickets opened in this window."
+msgstr ""
+
 #: service_crm/templates/tickets/detail.html:58 service_crm/tickets/forms.py:57
 msgid "Move to"
 msgstr ""
@@ -1996,10 +2392,6 @@ msgstr ""
 
 #: service_crm/templates/tickets/detail.html:74
 msgid "Reason (required for cancellation)"
-msgstr ""
-
-#: service_crm/templates/tickets/detail.html:84
-msgid "Interventions"
 msgstr ""
 
 #: service_crm/templates/tickets/detail.html:86
@@ -2045,16 +2437,7 @@ msgid "Start intervention"
 msgstr ""
 
 #: service_crm/templates/tickets/detail.html:117
-msgid "Started"
-msgstr ""
-
-#: service_crm/templates/tickets/detail.html:117
 msgid "Ended"
-msgstr ""
-
-#: service_crm/templates/tickets/detail.html:121
-#: service_crm/templates/tickets/list.html:47
-msgid "Open"
 msgstr ""
 
 #: service_crm/templates/tickets/detail.html:122
@@ -2128,12 +2511,6 @@ msgstr ""
 msgid "Ticket details"
 msgstr ""
 
-#: service_crm/templates/tickets/intervention_detail.html:23
-#: service_crm/templates/tickets/intervention_detail.html:68
-#: service_crm/templates/tickets/intervention_detail.html:82
-msgid "min"
-msgstr ""
-
 #: service_crm/templates/tickets/intervention_detail.html:39
 #: service_crm/tickets/intervention_forms.py:58
 msgid "Stop"
@@ -2187,15 +2564,6 @@ msgstr ""
 msgid "Root cause"
 msgstr ""
 
-#: service_crm/templates/tickets/intervention_detail.html:133
-msgid "Parts used"
-msgstr ""
-
-#: service_crm/templates/tickets/intervention_detail.html:134
-#: service_crm/tickets/intervention_forms.py:92
-msgid "Quantity"
-msgstr ""
-
 #: service_crm/templates/tickets/intervention_detail.html:134
 #: service_crm/templates/tickets/parts_list.html:29
 #: service_crm/tickets/intervention_forms.py:96
@@ -2240,10 +2608,6 @@ msgstr ""
 
 #: service_crm/templates/tickets/list.html:26
 msgid "Search title / description…"
-msgstr ""
-
-#: service_crm/templates/tickets/list.html:33
-msgid "My queue"
 msgstr ""
 
 #: service_crm/templates/tickets/list.html:35
@@ -2339,10 +2703,6 @@ msgstr ""
 
 #: service_crm/tickets/_translations.py:29
 msgid "Monitoring"
-msgstr ""
-
-#: service_crm/tickets/_translations.py:30
-msgid "Completed"
 msgstr ""
 
 #: service_crm/tickets/_translations.py:32

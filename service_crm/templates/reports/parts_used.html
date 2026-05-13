@@ -1,0 +1,15 @@
+{% extends "reports/_layout.html" %}
+{% from "macros/data_table.html" import data_table %}
+
+{% block report_body %}
+{% set cols = [_("Part code"), _("Description"), _("Quantity")] %}
+{% set rows = [] %}
+{% for code, description, qty in result.rows %}
+  {% set _ = rows.append([code, description, qty]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No parts consumed in this window.")) }}
+
+{% if result.total_row %}
+<p class="report-total"><strong>{{ _("Total parts:") }}</strong> {{ result.total_row[-1] }}</p>
+{% endif %}
+{% endblock %}

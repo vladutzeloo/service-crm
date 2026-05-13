@@ -1,0 +1,33 @@
+{# Shared header layout for every report page. Keeps the per-report
+   templates focused on their unique table. The caller fills the
+   ``content`` block; this template renders the title, the date
+   filter, the CSV link, and the back-to-index link. #}
+{% extends "base.html" %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ report_title }} — {{ _("Reports") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb">{{ _("Reports") }}</div>{% endblock %}
+{% block page_title %}{{ report_title }}{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+  <form method="get" action="{{ url_for('reports.' + report_code) }}" class="filter-form">
+    <label class="field">
+      <span>{{ _("From") }}</span>
+      <input type="date" name="from" class="input input-sm" value="{{ window.start.isoformat() }}">
+    </label>
+    <label class="field">
+      <span>{{ _("To") }}</span>
+      <input type="date" name="to" class="input input-sm" value="{{ window.end_inclusive.isoformat() }}">
+    </label>
+    <button type="submit" class="btn btn-sm btn-secondary">{{ _("Filter") }}</button>
+  </form>
+  <a href="{{ url_for('reports.' + report_code + '_csv', **{'from': window.start.isoformat(), 'to': window.end_inclusive.isoformat()}) }}"
+     class="btn btn-sm btn-primary">{{ icon("file-text") }} {{ _("Download CSV") }}</a>
+  <a href="{{ url_for('reports.index') }}" class="btn btn-sm btn-secondary">{{ _("All reports") }}</a>
+</div>
+
+<p class="hint">{{ _("Window: %(start)s → %(end)s", start=window.start.isoformat(), end=window.end_inclusive.isoformat()) }}</p>
+
+{% block report_body %}{% endblock %}
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Reports") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb">{{ _("Admin") }}</div>{% endblock %}
+{% block page_title %}{{ _("Reports") }}{% endblock %}
+
+{% block content %}
+<form method="get" action="{{ url_for('reports.index') }}" class="filter-bar">
+  <label class="field">
+    <span>{{ _("From") }}</span>
+    <input type="date" name="from" class="input input-sm" value="{{ window.start.isoformat() }}">
+  </label>
+  <label class="field">
+    <span>{{ _("To") }}</span>
+    <input type="date" name="to" class="input input-sm" value="{{ window.end_inclusive.isoformat() }}">
+  </label>
+  <button type="submit" class="btn btn-sm btn-secondary">{{ _("Filter") }}</button>
+</form>
+
+<p class="hint">{{ _("Default window: this month. Pick a range above; it flows to every report below.") }}</p>
+
+<div class="panel-grid">
+  {% for r in catalog %}
+    <article class="panel">
+      <header class="panel-head">
+        <h2>{{ r.label }}</h2>
+      </header>
+      <p class="panel-sub">{{ r.description }}</p>
+      <div class="panel-actions">
+        <a href="{{ url_for(r.html_endpoint, **{'from': window.start.isoformat(), 'to': window.end_inclusive.isoformat()}) }}"
+           class="btn btn-sm btn-primary">{{ _("Open") }}</a>
+        <a href="{{ url_for(r.csv_endpoint, **{'from': window.start.isoformat(), 'to': window.end_inclusive.isoformat()}) }}"
+           class="btn btn-sm btn-secondary">{{ icon("file-text") }} {{ _("CSV") }}</a>
+      </div>
+    </article>
+  {% endfor %}
+</div>
+{% endblock %}

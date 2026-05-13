@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% from "macros/kpi_card.html" import kpi_card %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Dashboard") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb">{{ _("Overview") }}</div>{% endblock %}
+{% block page_title %}{{ _("Operational dashboard") }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-toolbar">
+  <a href="{{ url_for('dashboard.me') }}" class="btn btn-secondary btn-sm">
+    {{ icon("zap") }} {{ _("My queue") }}
+  </a>
+  <a href="{{ url_for('reports.index') }}" class="btn btn-secondary btn-sm">
+    {{ icon("file-text") }} {{ _("Reports") }}
+  </a>
+</div>
+
+{% set kpi_icons = {
+    "active_clients": "users",
+    "open_tickets": "wrench",
+    "overdue_tickets": "alert-triangle",
+    "due_maintenance_week": "calendar-check",
+    "tickets_waiting_parts": "server",
+    "technician_utilization": "zap",
+} %}
+
+<section class="kpi-grid" aria-label="{{ _('Primary indicators') }}">
+  {% for k in kpis %}
+    {% set drill_href = url_for(k.drill_endpoint, **(k.drill_kwargs or {})) if k.drill_endpoint else None %}
+    <a href="{{ drill_href or '#' }}" class="kpi-link" aria-label="{{ kpi_label(k.code) }}">
+      {{ kpi_card(
+          label=kpi_label(k.code),
+          value=k.value,
+          help=k.help_text or None,
+          icon_name=kpi_icons.get(k.code, "layout-dashboard"),
+      ) }}
+    </a>
+  {% endfor %}
+</section>
+
+<div class="panel-grid">
+  <article class="panel">
+    <header class="panel-head">
+      <h2>{{ panel_label("tickets_by_status") }}</h2>
+      <a href="{{ url_for('tickets.list_tickets') }}" class="panel-link">{{ _("Open all") }}</a>
+    </header>
+    {% set status_rows = [] %}
+    {% for code, count in tickets_by_status %}
+      {% set href = url_for('tickets.list_tickets', status=code) %}
+      {% set label_cell %}
+        <span class="pill pill-{{ status_tone(code) }}">{{ status_label(code) }}</span>
+      {% endset %}
+      {% set count_cell %}
+        <a href="{{ href }}" class="cell-link">{{ count }}</a>
+      {% endset %}
+      {% set _ = status_rows.append([label_cell, count_cell]) %}
+    {% endfor %}
+    {{ data_table([_("Status"), _("Tickets")], status_rows, empty=_("No tickets recorded yet.")) }}
+  </article>
+
+  <article class="panel">
+    <header class="panel-head">
+      <h2>{{ panel_label("upcoming_maintenance") }}</h2>
+      <a href="{{ url_for('maintenance.plans_list') }}" class="panel-link">{{ _("Open all") }}</a>
+    </header>
+    {% set upcoming_rows = [] %}
+    {% for p in upcoming_maintenance %}
+      {% set href = url_for('maintenance.plan_detail', plan_hex=p.id.hex()) %}
+      {% set due_cell %}
+        <span class="pill pill-{{ 'warning' if p.is_overdue else 'default' }}">{{ p.next_due_on }}</span>
+      {% endset %}
+      {% set name_cell %}
+        <a href="{{ href }}" class="cell-link">{{ p.equipment.label }}</a>
+      {% endset %}
+      {% set _ = upcoming_rows.append([name_cell, p.template.name, due_cell]) %}
+    {% endfor %}
+    {{ data_table([_("Equipment"), _("Template"), _("Due")], upcoming_rows, empty=_("No upcoming maintenance plans.")) }}
+  </article>
+
+  <article class="panel">
+    <header class="panel-head">
+      <h2>{{ panel_label("recent_interventions") }}</h2>
+    </header>
+    {% set iv_rows = [] %}
+    {% for iv in recent_interventions %}
+      {% set href = url_for('tickets.detail', ticket_hex=iv.ticket_id.hex()) %}
+      {% set ticket_cell %}<a href="{{ href }}" class="cell-link">#{{ iv.ticket.label }}</a>{% endset %}
+      {% set tech_cell %}
+        {% if iv.technician %}{{ iv.technician.email }}{% else %}—{% endif %}
+      {% endset %}
+      {% set state_cell %}
+        {% if iv.is_open %}
+          <span class="pill pill-good">{{ _("Open") }}</span>
+        {% else %}
+          <span class="pill pill-muted">{{ _("Closed") }}</span>
+        {% endif %}
+      {% endset %}
+      {% set _ = iv_rows.append([
+          ticket_cell,
+          iv.started_at.strftime('%Y-%m-%d %H:%M'),
+          tech_cell,
+          state_cell,
+      ]) %}
+    {% endfor %}
+    {{ data_table([_("Ticket"), _("Started"), _("Technician"), _("State")], iv_rows, empty=_("No interventions recorded yet.")) }}
+  </article>
+
+  <article class="panel">
+    <header class="panel-head">
+      <h2>{{ panel_label("high_risk_machines") }}</h2>
+      <p class="panel-sub">{{ _("In the last %(days)s days.", days=window.days) }}</p>
+    </header>
+    {% set risk_rows = [] %}
+    {% for r in high_risk_machines %}
+      {% set href = url_for('tickets.list_tickets', equipment=r.equipment.id.hex()) %}
+      {% set name_cell %}<a href="{{ href }}" class="cell-link">{{ r.equipment.label }}</a>{% endset %}
+      {% set _ = risk_rows.append([name_cell, r.ticket_count]) %}
+    {% endfor %}
+    {{ data_table([_("Equipment"), _("Tickets")], risk_rows, empty=_("No equipment flagged as high-risk.")) }}
+  </article>
+
+  <article class="panel panel-wide">
+    <header class="panel-head">
+      <h2>{{ panel_label("technician_load_week") }}</h2>
+      <a href="{{ url_for('planning.capacity') }}" class="panel-link">{{ _("Open capacity grid") }}</a>
+    </header>
+    {% set load_rows = [] %}
+    {% for row in technician_load %}
+      {% set tech_href = url_for('planning.technician_detail', technician_hex=row.technician.id.hex()) %}
+      {% set tech_cell %}<a href="{{ tech_href }}" class="cell-link">{{ row.technician.label }}</a>{% endset %}
+      {% set load_cell %}
+        <span class="pill pill-{{ row.tone }}">{{ row.scheduled_minutes }}/{{ row.capacity_minutes }}m</span>
+      {% endset %}
+      {% set _ = load_rows.append([tech_cell, row.assignment_count, load_cell]) %}
+    {% endfor %}
+    {{ data_table([_("Technician"), _("Assignments"), _("Scheduled / capacity")], load_rows, empty=_("No active technicians on the roster.")) }}
+  </article>
+</div>
+{% endblock %}
