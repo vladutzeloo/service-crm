@@ -438,35 +438,48 @@ def repeat_issues(
 ) -> ReportResult:
     """Equipment with more than one ticket opened inside the window.
 
-    Joins :class:`Equipment` so the row materialises in one round-trip
-    and the optional ``client`` relationship is eager-loaded.
+    Two queries: aggregate ``(equipment_id, count)`` once, then fetch
+    :class:`Equipment` rows with their ``client`` eager-loaded via a
+    single ``IN (...)`` lookup. Postgres-friendly (no unaggregated
+    columns in the ``GROUP BY``).
     """
     rows_raw = (
         session.query(
-            Equipment,
+            ServiceTicket.equipment_id,
             func.count(ServiceTicket.id),
         )
-        .join(ServiceTicket, ServiceTicket.equipment_id == Equipment.id)
-        .options(joinedload(Equipment.client))
         .filter(
+            ServiceTicket.equipment_id.is_not(None),
             ServiceTicket.created_at >= _to_utc(window.start),
             ServiceTicket.created_at < _to_utc(window.end_exclusive),
         )
-        .group_by(Equipment.id)
+        .group_by(ServiceTicket.equipment_id)
         .having(func.count(ServiceTicket.id) >= min_tickets)
         .all()
     )
     out_rows: list[tuple[Any, ...]] = []
-    for equipment, count in rows_raw:
-        client = equipment.client
-        out_rows.append(
-            (
-                equipment.id.hex(),
-                equipment.label,
-                client.name if client is not None else "—",
-                int(count),
+    if rows_raw:
+        equipment_ids = [eid for eid, _ in rows_raw]
+        equipment_by_id = {
+            e.id: e
+            for e in session.query(Equipment)
+            .options(joinedload(Equipment.client))
+            .filter(Equipment.id.in_(equipment_ids))
+            .all()
+        }
+        for equipment_id, count in rows_raw:
+            equipment = equipment_by_id.get(equipment_id)
+            if equipment is None:  # pragma: no cover - FK is SET NULL
+                continue
+            client = equipment.client
+            out_rows.append(
+                (
+                    equipment.id.hex(),
+                    equipment.label,
+                    client.name if client is not None else "—",
+                    int(count),
+                )
             )
-        )
     out_rows.sort(key=lambda r: int(r[3]), reverse=True)
     headers = ["equipment_id", "label", "client", "tickets"]
     total = ("", "", "TOTAL", sum(int(r[3]) for r in out_rows))

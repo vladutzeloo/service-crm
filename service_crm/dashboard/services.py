@@ -269,27 +269,39 @@ def high_risk_machines(
 ) -> list[dict[str, Any]]:
     """Equipment with ≥ ``min_tickets`` opened inside ``window``.
 
-    Single query: joins :class:`Equipment` so the row materialises in
-    one round-trip — no per-equipment ``session.get`` follow-up.
-    Returns plain dicts so the template doesn't wander off the
-    relationship graph.
+    Two queries, regardless of result size: one ``GROUP BY`` to pull
+    ``(equipment_id, count)``, one ``IN (...)`` to fetch the
+    :class:`Equipment` rows. Postgres requires every selected column
+    to appear in ``GROUP BY`` or be aggregated; the two-step pattern
+    sidesteps the "group by every Equipment column" footgun without
+    relapsing to a per-row ``session.get``.
     """
     rows = (
         session.query(
-            Equipment,
+            ServiceTicket.equipment_id,
             func.count(ServiceTicket.id).label("ticket_count"),
         )
-        .join(ServiceTicket, ServiceTicket.equipment_id == Equipment.id)
         .filter(
+            ServiceTicket.equipment_id.is_not(None),
             ServiceTicket.created_at >= _to_utc(window.start),
             ServiceTicket.created_at < _to_utc(window.end_exclusive),
         )
-        .group_by(Equipment.id)
+        .group_by(ServiceTicket.equipment_id)
         .having(func.count(ServiceTicket.id) >= min_tickets)
-        .order_by(func.count(ServiceTicket.id).desc())
         .all()
     )
-    return [{"equipment": equipment, "ticket_count": int(count)} for equipment, count in rows]
+    if not rows:
+        return []
+    equipment_ids = [eid for eid, _ in rows]
+    equipment_by_id = {
+        e.id: e for e in session.query(Equipment).filter(Equipment.id.in_(equipment_ids)).all()
+    }
+    sorted_rows = sorted(rows, key=lambda r: int(r[1]), reverse=True)
+    return [
+        {"equipment": equipment_by_id[eid], "ticket_count": int(count)}
+        for eid, count in sorted_rows
+        if eid in equipment_by_id
+    ]
 
 
 def technician_load_week(
