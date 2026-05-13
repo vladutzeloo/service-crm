@@ -12,6 +12,100 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-05-13
+
+### Added
+
+- **Interventions, parts, knowledge** — ROADMAP 0.6.0.
+  - `service_crm/tickets/intervention_models.py` adds
+    `ServiceIntervention`, `InterventionAction`,
+    `InterventionFinding`, `PartMaster`, `ServicePartUsage` to the
+    tickets blueprint. The v0.5 placeholder column
+    `TicketAttachment.intervention_id` is wired up (nullable FK with
+    `ON DELETE SET NULL`).
+  - `service_crm/knowledge/` blueprint with `ChecklistTemplate` +
+    `ChecklistTemplateItem`, `ChecklistRun` + `ChecklistRunItem`
+    (frozen-snapshot pattern — editing a template never mutates
+    historical runs; property test asserts this), and
+    `ProcedureDocument` + `ProcedureTag` (M2M).
+  - Alembic migration
+    `20260513_0900_d5e9f1a2b3c4_interventions_parts_knowledge.py`
+    creates every new table, the `TicketAttachment.intervention_id`
+    column, and Postgres GIN expression-indices on
+    `procedure_document(title + summary + body)` and
+    `part_master(code + description)`.
+  - Routes:
+    `/tickets/<hex>/interventions/{new, <hex>, <hex>/edit,
+    <hex>/stop, <hex>/actions[…], <hex>/findings[…], <hex>/parts[…],
+    <hex>/photos[…]}`, plus the parts catalog under
+    `/tickets/parts[…]` and the full knowledge surface under
+    `/knowledge/{procedures[…], tags[…], templates[…]}`.
+  - **Phone-first intervention form** (`templates/tickets/
+    intervention_edit.html` + `intervention_detail.html`):
+    ≥ 44 pt tap targets via the v0.2 token contract, mobile
+    keyboards (`type="datetime-local"`, `inputmode="numeric"`),
+    camera capture (`<input type="file" accept="image/*"
+    capture="environment">`). Photo uploads route through
+    `service_crm.shared.uploads.store_upload` and re-encode to WebP
+    q85 with long-edge ≤ 2048 px.
+  - **Procedure search**: dialect-aware FTS (Postgres `tsvector` /
+    SQLite `LIKE`) on title + summary + body, with tag filter.
+  - **Markdown rendering** (`service_crm/knowledge/markdown.py`) —
+    tiny hand-rolled renderer supporting headings, paragraphs,
+    ordered + unordered lists, fenced code, inline code,
+    `**bold**` / `*italic*`, and `[link](url)` with an allowlist of
+    schemes (`http`, `https`, `mailto`); raw HTML is escaped, and
+    `javascript:` / protocol-relative URLs are rejected.
+  - Idempotency tokens cover every state-changing intervention,
+    parts, tag, template, item, and procedure form via the existing
+    `service_crm.shared.idempotency` window.
+  - Sidebar gains `Knowledge` and `Parts` links; tickets detail
+    grows an `Interventions` tab and "Start intervention" entry
+    point.
+  - **226 new tests** across `tests/tickets/test_intervention_*.py`
+    and `tests/knowledge/`: models (constraints, cascades, SET NULL,
+    frozen snapshots), services (CRUD, search, dialect branches via
+    monkeypatched `_dialect`, run completion gate, choice-options
+    validation), routes (every endpoint, idempotent retries,
+    validation re-renders, cross-blueprint 404s, photo upload +
+    auth-gated download), and the Markdown renderer (every
+    supported feature + the link-scheme allowlist).
+  - Test factories: `ServiceInterventionFactory`,
+    `InterventionActionFactory`, `InterventionFindingFactory`,
+    `PartMasterFactory`, `ServicePartUsageFactory`,
+    `ChecklistTemplateFactory`, `ChecklistTemplateItemFactory`,
+    `ChecklistRunFactory`, `ChecklistRunItemFactory`,
+    `ProcedureTagFactory`, `ProcedureDocumentFactory`.
+  - **RO + EN translations** for every new label, button caption,
+    flash message, and form hint; catalogs compiled into the wheel.
+
+### Fixed
+
+- Part / procedure search on Postgres: ``plainto_tsquery`` keeps a
+  hyphenated input (``part-a``) as a compound lexeme but the indexed
+  ``to_tsvector`` carries the individual tokens too — the conjunction
+  would never match for codes like ``X-12``. The query is now
+  normalised by replacing non-word characters with spaces before
+  being handed to ``plainto_tsquery`` so it tokenises the same way as
+  the indexed vector. Applies to both ``part_master`` and
+  ``procedure_document`` search; SQLite ``LIKE`` was already
+  hyphen-safe.
+
+### Changed
+
+- `service_crm/__init__.py` registers the `knowledge` blueprint.
+- `service_crm/tickets/__init__.py` mounts the intervention routes
+  and re-exports the new models for external imports.
+- `service_crm/shared/uploads.py` is now reused by intervention
+  photos (scope ``interventions``), unchanged behaviour.
+- `service_crm/templates/tickets/detail.html` lights up the
+  `Interventions` tab (replaces the v0.5 placeholder).
+- `service_crm/templates/base.html` — sidebar `Knowledge` link now
+  points at `/knowledge/`; new `Parts` link added.
+- `pyproject.toml` mypy override extends `arg-type` suppression to
+  `tickets.intervention_routes` and `knowledge.routes`, same
+  rationale as the v0.5 entry (scoped_session vs. Session).
+
 ## [0.5.0] - 2026-05-12
 
 ### Added
@@ -400,7 +494,8 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
   scaffold lands in 0.1.0 walking skeleton.
 - 2026-05-10: adopt the blueprint's CNC domain in full.
 
-[Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/vladutzeloo/service-crm/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/vladutzeloo/service-crm/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/vladutzeloo/service-crm/compare/v0.2.0...v0.5.0
 [0.2.0]: https://github.com/vladutzeloo/service-crm/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/vladutzeloo/service-crm/releases/tag/v0.1.0

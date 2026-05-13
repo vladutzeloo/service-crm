@@ -36,7 +36,8 @@
       <div class="nav-section-title">{{ _("Catalogue") }}</div>
       <a href="{{ url_for('clients.list_clients') }}" class="nav-link">{{ icon("users") }} {{ _("Clients") }}</a>
       <a href="{{ url_for('equipment.list_equipment') }}" class="nav-link">{{ icon("server") }} {{ _("Equipment") }}</a>
-      <a href="#" class="nav-link">{{ icon("book-open") }} {{ _("Knowledge") }}</a>
+      <a href="{{ url_for('knowledge.procedures_list') }}" class="nav-link">{{ icon("book-open") }} {{ _("Knowledge") }}</a>
+      <a href="{{ url_for('tickets.parts_list') }}" class="nav-link">{{ icon("package") }} {{ _("Parts") }}</a>
 
       <div class="nav-section-title">{{ _("Admin") }}</div>
       <a href="#" class="nav-link">{{ icon("user-cog") }} {{ _("Users") }}</a>

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Procedures") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('knowledge.procedures_list') }}">{{ _("Knowledge") }}</a></div>{% endblock %}
+{% block page_title %}{{ _("Procedures") }}{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+  <form method="get" action="{{ url_for('knowledge.procedures_list') }}" class="filter-form">
+    <input type="search" name="q" class="input" value="{{ q }}"
+           placeholder="{{ _('Search procedures…') }}" autocomplete="off">
+    <select name="show" class="input">
+      <option value="active" {% if show != 'all' %}selected{% endif %}>{{ _("Active") }}</option>
+      <option value="all" {% if show == 'all' %}selected{% endif %}>{{ _("All") }}</option>
+    </select>
+    <button type="submit" class="btn btn-sm btn-secondary">{{ _("Filter") }}</button>
+  </form>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('knowledge.procedure_new') }}">
+    {{ icon("plus") }} {{ _("New procedure") }}
+  </a>
+</div>
+
+{% if tags %}
+<div class="chip-row">
+  {% for t in tags %}
+    {% set is_active = t.id.hex() in active_tag_ids %}
+    <a class="chip {% if is_active %}chip-active{% endif %}"
+       href="{{ url_for('knowledge.procedures_list', q=q, tag=t.id.hex()) }}">
+      {{ t.name }}
+    </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set cols = [_("Title"), _("Summary"), _("Tags"), _("Active")] %}
+{% set rows = [] %}
+{% for d in items %}
+  {% set title_html %}
+    <a href="{{ url_for('knowledge.procedure_detail', procedure_hex=d.id.hex()) }}" class="link">{{ d.title|e }}</a>
+  {% endset %}
+  {% set tags_html %}
+    {% for t in d.tags %}<span class="badge badge-muted">{{ t.name|e }}</span>{% endfor %}
+  {% endset %}
+  {% set _ = rows.append([
+    title_html,
+    d.summary or '—',
+    tags_html or '—',
+    (_("Yes") if d.is_active else _("No")),
+  ]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No procedures yet.")) }}
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% set is_new = doc is none %}
+{% block title %}
+  {{ _("New procedure") if is_new else _("Edit procedure") }} — Service-CRM
+{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('knowledge.procedures_list') }}">{{ _("Procedures") }}</a>
+    {% if not is_new %}
+      › <a href="{{ url_for('knowledge.procedure_detail', procedure_hex=doc.id.hex()) }}">{{ doc.title|e }}</a>
+    {% endif %}
+  </div>
+{% endblock %}
+{% block page_title %}
+  {{ _("New procedure") if is_new else _("Edit procedure") }}
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('knowledge.procedure_new') if is_new else url_for('knowledge.procedure_edit', procedure_hex=doc.id.hex()) }}"
+        novalidate>
+    <h2 class="form-title">{{ _("Procedure") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      <div class="field field-full{% if form.title.errors %} field-error{% endif %}">
+        {{ form.title.label }}
+        {{ form.title(class="input", autocomplete="off") }}
+      </div>
+      <div class="field field-full{% if form.summary.errors %} field-error{% endif %}">
+        {{ form.summary.label }}
+        {{ form.summary(class="input") }}
+      </div>
+      <div class="field field-full">
+        {{ form.tags.label }}
+        {{ form.tags(class="input", size=4) }}
+      </div>
+      {% if not is_new %}
+      <div class="field">
+        {{ form.is_active.label }}
+        {{ form.is_active() }}
+      </div>
+      {% endif %}
+      <div class="field field-full{% if form.body.errors %} field-error{% endif %}">
+        {{ form.body.label }}
+        {{ form.body(class="input textarea", rows=18, maxlength=65536) }}
+        <span class="field-hint">{{ _("Supports headings, lists, code blocks, links.") }}</span>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('knowledge.procedures_list') if is_new else url_for('knowledge.procedure_detail', procedure_hex=doc.id.hex()) }}"
+         class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

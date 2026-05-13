@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ doc.title }} — {{ _("Procedures") }}{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('knowledge.procedures_list') }}">{{ _("Procedures") }}</a>
+  </div>
+{% endblock %}
+{% block page_title %}{{ doc.title }}{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+  <div class="detail-meta">
+    {% for t in doc.tags %}
+      <span class="badge badge-muted">{{ t.name|e }}</span>
+    {% endfor %}
+    {% if not doc.is_active %}
+      <span class="badge badge-warn">{{ _("Inactive") }}</span>
+    {% endif %}
+  </div>
+  <div class="detail-actions">
+    <a href="{{ url_for('knowledge.procedure_edit', procedure_hex=doc.id.hex()) }}"
+       class="btn btn-sm btn-secondary">{{ icon("edit-2") }} {{ _("Edit") }}</a>
+  </div>
+</div>
+
+{% if doc.summary %}<p class="lede">{{ doc.summary }}</p>{% endif %}
+<div class="procedure-body">
+  {{ rendered|safe }}
+</div>
+{% endblock %}

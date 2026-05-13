@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% set is_new = intervention is none %}
+{% block title %}{{ _("Start intervention") if is_new else _("Edit intervention") }} — {{ ticket.label }}{% endblock %}
+{% block crumb %}
+  <div class="crumb">
+    <a href="{{ url_for('tickets.list_tickets') }}">{{ _("Tickets") }}</a>
+    › <a href="{{ url_for('tickets.detail', ticket_hex=ticket.id.hex()) }}">{{ ticket.label }}</a>
+    {% if not is_new %}
+      › <a href="{{ url_for('tickets.intervention_detail', ticket_hex=ticket.id.hex(), intervention_hex=intervention.id.hex()) }}">{{ _("Intervention") }}</a>
+    {% endif %}
+  </div>
+{% endblock %}
+{% block page_title %}
+  {{ _("Start intervention") if is_new else _("Edit intervention") }}
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('tickets.intervention_new', ticket_hex=ticket.id.hex()) if is_new else url_for('tickets.intervention_edit', ticket_hex=ticket.id.hex(), intervention_hex=intervention.id.hex()) }}"
+        novalidate>
+    <h2 class="form-title">{{ _("Intervention") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      <div class="field{% if form.technician_user_id.errors %} field-error{% endif %}">
+        {{ form.technician_user_id.label }}
+        {{ form.technician_user_id(class="input") }}
+      </div>
+
+      <div class="field{% if form.started_at.errors %} field-error{% endif %}">
+        {{ form.started_at.label }}
+        {{ form.started_at(class="input", type="datetime-local") }}
+      </div>
+
+      {% if not is_new %}
+      <div class="field{% if form.ended_at.errors %} field-error{% endif %}">
+        {{ form.ended_at.label }}
+        {{ form.ended_at(class="input", type="datetime-local") }}
+      </div>
+      {% endif %}
+
+      <div class="field field-full{% if form.summary.errors %} field-error{% endif %}">
+        {{ form.summary.label }}
+        {{ form.summary(class="input textarea", rows=4, maxlength=8000,
+                        inputmode="text", placeholder=_("What you did, in brief…")) }}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('tickets.detail', ticket_hex=ticket.id.hex()) if is_new else url_for('tickets.intervention_detail', ticket_hex=ticket.id.hex(), intervention_hex=intervention.id.hex()) }}"
+         class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

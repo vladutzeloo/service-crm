@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Tags") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('knowledge.procedures_list') }}">{{ _("Knowledge") }}</a></div>{% endblock %}
+{% block page_title %}{{ _("Procedure tags") }}{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+  <a class="btn btn-primary btn-sm" href="{{ url_for('knowledge.tag_new') }}">
+    {{ icon("plus") }} {{ _("New tag") }}
+  </a>
+</div>
+
+{% set cols = [_("Code"), _("Name"), _("Active"), ""] %}
+{% set rows = [] %}
+{% for t in items %}
+  {% set actions %}
+    <a href="{{ url_for('knowledge.tag_edit', tag_hex=t.id.hex()) }}" class="btn btn-sm btn-ghost">{{ icon("edit-2") }}</a>
+  {% endset %}
+  {% set _ = rows.append([
+    t.code,
+    t.name,
+    (_("Yes") if t.is_active else _("No")),
+    actions,
+  ]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No tags yet.")) }}
+{% endblock %}

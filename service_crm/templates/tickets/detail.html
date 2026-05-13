@@ -81,6 +81,8 @@
 {% set tab_items = [
   {"label": _("History"),     "href": url_for("tickets.detail", ticket_hex=ticket.id.hex(), tab="history"),
    "count": history|length, "active": tab == "history"},
+  {"label": _("Interventions"), "href": url_for("tickets.detail", ticket_hex=ticket.id.hex(), tab="interventions"),
+   "count": ticket.interventions|length, "active": tab == "interventions"},
   {"label": _("Comments"),    "href": url_for("tickets.detail", ticket_hex=ticket.id.hex(), tab="comments"),
    "count": comments|length, "active": tab == "comments"},
   {"label": _("Attachments"), "href": url_for("tickets.detail", ticket_hex=ticket.id.hex(), tab="attachments"),
@@ -104,6 +106,30 @@
     ]) %}
   {% endfor %}
   {{ data_table(h_cols, h_rows, empty=_("No status changes yet.")) }}
+</div>
+
+{% elif tab == "interventions" %}
+<div class="tab-panel">
+  <div class="tab-actions">
+    <a href="{{ url_for('tickets.intervention_new', ticket_hex=ticket.id.hex()) }}"
+       class="btn btn-primary btn-sm">{{ _("Start intervention") }}</a>
+  </div>
+  {% set i_cols = [_("Started"), _("Ended"), _("Technician"), _("Summary"), ""] %}
+  {% set i_rows = [] %}
+  {% for iv in ticket.interventions %}
+    {% set view_url = url_for('tickets.intervention_detail', ticket_hex=ticket.id.hex(), intervention_hex=iv.id.hex()) %}
+    {% set view_html %}<a href="{{ view_url }}" class="btn btn-sm btn-ghost">{{ _("Open") }}</a>{% endset %}
+    {% set ended_html %}{% if iv.ended_at %}{{ iv.ended_at.strftime('%Y-%m-%d %H:%M') }}{% else %}<em>{{ _("in progress") }}</em>{% endif %}{% endset %}
+    {% set tech_html %}{% if iv.technician %}{{ iv.technician.email|e }}{% else %}<em>{{ _("(unassigned)") }}</em>{% endif %}{% endset %}
+    {% set _ = i_rows.append([
+      iv.started_at.strftime('%Y-%m-%d %H:%M'),
+      ended_html,
+      tech_html,
+      (iv.summary or '')[:120],
+      view_html,
+    ]) %}
+  {% endfor %}
+  {{ data_table(i_cols, i_rows, empty=_("No interventions yet.")) }}
 </div>
 
 {% elif tab == "comments" %}
