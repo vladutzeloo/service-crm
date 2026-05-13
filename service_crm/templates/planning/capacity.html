@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Capacity") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb">{{ _("Planning") }}</div>{% endblock %}
+{% block page_title %}{{ _("Technician capacity") }}{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+  <form method="get" action="{{ url_for('planning.capacity') }}" class="filter-form">
+    <label class="field">
+      <span>{{ _("Start") }}</span>
+      <input type="date" name="start" class="input input-sm" value="{{ start.isoformat() }}">
+    </label>
+    <label class="field">
+      <span>{{ _("End") }}</span>
+      <input type="date" name="end" class="input input-sm" value="{{ end.isoformat() }}">
+    </label>
+    <button type="submit" class="btn btn-sm btn-secondary">{{ _("Filter") }}</button>
+  </form>
+  <a class="btn btn-secondary btn-sm" href="{{ url_for('planning.technicians_list') }}">
+    {{ _("Roster") }}
+  </a>
+</div>
+
+{% if not load %}
+  <p class="empty">{{ _("No active technicians to display.") }}</p>
+{% else %}
+<div class="table-scroll">
+<table class="data-table capacity-grid">
+  <thead>
+    <tr>
+      <th scope="col">{{ _("Technician") }}</th>
+      {% for d in days %}
+        <th scope="col" class="capacity-day{% if d == today %} is-today{% endif %}">{{ d.strftime('%a %d') }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in load %}
+      <tr>
+        <th scope="row">
+          <a href="{{ url_for('planning.technician_detail', technician_hex=row.technician.id.hex()) }}">
+            {{ row.technician.label }}
+          </a>
+        </th>
+        {% for cell in row.days %}
+          {% set ratio = (cell.assignment_count * 60) / (cell.capacity_minutes if cell.capacity_minutes else 1) %}
+          {% set tone = 'success' if ratio < 0.75 else ('warning' if ratio < 1.0 else 'danger') %}
+          <td class="capacity-cell capacity-cell-{{ tone }}" data-label="{{ cell.day }}">
+            <div class="capacity-cell-count">{{ cell.assignment_count }}</div>
+            <div class="capacity-cell-cap">{{ cell.capacity_minutes }}m</div>
+          </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

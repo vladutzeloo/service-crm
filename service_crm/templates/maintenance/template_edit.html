@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% set is_new = template is none %}
+{% block title %}{{ _("New maintenance template") if is_new else _("Edit maintenance template") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('maintenance.templates_list') }}">{{ _("Maintenance templates") }}</a></div>{% endblock %}
+{% block page_title %}{{ _("Maintenance template") }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('maintenance.template_new') if is_new else url_for('maintenance.template_edit', template_hex=template.id.hex()) }}"
+        novalidate>
+    <h2 class="form-title">{{ _("Maintenance template") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      <div class="field field-full{% if form.name.errors %} field-error{% endif %}">
+        {{ form.name.label }}
+        {{ form.name(class="input", autocomplete="off") }}
+      </div>
+      <div class="field field-full{% if form.description.errors %} field-error{% endif %}">
+        {{ form.description.label }}
+        {{ form.description(class="input textarea", rows=3) }}
+      </div>
+      <div class="field{% if form.cadence_days.errors %} field-error{% endif %}">
+        {{ form.cadence_days.label }}
+        {{ form.cadence_days(class="input", inputmode="numeric") }}
+      </div>
+      <div class="field{% if form.estimated_minutes.errors %} field-error{% endif %}">
+        {{ form.estimated_minutes.label }}
+        {{ form.estimated_minutes(class="input", inputmode="numeric") }}
+      </div>
+      <div class="field field-full{% if form.checklist_template_id.errors %} field-error{% endif %}">
+        {{ form.checklist_template_id.label }}
+        {{ form.checklist_template_id(class="input") }}
+      </div>
+      {% if not is_new %}
+      <div class="field">
+        {{ form.is_active.label }}
+        {{ form.is_active() }}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('maintenance.templates_list') }}" class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

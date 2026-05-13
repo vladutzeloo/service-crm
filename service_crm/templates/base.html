@@ -30,8 +30,8 @@
 
       <div class="nav-section-title">{{ _("Operations") }}</div>
       <a href="{{ url_for('tickets.list_tickets') }}" class="nav-link">{{ icon("wrench") }} {{ _("Tickets") }}</a>
-      <a href="#" class="nav-link">{{ icon("calendar-check") }} {{ _("Maintenance") }}</a>
-      <a href="#" class="nav-link">{{ icon("calendar") }} {{ _("Planning") }}</a>
+      <a href="{{ url_for('maintenance.plans_list') }}" class="nav-link">{{ icon("calendar-check") }} {{ _("Maintenance") }}</a>
+      <a href="{{ url_for('planning.capacity') }}" class="nav-link">{{ icon("calendar") }} {{ _("Planning") }}</a>
 
       <div class="nav-section-title">{{ _("Catalogue") }}</div>
       <a href="{{ url_for('clients.list_clients') }}" class="nav-link">{{ icon("users") }} {{ _("Clients") }}</a>

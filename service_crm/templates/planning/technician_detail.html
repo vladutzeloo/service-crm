@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ technician.label }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('planning.technicians_list') }}">{{ _("Technicians") }}</a></div>{% endblock %}
+{% block page_title %}{{ technician.label }}{% endblock %}
+
+{% block content %}
+<section class="detail-header">
+  <div class="detail-meta">
+    <div><strong>{{ _("Email") }}:</strong> {{ technician.user.email if technician.user else '—' }}</div>
+    <div><strong>{{ _("Timezone") }}:</strong> {{ technician.timezone }}</div>
+    <div><strong>{{ _("Weekly capacity (minutes)") }}:</strong> {{ technician.weekly_capacity_minutes }}</div>
+    <div><strong>{{ _("Active") }}:</strong> {{ _("Yes") if technician.is_active else _("No") }}</div>
+  </div>
+  <div class="detail-actions">
+    <a class="btn btn-sm btn-secondary"
+       href="{{ url_for('planning.technician_edit', technician_hex=technician.id.hex()) }}">{{ icon("edit-2") }} {{ _("Edit") }}</a>
+  </div>
+</section>
+
+<section class="detail-section">
+  <h3>{{ _("Capacity slots") }}</h3>
+  <form method="post" action="{{ url_for('planning.slot_upsert', technician_hex=technician.id.hex()) }}"
+        class="inline-compose">
+    {{ slot_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <label class="field">
+      {{ slot_form.day.label }}
+      {{ slot_form.day(class="input input-sm", type="date") }}
+    </label>
+    <label class="field">
+      {{ slot_form.capacity_minutes.label }}
+      {{ slot_form.capacity_minutes(class="input input-sm", inputmode="numeric") }}
+    </label>
+    <label class="field field-full">
+      {{ slot_form.notes.label }}
+      {{ slot_form.notes(class="input input-sm") }}
+    </label>
+    <button type="submit" class="btn btn-primary btn-sm">{{ _("Save") }}</button>
+  </form>
+
+  {% set cols = [_("Day"), _("Capacity (minutes)"), _("Notes"), ""] %}
+  {% set rows = [] %}
+  {% for s in slots %}
+    {% set delete_url = url_for('planning.slot_delete', technician_hex=technician.id.hex(), slot_hex=s.id.hex()) %}
+    {% set actions %}
+      <form method="post" action="{{ delete_url }}" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="idempotency_token" value="{{ tok }}">
+        <button type="submit" class="btn btn-sm btn-ghost btn-danger-ghost"
+                onclick="return confirm('{{ _("Delete this slot?") }}')">{{ icon("trash-2") }}</button>
+      </form>
+    {% endset %}
+    {% set _ = rows.append([
+      s.day,
+      s.capacity_minutes,
+      s.notes or '—',
+      actions,
+    ]) %}
+  {% endfor %}
+  {{ data_table(cols, rows, empty=_("No capacity slots yet.")) }}
+</section>
+{% endblock %}

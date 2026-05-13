@@ -12,6 +12,82 @@ standard headings: **Added / Changed / Deprecated / Removed / Fixed / Security**
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-05-13
+
+### Added
+
+- **Maintenance + planning** — ROADMAP 0.7.0.
+  - New `service_crm/maintenance/` blueprint with
+    `MaintenanceTemplate`, `MaintenancePlan`, `MaintenanceTask`,
+    `MaintenanceExecution`. `next_due_on` is a derived field — the
+    service layer is the only writer; routes never set it directly.
+  - New `service_crm/planning/` blueprint with `Technician` (1:1 with
+    `User`), `TechnicianAssignment` (with a DB-level CHECK so a row
+    must reference a ticket or intervention), and
+    `TechnicianCapacitySlot` (per-day declared minutes).
+  - **APScheduler** bootstrap in `service_crm/shared/scheduler.py`.
+    In-process `BackgroundScheduler` gated by `SCHEDULER_ENABLED`
+    (off in tests + dev, on in prod). Two recurring jobs:
+    `maintenance_tick` (recomputes every active plan's `next_due_on`
+    and generates the next pending task inside a 14-day horizon) and
+    `idempotency_sweep` (formerly cron-only).
+  - **One-click escalation** — `POST /maintenance/tasks/<hex>/escalate`
+    creates a `ServiceTicket` (`preventive` / `normal`) seeded from
+    the plan + template; the resulting `MaintenanceTask.ticket_id`
+    points back so the link is bidirectional. Idempotency-token
+    guarded.
+  - **Technician capacity view** modeled on
+    `oee-calculator2.0/templates/capacity.html` —
+    per-(technician, day) grid coloured by ratio of scheduled
+    assignments to declared capacity. Defaults to today + 13 days;
+    `?start=` / `?end=` override.
+  - Alembic migration
+    `20260513_1800_e6f1a2b3c4d5_maintenance_planning.py` creates
+    every new table with the indexes and CHECK constraints called
+    out in the architecture plan §4.
+  - Routes (all `@login_required`):
+    `/maintenance/templates[/...]`,
+    `/maintenance/plans[/..., new, <hex>, <hex>/edit, <hex>/generate-tasks]`,
+    `/maintenance/tasks[/..., <hex>, <hex>/assign, <hex>/complete,
+    <hex>/escalate]`, `/planning/technicians[/..., new, <hex>,
+    <hex>/edit, <hex>/slots, <hex>/slots/<sid>/delete]`,
+    `/planning/capacity`.
+  - **CLI**: new `flask run-maintenance-tick` exposes the scheduler
+    entrypoint for cron / dev triggering.
+  - Sidebar `Maintenance` and `Planning` placeholder links are now
+    wired up to the new blueprints.
+  - **172 new tests** across `tests/maintenance/`, `tests/planning/`,
+    and `tests/shared/test_scheduler.py`: models (constraints,
+    cascades, CHECK), services (CRUD, scheduler tick idempotency,
+    one-task-per-plan rule, escalation flow), routes (every endpoint,
+    idempotent retries, validation flashes, query-string filters),
+    scheduler (init_app gating, idempotent restart, job execution
+    inside an app context).
+  - Test factories: `MaintenanceTemplateFactory`,
+    `MaintenancePlanFactory`, `MaintenanceTaskFactory`,
+    `MaintenanceExecutionFactory`, `TechnicianFactory`,
+    `TechnicianAssignmentFactory`, `TechnicianCapacitySlotFactory`.
+  - **RO + EN translations** for every new label, status, button
+    caption, and flash message; catalogs compiled into the wheel.
+
+### Changed
+
+- `service_crm/__init__.py` registers the two new blueprints and
+  calls `shared.scheduler.init_app`.
+- `service_crm/config.py` adds `SCHEDULER_ENABLED`,
+  `SCHEDULER_MAINTENANCE_INTERVAL_MIN`, and
+  `SCHEDULER_IDEMPOTENCY_INTERVAL_H` — defaults are off / 60 min /
+  6 h respectively.
+- `service_crm/cli.py` adds `run-maintenance-tick`. The
+  `sweep-idempotency` docstring now points at the scheduler instead
+  of a "v0.7 will…" placeholder.
+- `service_crm/templates/base.html` sidebar `Maintenance` and
+  `Planning` entries now link to the new blueprint indices.
+- `pyproject.toml` mypy override extends the `arg-type` suppression
+  list to `maintenance.routes`, `maintenance.services`,
+  `planning.routes`, and `shared.scheduler` — same rationale as the
+  v0.5 / v0.6 entries (`scoped_session` vs. `Session`).
+
 ## [0.6.0] - 2026-05-13
 
 ### Added

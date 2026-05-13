@@ -118,6 +118,7 @@ warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
 module = [
+    "apscheduler.*",
     "factory.*",
     "factory_boy.*",
     "flask_babel",
@@ -143,6 +144,10 @@ module = [
     "service_crm.tickets.routes",
     "service_crm.tickets.intervention_routes",
     "service_crm.knowledge.routes",
+    "service_crm.maintenance.routes",
+    "service_crm.maintenance.services",
+    "service_crm.planning.routes",
+    "service_crm.shared.scheduler",
     "service_crm.cli",
 ]
 disable_error_code = ["arg-type"]

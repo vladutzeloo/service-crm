@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-13 05:57+0000\n"
+"POT-Creation-Date: 2026-05-13 07:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,6 +30,8 @@ msgstr ""
 #: service_crm/templates/clients/detail.html:103
 #: service_crm/templates/clients/detail.html:141
 #: service_crm/templates/clients/list.html:40
+#: service_crm/templates/planning/technician_detail.html:12
+#: service_crm/templates/planning/technicians_list.html:23
 msgid "Email"
 msgstr ""
 
@@ -57,7 +59,8 @@ msgstr ""
 
 #: service_crm/clients/forms.py:13 service_crm/clients/forms.py:21
 #: service_crm/equipment/forms.py:25 service_crm/knowledge/forms.py:19
-#: service_crm/knowledge/forms.py:53 service_crm/knowledge/forms.py:58
+#: service_crm/knowledge/forms.py:51 service_crm/knowledge/forms.py:56
+#: service_crm/maintenance/forms.py:20
 #: service_crm/templates/clients/detail.html:75
 #: service_crm/templates/clients/detail.html:101
 #: service_crm/templates/clients/detail.html:133
@@ -66,6 +69,8 @@ msgstr ""
 #: service_crm/templates/equipment/controllers_list.html:47
 #: service_crm/templates/knowledge/tags_list.html:16
 #: service_crm/templates/knowledge/templates_list.html:16
+#: service_crm/templates/maintenance/templates_list.html:23
+#: service_crm/templates/planning/technicians_list.html:23
 msgid "Name"
 msgstr ""
 
@@ -80,6 +85,9 @@ msgstr ""
 #: service_crm/clients/forms.py:16 service_crm/clients/forms.py:42
 #: service_crm/equipment/forms.py:26 service_crm/equipment/forms.py:37
 #: service_crm/equipment/forms.py:62 service_crm/equipment/forms.py:71
+#: service_crm/maintenance/forms.py:62 service_crm/maintenance/forms.py:72
+#: service_crm/maintenance/forms.py:94 service_crm/planning/forms.py:37
+#: service_crm/planning/forms.py:48 service_crm/planning/forms.py:59
 #: service_crm/templates/clients/detail.html:270
 #: service_crm/templates/clients/detail.html:291
 #: service_crm/templates/dev/macro_smoke.html:130
@@ -87,6 +95,8 @@ msgstr ""
 #: service_crm/templates/equipment/controllers_list.html:47
 #: service_crm/templates/equipment/detail.html:113
 #: service_crm/templates/equipment/detail.html:134
+#: service_crm/templates/maintenance/plan_detail.html:40
+#: service_crm/templates/planning/technician_detail.html:44
 #: service_crm/tickets/intervention_forms.py:118
 #: service_crm/tickets/intervention_forms.py:125
 msgid "Notes"
@@ -96,8 +106,12 @@ msgstr ""
 #: service_crm/clients/forms.py:34 service_crm/clients/forms.py:43
 #: service_crm/equipment/forms.py:27 service_crm/equipment/forms.py:38
 #: service_crm/equipment/forms.py:63 service_crm/equipment/forms.py:72
-#: service_crm/knowledge/forms.py:23 service_crm/knowledge/forms.py:54
-#: service_crm/knowledge/forms.py:60 service_crm/knowledge/forms.py:70
+#: service_crm/knowledge/forms.py:21 service_crm/knowledge/forms.py:52
+#: service_crm/knowledge/forms.py:58 service_crm/knowledge/forms.py:68
+#: service_crm/maintenance/forms.py:37 service_crm/maintenance/forms.py:63
+#: service_crm/maintenance/forms.py:74 service_crm/maintenance/forms.py:84
+#: service_crm/planning/forms.py:38 service_crm/planning/forms.py:50
+#: service_crm/planning/forms.py:60
 #: service_crm/templates/clients/detail.html:112
 #: service_crm/templates/clients/detail.html:156
 #: service_crm/templates/clients/detail.html:204
@@ -112,6 +126,11 @@ msgstr ""
 #: service_crm/templates/knowledge/tag_edit.html:37
 #: service_crm/templates/knowledge/template_edit.html:37
 #: service_crm/templates/macros/form_shell.html:48
+#: service_crm/templates/maintenance/plan_edit.html:50
+#: service_crm/templates/maintenance/task_detail.html:43
+#: service_crm/templates/maintenance/template_edit.html:48
+#: service_crm/templates/planning/technician_detail.html:41
+#: service_crm/templates/planning/technician_edit.html:50
 #: service_crm/templates/tickets/edit.html:88
 #: service_crm/templates/tickets/intervention_edit.html:54
 #: service_crm/templates/tickets/lookup_edit.html:32
@@ -136,7 +155,7 @@ msgstr ""
 msgid "Primary contact"
 msgstr ""
 
-#: service_crm/clients/forms.py:30 service_crm/knowledge/forms.py:32
+#: service_crm/clients/forms.py:30 service_crm/knowledge/forms.py:30
 #: service_crm/templates/clients/detail.html:173
 #: service_crm/templates/clients/detail.html:197
 #: service_crm/templates/clients/detail.html:217
@@ -167,7 +186,7 @@ msgstr ""
 msgid "Country"
 msgstr ""
 
-#: service_crm/clients/forms.py:38 service_crm/knowledge/forms.py:64
+#: service_crm/clients/forms.py:38 service_crm/knowledge/forms.py:62
 #: service_crm/templates/clients/detail.html:241
 #: service_crm/templates/clients/detail.html:266
 #: service_crm/templates/clients/detail.html:287
@@ -298,7 +317,7 @@ msgstr ""
 msgid "%(count)s clients imported."
 msgstr ""
 
-#: service_crm/equipment/forms.py:24 service_crm/knowledge/forms.py:52
+#: service_crm/equipment/forms.py:24 service_crm/knowledge/forms.py:50
 #: service_crm/templates/equipment/controllers_list.html:28
 #: service_crm/templates/equipment/controllers_list.html:47
 #: service_crm/templates/knowledge/tags_list.html:16
@@ -321,7 +340,8 @@ msgstr ""
 msgid "Model code"
 msgstr ""
 
-#: service_crm/equipment/forms.py:33
+#: service_crm/equipment/forms.py:33 service_crm/planning/forms.py:26
+#: service_crm/planning/forms.py:42
 #: service_crm/templates/equipment/models_list.html:55
 msgid "Display name"
 msgstr ""
@@ -367,8 +387,9 @@ msgstr ""
 
 #: service_crm/equipment/routes.py:65 service_crm/equipment/routes.py:76
 #: service_crm/equipment/routes.py:80 service_crm/equipment/routes.py:86
-#: service_crm/tickets/forms.py:63 service_crm/tickets/routes.py:99
-#: service_crm/tickets/routes.py:113 service_crm/tickets/routes.py:119
+#: service_crm/maintenance/routes.py:86 service_crm/tickets/forms.py:63
+#: service_crm/tickets/routes.py:99 service_crm/tickets/routes.py:113
+#: service_crm/tickets/routes.py:119
 msgid "— none —"
 msgstr ""
 
@@ -487,23 +508,23 @@ msgid ""
 "display_name, controller_code, notes"
 msgstr ""
 
-#: service_crm/knowledge/_translations.py:14 service_crm/knowledge/forms.py:36
+#: service_crm/knowledge/_translations.py:14 service_crm/knowledge/forms.py:34
 msgid "Yes / no"
 msgstr ""
 
-#: service_crm/knowledge/_translations.py:15 service_crm/knowledge/forms.py:37
+#: service_crm/knowledge/_translations.py:15 service_crm/knowledge/forms.py:35
 msgid "Text"
 msgstr ""
 
-#: service_crm/knowledge/_translations.py:16 service_crm/knowledge/forms.py:38
+#: service_crm/knowledge/_translations.py:16 service_crm/knowledge/forms.py:36
 msgid "Number"
 msgstr ""
 
-#: service_crm/knowledge/_translations.py:17 service_crm/knowledge/forms.py:39
+#: service_crm/knowledge/_translations.py:17 service_crm/knowledge/forms.py:37
 msgid "Choice"
 msgstr ""
 
-#: service_crm/knowledge/forms.py:21
+#: service_crm/knowledge/forms.py:20 service_crm/maintenance/forms.py:21
 #: service_crm/templates/knowledge/templates_list.html:16
 #: service_crm/templates/tickets/intervention_detail.html:134
 #: service_crm/templates/tickets/parts_list.html:29
@@ -513,8 +534,9 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: service_crm/knowledge/forms.py:27 service_crm/knowledge/forms.py:59
-#: service_crm/knowledge/forms.py:74
+#: service_crm/knowledge/forms.py:25 service_crm/knowledge/forms.py:57
+#: service_crm/knowledge/forms.py:72 service_crm/maintenance/forms.py:41
+#: service_crm/maintenance/forms.py:73 service_crm/planning/forms.py:49
 #: service_crm/templates/clients/detail.html:22
 #: service_crm/templates/clients/detail.html:255
 #: service_crm/templates/clients/list.html:35
@@ -526,6 +548,14 @@ msgstr ""
 #: service_crm/templates/knowledge/procedures_list.html:37
 #: service_crm/templates/knowledge/tags_list.html:16
 #: service_crm/templates/knowledge/templates_list.html:16
+#: service_crm/templates/maintenance/plan_detail.html:23
+#: service_crm/templates/maintenance/plans_list.html:13
+#: service_crm/templates/maintenance/plans_list.html:37
+#: service_crm/templates/maintenance/templates_list.html:13
+#: service_crm/templates/maintenance/templates_list.html:23
+#: service_crm/templates/planning/technician_detail.html:15
+#: service_crm/templates/planning/technicians_list.html:13
+#: service_crm/templates/planning/technicians_list.html:23
 #: service_crm/templates/tickets/parts_list.html:19
 #: service_crm/templates/tickets/parts_list.html:29
 #: service_crm/templates/tickets/priorities_list.html:16
@@ -535,32 +565,32 @@ msgstr ""
 msgid "Active"
 msgstr ""
 
-#: service_crm/knowledge/forms.py:31
+#: service_crm/knowledge/forms.py:29
 #: service_crm/templates/knowledge/template_edit.html:45
 msgid "Key"
 msgstr ""
 
-#: service_crm/knowledge/forms.py:34
+#: service_crm/knowledge/forms.py:32
 #: service_crm/templates/knowledge/template_edit.html:45
 #: service_crm/templates/tickets/intervention_detail.html:89
 msgid "Kind"
 msgstr ""
 
-#: service_crm/knowledge/forms.py:43
+#: service_crm/knowledge/forms.py:41
 #: service_crm/templates/knowledge/template_edit.html:45
 #: service_crm/templates/knowledge/template_edit.html:82
 msgid "Required"
 msgstr ""
 
-#: service_crm/knowledge/forms.py:45
+#: service_crm/knowledge/forms.py:43
 msgid "Choice options (comma-separated)"
 msgstr ""
 
-#: service_crm/knowledge/forms.py:48
+#: service_crm/knowledge/forms.py:46
 msgid "Add item"
 msgstr ""
 
-#: service_crm/knowledge/forms.py:65
+#: service_crm/knowledge/forms.py:63
 #: service_crm/templates/knowledge/procedures_list.html:37
 #: service_crm/templates/tickets/detail.html:117
 #: service_crm/tickets/intervention_forms.py:32
@@ -568,34 +598,40 @@ msgstr ""
 msgid "Summary"
 msgstr ""
 
-#: service_crm/knowledge/forms.py:66
+#: service_crm/knowledge/forms.py:64
 msgid "Body (Markdown)"
 msgstr ""
 
-#: service_crm/knowledge/forms.py:68
+#: service_crm/knowledge/forms.py:66
 #: service_crm/templates/knowledge/procedures_list.html:37
 #: service_crm/templates/knowledge/tag_edit.html:5
 #: service_crm/templates/knowledge/tags_list.html:5
 msgid "Tags"
 msgstr ""
 
-#: service_crm/knowledge/routes.py:101 service_crm/knowledge/routes.py:153
+#: service_crm/knowledge/routes.py:101 service_crm/knowledge/routes.py:151
 msgid "Procedure not found."
 msgstr ""
 
-#: service_crm/knowledge/routes.py:120 service_crm/knowledge/routes.py:167
-#: service_crm/knowledge/routes.py:215 service_crm/knowledge/routes.py:249
-#: service_crm/knowledge/routes.py:292 service_crm/knowledge/routes.py:333
-#: service_crm/knowledge/routes.py:376
-#: service_crm/tickets/intervention_routes.py:93
-#: service_crm/tickets/intervention_routes.py:198
-#: service_crm/tickets/intervention_routes.py:262
-#: service_crm/tickets/intervention_routes.py:318
-#: service_crm/tickets/intervention_routes.py:410
-#: service_crm/tickets/intervention_routes.py:503
-#: service_crm/tickets/intervention_routes.py:598
-#: service_crm/tickets/intervention_routes.py:688
-#: service_crm/tickets/intervention_routes.py:728
+#: service_crm/knowledge/routes.py:120 service_crm/knowledge/routes.py:165
+#: service_crm/knowledge/routes.py:209 service_crm/knowledge/routes.py:241
+#: service_crm/knowledge/routes.py:284 service_crm/knowledge/routes.py:323
+#: service_crm/knowledge/routes.py:364 service_crm/maintenance/routes.py:99
+#: service_crm/maintenance/routes.py:145 service_crm/maintenance/routes.py:220
+#: service_crm/maintenance/routes.py:280 service_crm/maintenance/routes.py:314
+#: service_crm/maintenance/routes.py:425 service_crm/maintenance/routes.py:457
+#: service_crm/maintenance/routes.py:489 service_crm/planning/routes.py:83
+#: service_crm/planning/routes.py:153 service_crm/planning/routes.py:224
+#: service_crm/planning/routes.py:255
+#: service_crm/tickets/intervention_routes.py:90
+#: service_crm/tickets/intervention_routes.py:189
+#: service_crm/tickets/intervention_routes.py:251
+#: service_crm/tickets/intervention_routes.py:305
+#: service_crm/tickets/intervention_routes.py:391
+#: service_crm/tickets/intervention_routes.py:478
+#: service_crm/tickets/intervention_routes.py:567
+#: service_crm/tickets/intervention_routes.py:651
+#: service_crm/tickets/intervention_routes.py:691
 #: service_crm/tickets/routes.py:238 service_crm/tickets/routes.py:343
 #: service_crm/tickets/routes.py:394 service_crm/tickets/routes.py:443
 #: service_crm/tickets/routes.py:481 service_crm/tickets/routes.py:545
@@ -606,44 +642,282 @@ msgstr ""
 msgid "Procedure created."
 msgstr ""
 
-#: service_crm/knowledge/routes.py:184
+#: service_crm/knowledge/routes.py:180
 msgid "Procedure updated."
 msgstr ""
 
-#: service_crm/knowledge/routes.py:222
+#: service_crm/knowledge/routes.py:214
 msgid "Tag created."
 msgstr ""
 
-#: service_crm/knowledge/routes.py:240
+#: service_crm/knowledge/routes.py:232
 msgid "Tag not found."
 msgstr ""
 
-#: service_crm/knowledge/routes.py:259
+#: service_crm/knowledge/routes.py:251
 msgid "Tag updated."
 msgstr ""
 
-#: service_crm/knowledge/routes.py:301
+#: service_crm/knowledge/routes.py:293
 msgid "Template created."
 msgstr ""
 
-#: service_crm/knowledge/routes.py:323 service_crm/knowledge/routes.py:364
+#: service_crm/knowledge/routes.py:313 service_crm/knowledge/routes.py:354
+#: service_crm/maintenance/routes.py:129
 msgid "Template not found."
 msgstr ""
 
-#: service_crm/knowledge/routes.py:344
+#: service_crm/knowledge/routes.py:334
 msgid "Template updated."
 msgstr ""
 
-#: service_crm/knowledge/routes.py:391
+#: service_crm/knowledge/routes.py:377
 msgid "Item added."
 msgstr ""
 
-#: service_crm/knowledge/routes.py:407 service_crm/knowledge/routes.py:410
+#: service_crm/knowledge/routes.py:393 service_crm/knowledge/routes.py:396
 msgid "Item not found."
 msgstr ""
 
-#: service_crm/knowledge/routes.py:414
+#: service_crm/knowledge/routes.py:400
 msgid "Item removed."
+msgstr ""
+
+#: service_crm/maintenance/_translations.py:15
+msgid "Pending"
+msgstr ""
+
+#: service_crm/maintenance/_translations.py:16
+msgid "Done"
+msgstr ""
+
+#: service_crm/maintenance/_translations.py:17
+msgid "Escalated to ticket"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:23 service_crm/maintenance/forms.py:58
+#: service_crm/maintenance/forms.py:68
+#: service_crm/templates/maintenance/plan_detail.html:16
+#: service_crm/templates/maintenance/plans_list.html:37
+#: service_crm/templates/maintenance/templates_list.html:23
+msgid "Cadence (days)"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:28
+#: service_crm/templates/maintenance/templates_list.html:23
+msgid "Estimated minutes"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:32
+msgid "Checklist template"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:46 service_crm/templates/base.html:38
+#: service_crm/templates/dev/macro_smoke.html:76
+#: service_crm/templates/equipment/controllers_list.html:8
+#: service_crm/templates/equipment/detail.html:10
+#: service_crm/templates/equipment/edit.html:10
+#: service_crm/templates/equipment/import.html:6
+#: service_crm/templates/equipment/list.html:6
+#: service_crm/templates/equipment/list.html:16
+#: service_crm/templates/equipment/models_list.html:8
+#: service_crm/templates/maintenance/plan_detail.html:13
+#: service_crm/templates/maintenance/plans_list.html:37
+#: service_crm/templates/maintenance/task_detail.html:14
+#: service_crm/templates/maintenance/tasks_list.html:26
+#: service_crm/tickets/forms.py:31
+msgid "Equipment"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:52
+#: service_crm/templates/knowledge/template_edit.html:15
+#: service_crm/templates/maintenance/plans_list.html:37
+msgid "Template"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:61 service_crm/maintenance/forms.py:71
+#: service_crm/templates/maintenance/plan_detail.html:17
+msgid "Last done on"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:79
+#: service_crm/templates/planning/capacity.html:33
+#: service_crm/templates/planning/technician_edit.html:6
+#: service_crm/templates/planning/technician_edit.html:13
+#: service_crm/templates/tickets/detail.html:117
+#: service_crm/tickets/intervention_forms.py:22
+#: service_crm/tickets/intervention_forms.py:38
+msgid "Technician"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:89
+msgid "Linked intervention"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:95
+#: service_crm/templates/maintenance/task_detail.html:49
+#: service_crm/templates/maintenance/task_detail.html:65
+msgid "Mark done"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:99
+msgid "Ticket title"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:101
+msgid "Ticket description"
+msgstr ""
+
+#: service_crm/maintenance/forms.py:104
+#: service_crm/templates/maintenance/task_detail.html:87
+msgid "Open ticket"
+msgstr ""
+
+#: service_crm/maintenance/routes.py:111
+msgid "Maintenance template created."
+msgstr ""
+
+#: service_crm/maintenance/routes.py:159
+msgid "Maintenance template updated."
+msgstr ""
+
+#: service_crm/maintenance/routes.py:232
+msgid "Maintenance plan created."
+msgstr ""
+
+#: service_crm/maintenance/routes.py:250 service_crm/maintenance/routes.py:269
+#: service_crm/maintenance/routes.py:310
+msgid "Plan not found."
+msgstr ""
+
+#: service_crm/maintenance/routes.py:292
+msgid "Maintenance plan updated."
+msgstr ""
+
+#: service_crm/maintenance/routes.py:320
+#, python-format
+msgid "Generated %(count)s task(s)."
+msgstr ""
+
+#: service_crm/maintenance/routes.py:359 service_crm/maintenance/routes.py:414
+#: service_crm/maintenance/routes.py:446 service_crm/maintenance/routes.py:479
+msgid "Task not found."
+msgstr ""
+
+#: service_crm/maintenance/routes.py:386
+#: service_crm/tickets/intervention_routes.py:58
+#: service_crm/tickets/routes.py:125
+msgid "— unassigned —"
+msgstr ""
+
+#: service_crm/maintenance/routes.py:402
+msgid "— no linked intervention —"
+msgstr ""
+
+#: service_crm/maintenance/routes.py:434
+msgid "Task assigned."
+msgstr ""
+
+#: service_crm/maintenance/routes.py:467
+msgid "Task marked done."
+msgstr ""
+
+#: service_crm/maintenance/routes.py:499
+msgid "Ticket opened from maintenance task."
+msgstr ""
+
+#: service_crm/planning/_translations.py:8
+#: service_crm/templates/dev/macro_smoke.html:76
+#: service_crm/templates/equipment/detail.html:150
+#: service_crm/templates/maintenance/plan_detail.html:47
+#: service_crm/templates/maintenance/task_detail.html:22
+#: service_crm/templates/tickets/list.html:56
+msgid "Ticket"
+msgstr ""
+
+#: service_crm/planning/_translations.py:9
+#: service_crm/templates/tickets/intervention_detail.html:5
+#: service_crm/templates/tickets/intervention_detail.html:12
+#: service_crm/templates/tickets/intervention_edit.html:9
+#: service_crm/templates/tickets/intervention_edit.html:22
+msgid "Intervention"
+msgstr ""
+
+#: service_crm/planning/_translations.py:10
+msgid "Ticket + intervention"
+msgstr ""
+
+#: service_crm/planning/forms.py:21
+msgid "User"
+msgstr ""
+
+#: service_crm/planning/forms.py:28 service_crm/planning/forms.py:43
+#: service_crm/templates/planning/technician_detail.html:13
+#: service_crm/templates/planning/technicians_list.html:23
+msgid "Timezone"
+msgstr ""
+
+#: service_crm/planning/forms.py:33 service_crm/planning/forms.py:45
+#: service_crm/templates/planning/technician_detail.html:14
+#: service_crm/templates/planning/technicians_list.html:23
+msgid "Weekly capacity (minutes)"
+msgstr ""
+
+#: service_crm/planning/forms.py:54
+#: service_crm/templates/planning/technician_detail.html:44
+msgid "Day"
+msgstr ""
+
+#: service_crm/planning/forms.py:56
+#: service_crm/templates/planning/technician_detail.html:44
+msgid "Capacity (minutes)"
+msgstr ""
+
+#: service_crm/planning/forms.py:64
+#: service_crm/templates/planning/capacity.html:12
+msgid "Start"
+msgstr ""
+
+#: service_crm/planning/forms.py:65
+#: service_crm/templates/planning/capacity.html:16
+msgid "End"
+msgstr ""
+
+#: service_crm/planning/forms.py:66
+#: service_crm/templates/knowledge/procedures_list.html:18
+#: service_crm/templates/maintenance/plans_list.html:20
+#: service_crm/templates/maintenance/tasks_list.html:22
+#: service_crm/templates/maintenance/templates_list.html:16
+#: service_crm/templates/planning/capacity.html:19
+#: service_crm/templates/planning/technicians_list.html:16
+#: service_crm/templates/tickets/parts_list.html:22
+#: service_crm/tickets/forms.py:91
+msgid "Filter"
+msgstr ""
+
+#: service_crm/planning/routes.py:96
+msgid "Technician added."
+msgstr ""
+
+#: service_crm/planning/routes.py:114 service_crm/planning/routes.py:141
+#: service_crm/planning/routes.py:214
+msgid "Technician not found."
+msgstr ""
+
+#: service_crm/planning/routes.py:167
+msgid "Technician updated."
+msgstr ""
+
+#: service_crm/planning/routes.py:235
+msgid "Capacity slot saved."
+msgstr ""
+
+#: service_crm/planning/routes.py:248 service_crm/planning/routes.py:251
+msgid "Capacity slot not found."
+msgstr ""
+
+#: service_crm/planning/routes.py:259
+msgid "Capacity slot removed."
 msgstr ""
 
 #: service_crm/templates/base.html:23
@@ -685,10 +959,15 @@ msgstr ""
 
 #: service_crm/templates/base.html:33
 #: service_crm/templates/equipment/detail.html:72
+#: service_crm/templates/maintenance/plans_list.html:6
+#: service_crm/templates/maintenance/tasks_list.html:6
+#: service_crm/templates/maintenance/templates_list.html:6
 msgid "Maintenance"
 msgstr ""
 
 #: service_crm/templates/base.html:34
+#: service_crm/templates/planning/capacity.html:5
+#: service_crm/templates/planning/technicians_list.html:6
 msgid "Planning"
 msgstr ""
 
@@ -704,19 +983,6 @@ msgstr ""
 #: service_crm/templates/clients/list.html:6
 #: service_crm/templates/clients/list.html:8
 msgid "Clients"
-msgstr ""
-
-#: service_crm/templates/base.html:38
-#: service_crm/templates/dev/macro_smoke.html:76
-#: service_crm/templates/equipment/controllers_list.html:8
-#: service_crm/templates/equipment/detail.html:10
-#: service_crm/templates/equipment/edit.html:10
-#: service_crm/templates/equipment/import.html:6
-#: service_crm/templates/equipment/list.html:6
-#: service_crm/templates/equipment/list.html:16
-#: service_crm/templates/equipment/models_list.html:8
-#: service_crm/tickets/forms.py:31
-msgid "Equipment"
 msgstr ""
 
 #: service_crm/templates/base.html:39
@@ -790,6 +1056,8 @@ msgstr ""
 #: service_crm/templates/equipment/detail.html:43
 #: service_crm/templates/equipment/detail.html:90
 #: service_crm/templates/knowledge/procedure_detail.html:24
+#: service_crm/templates/maintenance/plan_detail.html:27
+#: service_crm/templates/planning/technician_detail.html:19
 #: service_crm/templates/tickets/detail.html:45
 #: service_crm/templates/tickets/intervention_detail.html:32
 msgid "Edit"
@@ -881,6 +1149,9 @@ msgstr ""
 #: service_crm/templates/knowledge/tag_edit.html:36
 #: service_crm/templates/knowledge/template_edit.html:36
 #: service_crm/templates/macros/form_shell.html:45
+#: service_crm/templates/maintenance/plan_edit.html:49
+#: service_crm/templates/maintenance/template_edit.html:47
+#: service_crm/templates/planning/technician_edit.html:49
 #: service_crm/templates/tickets/edit.html:87
 #: service_crm/templates/tickets/intervention_edit.html:53
 #: service_crm/templates/tickets/lookup_edit.html:31
@@ -931,6 +1202,9 @@ msgstr ""
 #: service_crm/templates/equipment/detail.html:150
 #: service_crm/templates/equipment/list.html:50
 #: service_crm/templates/equipment/list.html:57
+#: service_crm/templates/maintenance/plan_detail.html:47
+#: service_crm/templates/maintenance/task_detail.html:18
+#: service_crm/templates/maintenance/tasks_list.html:26
 #: service_crm/templates/tickets/list.html:54
 #: service_crm/templates/tickets/list.html:56 service_crm/tickets/forms.py:85
 msgid "Status"
@@ -989,6 +1263,9 @@ msgstr ""
 #: service_crm/templates/dev/macro_smoke.html:65
 #: service_crm/templates/equipment/list.html:53
 #: service_crm/templates/knowledge/procedures_list.html:16
+#: service_crm/templates/maintenance/plans_list.html:14
+#: service_crm/templates/maintenance/templates_list.html:14
+#: service_crm/templates/planning/technicians_list.html:14
 #: service_crm/templates/tickets/list.html:48
 #: service_crm/templates/tickets/parts_list.html:20
 msgid "All"
@@ -1124,12 +1401,6 @@ msgstr ""
 #: service_crm/templates/dev/macro_smoke.html:68
 #: service_crm/tickets/_translations.py:31
 msgid "Closed"
-msgstr ""
-
-#: service_crm/templates/dev/macro_smoke.html:76
-#: service_crm/templates/equipment/detail.html:150
-#: service_crm/templates/tickets/list.html:56
-msgid "Ticket"
 msgstr ""
 
 #: service_crm/templates/dev/macro_smoke.html:76
@@ -1350,16 +1621,15 @@ msgstr ""
 msgid "Search procedures…"
 msgstr ""
 
-#: service_crm/templates/knowledge/procedures_list.html:18
-#: service_crm/templates/tickets/parts_list.html:22
-#: service_crm/tickets/forms.py:91
-msgid "Filter"
-msgstr ""
-
 #: service_crm/templates/knowledge/procedures_list.html:50
 #: service_crm/templates/knowledge/tags_list.html:25
 #: service_crm/templates/knowledge/template_edit.html:61
 #: service_crm/templates/knowledge/templates_list.html:26
+#: service_crm/templates/maintenance/plan_detail.html:23
+#: service_crm/templates/maintenance/plans_list.html:55
+#: service_crm/templates/maintenance/templates_list.html:34
+#: service_crm/templates/planning/technician_detail.html:15
+#: service_crm/templates/planning/technicians_list.html:35
 #: service_crm/templates/tickets/parts_list.html:40
 #: service_crm/templates/tickets/priorities_list.html:19
 #: service_crm/templates/tickets/priorities_list.html:20
@@ -1372,6 +1642,11 @@ msgstr ""
 #: service_crm/templates/knowledge/tags_list.html:25
 #: service_crm/templates/knowledge/template_edit.html:61
 #: service_crm/templates/knowledge/templates_list.html:26
+#: service_crm/templates/maintenance/plan_detail.html:23
+#: service_crm/templates/maintenance/plans_list.html:55
+#: service_crm/templates/maintenance/templates_list.html:34
+#: service_crm/templates/planning/technician_detail.html:15
+#: service_crm/templates/planning/technicians_list.html:35
 #: service_crm/templates/tickets/parts_list.html:40
 #: service_crm/templates/tickets/priorities_list.html:19
 #: service_crm/templates/tickets/types_list.html:19
@@ -1408,6 +1683,7 @@ msgstr ""
 #: service_crm/templates/knowledge/template_edit.html:6
 #: service_crm/templates/knowledge/template_edit.html:8
 #: service_crm/templates/knowledge/templates_list.html:12
+#: service_crm/templates/maintenance/templates_list.html:19
 msgid "New template"
 msgstr ""
 
@@ -1419,10 +1695,6 @@ msgstr ""
 #: service_crm/templates/knowledge/templates_list.html:5
 #: service_crm/templates/knowledge/templates_list.html:7
 msgid "Checklist templates"
-msgstr ""
-
-#: service_crm/templates/knowledge/template_edit.html:15
-msgid "Template"
 msgstr ""
 
 #: service_crm/templates/knowledge/template_edit.html:44
@@ -1498,8 +1770,192 @@ msgstr ""
 msgid "Section navigation"
 msgstr ""
 
+#: service_crm/templates/maintenance/plan_detail.html:6
+#: service_crm/templates/maintenance/plan_edit.html:5
+#: service_crm/templates/maintenance/plans_list.html:5
+#: service_crm/templates/maintenance/plans_list.html:7
+msgid "Maintenance plans"
+msgstr ""
+
+#: service_crm/templates/maintenance/plan_detail.html:18
+#: service_crm/templates/maintenance/plans_list.html:37
+msgid "Next due"
+msgstr ""
+
+#: service_crm/templates/maintenance/plan_detail.html:33
+msgid "Generate tasks"
+msgstr ""
+
+#: service_crm/templates/maintenance/plan_detail.html:46
+#: service_crm/templates/maintenance/plans_list.html:26
+msgid "Tasks"
+msgstr ""
+
+#: service_crm/templates/maintenance/plan_detail.html:47
+#: service_crm/templates/maintenance/tasks_list.html:26
 #: service_crm/templates/tickets/detail.html:40
 msgid "Due"
+msgstr ""
+
+#: service_crm/templates/maintenance/plan_detail.html:47
+msgid "Assigned"
+msgstr ""
+
+#: service_crm/templates/maintenance/plan_detail.html:69
+msgid "No tasks yet for this plan."
+msgstr ""
+
+#: service_crm/templates/maintenance/plan_edit.html:4
+#: service_crm/templates/maintenance/plans_list.html:29
+msgid "New plan"
+msgstr ""
+
+#: service_crm/templates/maintenance/plan_edit.html:4
+msgid "Edit plan"
+msgstr ""
+
+#: service_crm/templates/maintenance/plan_edit.html:6
+#: service_crm/templates/maintenance/plan_edit.html:13
+msgid "Maintenance plan"
+msgstr ""
+
+#: service_crm/templates/maintenance/plans_list.html:18
+#: service_crm/templates/maintenance/tasks_list.html:20
+msgid "Overdue only"
+msgstr ""
+
+#: service_crm/templates/maintenance/plans_list.html:23
+msgid "Templates"
+msgstr ""
+
+#: service_crm/templates/maintenance/plans_list.html:34
+msgid "Filtered by equipment:"
+msgstr ""
+
+#: service_crm/templates/maintenance/plans_list.html:37
+msgid "Last done"
+msgstr ""
+
+#: service_crm/templates/maintenance/plans_list.html:59
+msgid "No maintenance plans yet."
+msgstr ""
+
+#: service_crm/templates/maintenance/task_detail.html:4
+msgid "Maintenance task"
+msgstr ""
+
+#: service_crm/templates/maintenance/task_detail.html:5
+#: service_crm/templates/maintenance/tasks_list.html:5
+#: service_crm/templates/maintenance/tasks_list.html:7
+msgid "Maintenance tasks"
+msgstr ""
+
+#: service_crm/templates/maintenance/task_detail.html:11
+#: service_crm/templates/maintenance/tasks_list.html:26
+msgid "Plan"
+msgstr ""
+
+#: service_crm/templates/maintenance/task_detail.html:17
+msgid "Due on"
+msgstr ""
+
+#: service_crm/templates/maintenance/task_detail.html:31
+msgid "Assign"
+msgstr ""
+
+#: service_crm/templates/maintenance/task_detail.html:71
+msgid "Escalate to ticket"
+msgstr ""
+
+#: service_crm/templates/maintenance/task_detail.html:79
+msgid "Optional — defaults to plan name"
+msgstr ""
+
+#: service_crm/templates/maintenance/task_detail.html:95
+msgid "Executions"
+msgstr ""
+
+#: service_crm/templates/maintenance/task_detail.html:103
+msgid "intervention"
+msgstr ""
+
+#: service_crm/templates/maintenance/tasks_list.html:13
+msgid "All statuses"
+msgstr ""
+
+#: service_crm/templates/maintenance/tasks_list.html:43
+msgid "No tasks yet."
+msgstr ""
+
+#: service_crm/templates/maintenance/template_edit.html:4
+msgid "New maintenance template"
+msgstr ""
+
+#: service_crm/templates/maintenance/template_edit.html:4
+msgid "Edit maintenance template"
+msgstr ""
+
+#: service_crm/templates/maintenance/template_edit.html:5
+#: service_crm/templates/maintenance/templates_list.html:5
+#: service_crm/templates/maintenance/templates_list.html:7
+msgid "Maintenance templates"
+msgstr ""
+
+#: service_crm/templates/maintenance/template_edit.html:6
+#: service_crm/templates/maintenance/template_edit.html:13
+msgid "Maintenance template"
+msgstr ""
+
+#: service_crm/templates/maintenance/templates_list.html:38
+msgid "No maintenance templates yet."
+msgstr ""
+
+#: service_crm/templates/planning/capacity.html:4
+msgid "Capacity"
+msgstr ""
+
+#: service_crm/templates/planning/capacity.html:6
+msgid "Technician capacity"
+msgstr ""
+
+#: service_crm/templates/planning/capacity.html:22
+msgid "Roster"
+msgstr ""
+
+#: service_crm/templates/planning/capacity.html:27
+msgid "No active technicians to display."
+msgstr ""
+
+#: service_crm/templates/planning/technician_detail.html:6
+#: service_crm/templates/planning/technician_edit.html:5
+#: service_crm/templates/planning/technicians_list.html:5
+#: service_crm/templates/planning/technicians_list.html:7
+msgid "Technicians"
+msgstr ""
+
+#: service_crm/templates/planning/technician_detail.html:24
+msgid "Capacity slots"
+msgstr ""
+
+#: service_crm/templates/planning/technician_detail.html:53
+msgid "Delete this slot?"
+msgstr ""
+
+#: service_crm/templates/planning/technician_detail.html:63
+msgid "No capacity slots yet."
+msgstr ""
+
+#: service_crm/templates/planning/technician_edit.html:4
+#: service_crm/templates/planning/technicians_list.html:19
+msgid "New technician"
+msgstr ""
+
+#: service_crm/templates/planning/technician_edit.html:4
+msgid "Edit technician"
+msgstr ""
+
+#: service_crm/templates/planning/technicians_list.html:39
+msgid "No technicians yet."
 msgstr ""
 
 #: service_crm/templates/tickets/detail.html:58 service_crm/tickets/forms.py:57
@@ -1596,12 +2052,6 @@ msgstr ""
 msgid "Ended"
 msgstr ""
 
-#: service_crm/templates/tickets/detail.html:117
-#: service_crm/tickets/intervention_forms.py:22
-#: service_crm/tickets/intervention_forms.py:38
-msgid "Technician"
-msgstr ""
-
 #: service_crm/templates/tickets/detail.html:121
 #: service_crm/templates/tickets/list.html:47
 msgid "Open"
@@ -1676,13 +2126,6 @@ msgstr ""
 
 #: service_crm/templates/tickets/edit.html:25
 msgid "Ticket details"
-msgstr ""
-
-#: service_crm/templates/tickets/intervention_detail.html:5
-#: service_crm/templates/tickets/intervention_detail.html:12
-#: service_crm/templates/tickets/intervention_edit.html:9
-#: service_crm/templates/tickets/intervention_edit.html:22
-msgid "Intervention"
 msgstr ""
 
 #: service_crm/templates/tickets/intervention_detail.html:23
@@ -1991,93 +2434,88 @@ msgstr ""
 msgid "Allowed: images."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:61
-#: service_crm/tickets/routes.py:125
-msgid "— unassigned —"
-msgstr ""
-
-#: service_crm/tickets/intervention_routes.py:68
+#: service_crm/tickets/intervention_routes.py:65
 msgid "— ad-hoc —"
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:82
+#: service_crm/tickets/intervention_routes.py:79
 #: service_crm/tickets/routes.py:275 service_crm/tickets/routes.py:321
 #: service_crm/tickets/routes.py:380 service_crm/tickets/routes.py:431
 #: service_crm/tickets/routes.py:469
 msgid "Ticket not found."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:104
+#: service_crm/tickets/intervention_routes.py:101
 msgid "Intervention started."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:132
-#: service_crm/tickets/intervention_routes.py:179
-#: service_crm/tickets/intervention_routes.py:247
-#: service_crm/tickets/intervention_routes.py:300
-#: service_crm/tickets/intervention_routes.py:392
-#: service_crm/tickets/intervention_routes.py:484
-#: service_crm/tickets/intervention_routes.py:580
+#: service_crm/tickets/intervention_routes.py:127
+#: service_crm/tickets/intervention_routes.py:172
+#: service_crm/tickets/intervention_routes.py:236
+#: service_crm/tickets/intervention_routes.py:287
+#: service_crm/tickets/intervention_routes.py:373
+#: service_crm/tickets/intervention_routes.py:459
+#: service_crm/tickets/intervention_routes.py:549
 msgid "Intervention not found."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:216
+#: service_crm/tickets/intervention_routes.py:207
 msgid "Intervention updated."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:273
+#: service_crm/tickets/intervention_routes.py:262
 msgid "Intervention stopped."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:334
+#: service_crm/tickets/intervention_routes.py:321
 msgid "Action added."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:361
+#: service_crm/tickets/intervention_routes.py:344
 msgid "Action not found."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:367
+#: service_crm/tickets/intervention_routes.py:350
 msgid "Action removed."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:426
+#: service_crm/tickets/intervention_routes.py:407
 msgid "Finding recorded."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:453
+#: service_crm/tickets/intervention_routes.py:430
 msgid "Finding not found."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:459
+#: service_crm/tickets/intervention_routes.py:436
 msgid "Finding removed."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:522
+#: service_crm/tickets/intervention_routes.py:497
 msgid "Part recorded."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:549
+#: service_crm/tickets/intervention_routes.py:520
 msgid "Part usage not found."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:555
+#: service_crm/tickets/intervention_routes.py:526
 msgid "Part usage removed."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:617
+#: service_crm/tickets/intervention_routes.py:586
 msgid "Photo uploaded."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:699
+#: service_crm/tickets/intervention_routes.py:662
 msgid "Part created."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:717
+#: service_crm/tickets/intervention_routes.py:680
 msgid "Part not found."
 msgstr ""
 
-#: service_crm/tickets/intervention_routes.py:739
+#: service_crm/tickets/intervention_routes.py:702
 msgid "Part updated."
 msgstr ""
 

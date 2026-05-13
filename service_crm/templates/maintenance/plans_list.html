@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Maintenance plans") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb">{{ _("Maintenance") }}</div>{% endblock %}
+{% block page_title %}{{ _("Maintenance plans") }}{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+  <form method="get" action="{{ url_for('maintenance.plans_list') }}" class="filter-form">
+    <select name="show" class="input">
+      <option value="active" {% if show != 'all' %}selected{% endif %}>{{ _("Active") }}</option>
+      <option value="all" {% if show == 'all' %}selected{% endif %}>{{ _("All") }}</option>
+    </select>
+    <label class="inline-check">
+      <input type="checkbox" name="overdue" value="1" {% if overdue %}checked{% endif %}>
+      {{ _("Overdue only") }}
+    </label>
+    <button type="submit" class="btn btn-sm btn-secondary">{{ _("Filter") }}</button>
+  </form>
+  <a class="btn btn-secondary btn-sm" href="{{ url_for('maintenance.templates_list') }}">
+    {{ _("Templates") }}
+  </a>
+  <a class="btn btn-secondary btn-sm" href="{{ url_for('maintenance.tasks_list') }}">
+    {{ _("Tasks") }}
+  </a>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('maintenance.plan_new') }}">
+    {{ icon("plus") }} {{ _("New plan") }}
+  </a>
+</div>
+
+{% if equipment %}
+<p class="filter-hint">{{ _("Filtered by equipment:") }} <strong>{{ equipment.label }}</strong>.</p>
+{% endif %}
+
+{% set cols = [_("Equipment"), _("Template"), _("Cadence (days)"), _("Last done"), _("Next due"), _("Active"), ""] %}
+{% set rows = [] %}
+{% for p in items %}
+  {% set detail_url = url_for('maintenance.plan_detail', plan_hex=p.id.hex()) %}
+  {% set actions %}
+    <a href="{{ detail_url }}" class="btn btn-sm btn-ghost">{{ icon("eye") }}</a>
+  {% endset %}
+  {% set due_cell %}
+    {% if p.next_due_on %}
+      <span class="pill pill-{{ 'warning' if p.is_overdue else 'default' }}">{{ p.next_due_on }}</span>
+    {% else %}—{% endif %}
+  {% endset %}
+  {% set _ = rows.append([
+    p.equipment.label,
+    p.template.name,
+    p.cadence_days,
+    p.last_done_on or '—',
+    due_cell,
+    (_("Yes") if p.is_active else _("No")),
+    actions,
+  ]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No maintenance plans yet.")) }}
+{% endblock %}

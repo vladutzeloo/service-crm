@@ -111,6 +111,18 @@ def test_sweep_idempotency_command(app: Flask) -> None:
     assert "Removed 0" in result.output
 
 
+@pytest.mark.integration
+def test_run_maintenance_tick_command(app: Flask) -> None:
+    """``flask run-maintenance-tick`` runs the scheduler entrypoint and commits."""
+    from service_crm.cli import run_maintenance_tick
+
+    runner = CliRunner()
+    with app.app_context():
+        result = runner.invoke(run_maintenance_tick, [])
+    assert result.exit_code == 0, result.output
+    assert "Recomputed" in result.output
+
+
 @pytest.mark.unit
 def test_main_entrypoint_invokes_flask_group(monkeypatch: pytest.MonkeyPatch) -> None:
     """``service_crm.cli:main`` is the ``service-crm-cli`` console-script

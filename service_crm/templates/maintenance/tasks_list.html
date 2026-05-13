@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Maintenance tasks") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('maintenance.plans_list') }}">{{ _("Maintenance") }}</a></div>{% endblock %}
+{% block page_title %}{{ _("Maintenance tasks") }}{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+  <form method="get" action="{{ url_for('maintenance.tasks_list') }}" class="filter-form">
+    <select name="status" class="input">
+      <option value="">{{ _("All statuses") }}</option>
+      {% for s in statuses %}
+        <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ task_status_label(s) }}</option>
+      {% endfor %}
+    </select>
+    <label class="inline-check">
+      <input type="checkbox" name="overdue" value="1" {% if overdue %}checked{% endif %}>
+      {{ _("Overdue only") }}
+    </label>
+    <button type="submit" class="btn btn-sm btn-secondary">{{ _("Filter") }}</button>
+  </form>
+</div>
+
+{% set cols = [_("Due"), _("Status"), _("Plan"), _("Equipment"), ""] %}
+{% set rows = [] %}
+{% for t in items %}
+  {% set status_cell %}
+    <span class="pill pill-{{ task_status_tone(t.status) }}">{{ task_status_label(t.status) }}</span>
+  {% endset %}
+  {% set actions %}
+    <a href="{{ url_for('maintenance.task_detail', task_hex=t.id.hex()) }}" class="btn btn-sm btn-ghost">{{ icon("eye") }}</a>
+  {% endset %}
+  {% set _ = rows.append([
+    t.due_on,
+    status_cell,
+    t.plan.template.name,
+    t.plan.equipment.label,
+    actions,
+  ]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No tasks yet.")) }}
+{% endblock %}
