@@ -61,6 +61,13 @@ class BaseConfig:
     BABEL_DEFAULT_TIMEZONE: str = "Europe/Bucharest"
     BABEL_TRANSLATION_DIRECTORIES: str = "locale"
 
+    # APScheduler — gated so tests / dev don't spin up a background
+    # thread by default. ``ProdConfig`` flips :data:`SCHEDULER_ENABLED`
+    # on. Intervals are configurable per ``docs/v0.7-plan.md`` §3.3.
+    SCHEDULER_ENABLED: bool = _bool("SCHEDULER_ENABLED", False)
+    SCHEDULER_MAINTENANCE_INTERVAL_MIN: int = _int("SCHEDULER_MAINTENANCE_INTERVAL_MIN", 60)
+    SCHEDULER_IDEMPOTENCY_INTERVAL_H: int = _int("SCHEDULER_IDEMPOTENCY_INTERVAL_H", 6)
+
 
 class DevConfig(BaseConfig):
     DEBUG: bool = True
@@ -75,12 +82,14 @@ class TestConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI: str = os.environ.get("DATABASE_URL", "sqlite:///:memory:")
     WTF_CSRF_ENABLED: bool = False
     SECRET_KEY: str = "test-secret"
+    SCHEDULER_ENABLED: bool = False
 
 
 class ProdConfig(BaseConfig):
     DEBUG: bool = False
     TESTING: bool = False
     SESSION_COOKIE_SECURE: bool = True
+    SCHEDULER_ENABLED: bool = _bool("SCHEDULER_ENABLED", True)
 
     @classmethod
     def validate(cls) -> None:

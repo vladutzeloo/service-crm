@@ -36,6 +36,18 @@ from service_crm.knowledge.models import (
     ProcedureDocument,
     ProcedureTag,
 )
+from service_crm.maintenance.models import (
+    MaintenanceExecution,
+    MaintenancePlan,
+    MaintenanceTask,
+    MaintenanceTemplate,
+    TaskStatus,
+)
+from service_crm.planning.models import (
+    Technician,
+    TechnicianAssignment,
+    TechnicianCapacitySlot,
+)
 from service_crm.tickets.intervention_models import (
     InterventionAction,
     InterventionFinding,
@@ -568,3 +580,152 @@ class ProcedureDocumentFactory(SQLAlchemyModelFactory):
     summary = ""
     body = ""
     is_active = True
+
+
+# ── Maintenance ───────────────────────────────────────────────────────────────
+
+
+class MaintenanceTemplateFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = MaintenanceTemplate
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    name = factory.Sequence(lambda n: f"Maintenance template {n}")
+    description = ""
+    cadence_days = 180
+    estimated_minutes = None
+    checklist_template_id = None
+    is_active = True
+
+
+class MaintenancePlanFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = MaintenancePlan
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    equipment = factory.SubFactory(EquipmentFactory)
+    template = factory.SubFactory(MaintenanceTemplateFactory)
+    cadence_days = 180
+    last_done_on = None
+    next_due_on = None
+    notes = ""
+    is_active = True
+
+    @factory.lazy_attribute
+    def equipment_id(self) -> bytes:
+        return self.equipment.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def template_id(self) -> bytes:
+        return self.template.id  # type: ignore[return-value]
+
+
+class MaintenanceTaskFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = MaintenanceTask
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    plan = factory.SubFactory(MaintenancePlanFactory)
+    due_on = factory.LazyFunction(lambda: __import__("datetime").date(2026, 6, 1))
+    status = TaskStatus.PENDING
+    assigned_technician = None
+    ticket = None
+    notes = ""
+
+    @factory.lazy_attribute
+    def plan_id(self) -> bytes:
+        return self.plan.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def assigned_technician_id(self) -> bytes | None:
+        return self.assigned_technician.id if self.assigned_technician else None  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def ticket_id(self) -> bytes | None:
+        return self.ticket.id if self.ticket else None  # type: ignore[return-value]
+
+
+class MaintenanceExecutionFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = MaintenanceExecution
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    task = factory.SubFactory(MaintenanceTaskFactory)
+    intervention = None
+    completed_at = factory.LazyFunction(
+        lambda: __import__("service_crm.shared.clock", fromlist=["now"]).now()
+    )
+    notes = ""
+
+    @factory.lazy_attribute
+    def task_id(self) -> bytes:
+        return self.task.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def intervention_id(self) -> bytes | None:
+        return self.intervention.id if self.intervention else None  # type: ignore[return-value]
+
+
+# ── Planning ──────────────────────────────────────────────────────────────────
+
+
+class TechnicianFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = Technician
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    user = factory.SubFactory(UserFactory)
+    display_name = factory.Sequence(lambda n: f"Technician {n}")
+    timezone = "Europe/Bucharest"
+    weekly_capacity_minutes = Technician.DEFAULT_WEEKLY_MINUTES
+    notes = ""
+    is_active = True
+
+    @factory.lazy_attribute
+    def user_id(self) -> bytes:
+        return self.user.id  # type: ignore[return-value]
+
+
+class TechnicianAssignmentFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = TechnicianAssignment
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    technician = factory.SubFactory(TechnicianFactory)
+    ticket = factory.SubFactory(ServiceTicketFactory)
+    intervention = None
+    notes = ""
+
+    @factory.lazy_attribute
+    def technician_id(self) -> bytes:
+        return self.technician.id  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def ticket_id(self) -> bytes | None:
+        return self.ticket.id if self.ticket else None  # type: ignore[return-value]
+
+    @factory.lazy_attribute
+    def intervention_id(self) -> bytes | None:
+        return self.intervention.id if self.intervention else None  # type: ignore[return-value]
+
+
+class TechnicianCapacitySlotFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = TechnicianCapacitySlot
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    technician = factory.SubFactory(TechnicianFactory)
+    day = factory.LazyFunction(lambda: __import__("datetime").date(2026, 6, 1))
+    capacity_minutes = 480
+    notes = ""
+
+    @factory.lazy_attribute
+    def technician_id(self) -> bytes:
+        return self.technician.id  # type: ignore[return-value]

@@ -24,6 +24,7 @@ def register(app: Flask) -> None:
     app.cli.add_command(babel_update)
     app.cli.add_command(babel_compile)
     app.cli.add_command(sweep_idempotency)
+    app.cli.add_command(run_maintenance_tick)
 
 
 @click.command("reset-db")
@@ -127,12 +128,31 @@ def babel_compile() -> None:
 def sweep_idempotency() -> None:
     """Delete expired ``idempotency_key`` rows.
 
-    The window is 24 h; this command is meant to run from cron or
-    APScheduler (the latter lands in v0.7). Idempotent — running it more
-    than once a day is fine.
+    The window is 24 h; this command is run by the APScheduler job
+    registered in :mod:`service_crm.shared.scheduler`. Available as a
+    CLI for cron / dev triggering. Idempotent — running it more than
+    once a day is fine.
     """
     from .shared.idempotency import sweep
 
     removed = sweep(db.session)
     db.session.commit()
     click.echo(f"Removed {removed} expired idempotency keys.")
+
+
+@click.command("run-maintenance-tick")
+@with_appcontext
+def run_maintenance_tick() -> None:
+    """Recompute every active maintenance plan and generate pending tasks.
+
+    Same code path as the APScheduler job — exposed for cron / manual
+    triggering during dev.
+    """
+    from .maintenance.services import scheduler_tick
+
+    stats = scheduler_tick(db.session)
+    db.session.commit()
+    click.echo(
+        f"Recomputed {stats['plans_recomputed']} plan(s); "
+        f"generated {stats['tasks_generated']} task(s)."
+    )

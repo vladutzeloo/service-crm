@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% set is_new = plan is none %}
+{% block title %}{{ _("New plan") if is_new else _("Edit plan") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('maintenance.plans_list') }}">{{ _("Maintenance plans") }}</a></div>{% endblock %}
+{% block page_title %}{{ _("Maintenance plan") }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('maintenance.plan_new') if is_new else url_for('maintenance.plan_edit', plan_hex=plan.id.hex()) }}"
+        novalidate>
+    <h2 class="form-title">{{ _("Maintenance plan") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      {% if is_new %}
+      <div class="field field-full{% if form.equipment_id.errors %} field-error{% endif %}">
+        {{ form.equipment_id.label }}
+        {{ form.equipment_id(class="input") }}
+      </div>
+      <div class="field field-full{% if form.template_id.errors %} field-error{% endif %}">
+        {{ form.template_id.label }}
+        {{ form.template_id(class="input") }}
+      </div>
+      {% endif %}
+      <div class="field{% if form.cadence_days.errors %} field-error{% endif %}">
+        {{ form.cadence_days.label }}
+        {{ form.cadence_days(class="input", inputmode="numeric") }}
+      </div>
+      <div class="field{% if form.last_done_on.errors %} field-error{% endif %}">
+        {{ form.last_done_on.label }}
+        {{ form.last_done_on(class="input", type="date") }}
+      </div>
+      <div class="field field-full{% if form.notes.errors %} field-error{% endif %}">
+        {{ form.notes.label }}
+        {{ form.notes(class="input textarea", rows=3) }}
+      </div>
+      {% if not is_new %}
+      <div class="field">
+        {{ form.is_active.label }}
+        {{ form.is_active() }}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('maintenance.plans_list') }}" class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% set is_new = technician is none %}
+{% block title %}{{ _("New technician") if is_new else _("Edit technician") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('planning.technicians_list') }}">{{ _("Technicians") }}</a></div>{% endblock %}
+{% block page_title %}{{ _("Technician") }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <form class="form-shell" method="post"
+        action="{{ url_for('planning.technician_new') if is_new else url_for('planning.technician_edit', technician_hex=technician.id.hex()) }}"
+        novalidate>
+    <h2 class="form-title">{{ _("Technician") }}</h2>
+    {{ form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+
+    <div class="form-grid">
+      {% if is_new %}
+      <div class="field field-full{% if form.user_id.errors %} field-error{% endif %}">
+        {{ form.user_id.label }}
+        {{ form.user_id(class="input") }}
+      </div>
+      {% endif %}
+      <div class="field field-full{% if form.display_name.errors %} field-error{% endif %}">
+        {{ form.display_name.label }}
+        {{ form.display_name(class="input", autocomplete="off") }}
+      </div>
+      <div class="field{% if form.timezone.errors %} field-error{% endif %}">
+        {{ form.timezone.label }}
+        {{ form.timezone(class="input") }}
+      </div>
+      <div class="field{% if form.weekly_capacity_minutes.errors %} field-error{% endif %}">
+        {{ form.weekly_capacity_minutes.label }}
+        {{ form.weekly_capacity_minutes(class="input", inputmode="numeric") }}
+      </div>
+      <div class="field field-full{% if form.notes.errors %} field-error{% endif %}">
+        {{ form.notes.label }}
+        {{ form.notes(class="input textarea", rows=3) }}
+      </div>
+      {% if not is_new %}
+      <div class="field">
+        {{ form.is_active.label }}
+        {{ form.is_active() }}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('planning.technicians_list') }}" class="btn btn-secondary">{{ _("Cancel") }}</a>
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -29,9 +29,18 @@ def create_app(config: type[BaseConfig] = ProdConfig) -> Flask:
     _register_error_handlers(app)
     _register_audit_listeners(app)
     _register_jinja_globals(app)
+    _register_scheduler(app)
 
     app.config["VERSION"] = _read_version_file()
     return app
+
+
+def _register_scheduler(app: Flask) -> None:
+    # Background scheduler is gated on ``SCHEDULER_ENABLED`` — off in
+    # tests + dev unless explicitly enabled, on by default in prod.
+    from .shared import scheduler
+
+    scheduler.init_app(app)
 
 
 def _register_jinja_globals(app: Flask) -> None:
@@ -41,7 +50,17 @@ def _register_jinja_globals(app: Flask) -> None:
 
 
 def _register_blueprints(app: Flask) -> None:
-    from . import auth, clients, dev, equipment, health, knowledge, tickets
+    from . import (
+        auth,
+        clients,
+        dev,
+        equipment,
+        health,
+        knowledge,
+        maintenance,
+        planning,
+        tickets,
+    )
 
     app.register_blueprint(health.bp)
     app.register_blueprint(auth.bp)
@@ -49,6 +68,8 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(equipment.bp)
     app.register_blueprint(tickets.bp)
     app.register_blueprint(knowledge.bp)
+    app.register_blueprint(maintenance.bp)
+    app.register_blueprint(planning.bp)
     dev.register(app)
 
 

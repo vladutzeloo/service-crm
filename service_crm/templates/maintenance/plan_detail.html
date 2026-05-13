@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ plan.template.name }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('maintenance.plans_list') }}">{{ _("Maintenance plans") }}</a></div>{% endblock %}
+{% block page_title %}{{ plan.template.name }} — {{ plan.equipment.label }}{% endblock %}
+
+{% block content %}
+<section class="detail-header">
+  <div class="detail-meta">
+    <div>
+      <strong>{{ _("Equipment") }}:</strong>
+      <a href="{{ url_for('equipment.detail', equipment_hex=plan.equipment_id.hex()) }}">{{ plan.equipment.label }}</a>
+    </div>
+    <div><strong>{{ _("Cadence (days)") }}:</strong> {{ plan.cadence_days }}</div>
+    <div><strong>{{ _("Last done on") }}:</strong> {{ plan.last_done_on or '—' }}</div>
+    <div><strong>{{ _("Next due") }}:</strong>
+      {% if plan.next_due_on %}
+        <span class="pill pill-{{ 'warning' if plan.is_overdue else 'default' }}">{{ plan.next_due_on }}</span>
+      {% else %}—{% endif %}
+    </div>
+    <div><strong>{{ _("Active") }}:</strong> {{ _("Yes") if plan.is_active else _("No") }}</div>
+  </div>
+  <div class="detail-actions">
+    <a class="btn btn-sm btn-secondary"
+       href="{{ url_for('maintenance.plan_edit', plan_hex=plan.id.hex()) }}">{{ icon("edit-2") }} {{ _("Edit") }}</a>
+    <form method="post"
+          action="{{ url_for('maintenance.plan_generate_tasks', plan_hex=plan.id.hex()) }}"
+          class="inline-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="idempotency_token" value="{{ tok }}">
+      <button type="submit" class="btn btn-sm btn-primary">{{ icon("refresh-cw") }} {{ _("Generate tasks") }}</button>
+    </form>
+  </div>
+</section>
+
+{% if plan.notes %}
+<section class="detail-section">
+  <h3>{{ _("Notes") }}</h3>
+  <p>{{ plan.notes }}</p>
+</section>
+{% endif %}
+
+<section class="detail-section">
+  <h3>{{ _("Tasks") }}</h3>
+  {% set cols = [_("Due"), _("Status"), _("Assigned"), _("Ticket"), ""] %}
+  {% set rows = [] %}
+  {% for t in tasks %}
+    {% set status_cell %}
+      <span class="pill pill-{{ task_status_tone(t.status) }}">{{ task_status_label(t.status) }}</span>
+    {% endset %}
+    {% set ticket_cell %}
+      {% if t.ticket %}
+        <a href="{{ url_for('tickets.detail', ticket_hex=t.ticket_id.hex()) }}">{{ t.ticket.label }}</a>
+      {% else %}—{% endif %}
+    {% endset %}
+    {% set actions %}
+      <a href="{{ url_for('maintenance.task_detail', task_hex=t.id.hex()) }}" class="btn btn-sm btn-ghost">{{ icon("eye") }}</a>
+    {% endset %}
+    {% set _ = rows.append([
+      t.due_on,
+      status_cell,
+      (t.assigned_technician.label if t.assigned_technician else '—'),
+      ticket_cell,
+      actions,
+    ]) %}
+  {% endfor %}
+  {{ data_table(cols, rows, empty=_("No tasks yet for this plan.")) }}
+</section>
+{% endblock %}

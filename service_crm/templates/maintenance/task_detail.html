@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Maintenance task") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('maintenance.tasks_list') }}">{{ _("Maintenance tasks") }}</a></div>{% endblock %}
+{% block page_title %}{{ plan.template.name }} — {{ task.due_on }}{% endblock %}
+
+{% block content %}
+<section class="detail-header">
+  <div class="detail-meta">
+    <div><strong>{{ _("Plan") }}:</strong>
+      <a href="{{ url_for('maintenance.plan_detail', plan_hex=plan.id.hex()) }}">{{ plan.template.name }}</a>
+    </div>
+    <div><strong>{{ _("Equipment") }}:</strong>
+      <a href="{{ url_for('equipment.detail', equipment_hex=plan.equipment_id.hex()) }}">{{ plan.equipment.label }}</a>
+    </div>
+    <div><strong>{{ _("Due on") }}:</strong> {{ task.due_on }}</div>
+    <div><strong>{{ _("Status") }}:</strong>
+      <span class="pill pill-{{ task_status_tone(task.status) }}">{{ task_status_label(task.status) }}</span>
+    </div>
+    {% if task.ticket %}
+    <div><strong>{{ _("Ticket") }}:</strong>
+      <a href="{{ url_for('tickets.detail', ticket_hex=task.ticket_id.hex()) }}">{{ task.ticket.label }}</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+{% if task.status == 'pending' %}
+<section class="detail-section">
+  <h3>{{ _("Assign") }}</h3>
+  <form method="post" action="{{ url_for('maintenance.task_assign', task_hex=task.id.hex()) }}"
+        class="form-shell">
+    {{ assign_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <div class="form-grid">
+      <div class="field field-full">
+        {{ assign_form.technician_id.label }}
+        {{ assign_form.technician_id(class="input") }}
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+    </div>
+  </form>
+</section>
+
+<section class="detail-section">
+  <h3>{{ _("Mark done") }}</h3>
+  <form method="post" action="{{ url_for('maintenance.task_complete', task_hex=task.id.hex()) }}"
+        class="form-shell">
+    {{ complete_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <div class="form-grid">
+      <div class="field field-full">
+        {{ complete_form.intervention_id.label }}
+        {{ complete_form.intervention_id(class="input") }}
+      </div>
+      <div class="field field-full">
+        {{ complete_form.notes.label }}
+        {{ complete_form.notes(class="input textarea", rows=3) }}
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ icon("check") }} {{ _("Mark done") }}</button>
+    </div>
+  </form>
+</section>
+
+<section class="detail-section">
+  <h3>{{ _("Escalate to ticket") }}</h3>
+  <form method="post" action="{{ url_for('maintenance.task_escalate', task_hex=task.id.hex()) }}"
+        class="form-shell">
+    {{ escalate_form.csrf_token }}
+    <input type="hidden" name="idempotency_token" value="{{ tok }}">
+    <div class="form-grid">
+      <div class="field field-full">
+        {{ escalate_form.title.label }}
+        {{ escalate_form.title(class="input", placeholder=_("Optional — defaults to plan name")) }}
+      </div>
+      <div class="field field-full">
+        {{ escalate_form.description.label }}
+        {{ escalate_form.description(class="input textarea", rows=3) }}
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-secondary">{{ icon("alert-triangle") }} {{ _("Open ticket") }}</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+{% if task.executions %}
+<section class="detail-section">
+  <h3>{{ _("Executions") }}</h3>
+  <ul>
+    {% for ex in task.executions %}
+      <li>
+        {{ ex.completed_at.strftime('%Y-%m-%d %H:%M') }}
+        {% if ex.intervention %}
+          — <a href="{{ url_for('tickets.intervention_detail',
+                                ticket_hex=ex.intervention.ticket_id.hex(),
+                                intervention_hex=ex.intervention_id.hex()) }}">{{ _("intervention") }}</a>
+        {% endif %}
+        {% if ex.notes %}— {{ ex.notes }}{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

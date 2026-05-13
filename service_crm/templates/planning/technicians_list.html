@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "macros/data_table.html" import data_table %}
+{% from "macros/icons.html" import icon %}
+
+{% block title %}{{ _("Technicians") }} — Service-CRM{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{{ url_for('planning.capacity') }}">{{ _("Planning") }}</a></div>{% endblock %}
+{% block page_title %}{{ _("Technicians") }}{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+  <form method="get" action="{{ url_for('planning.technicians_list') }}" class="filter-form">
+    <select name="show" class="input">
+      <option value="active" {% if show != 'all' %}selected{% endif %}>{{ _("Active") }}</option>
+      <option value="all" {% if show == 'all' %}selected{% endif %}>{{ _("All") }}</option>
+    </select>
+    <button type="submit" class="btn btn-sm btn-secondary">{{ _("Filter") }}</button>
+  </form>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('planning.technician_new') }}">
+    {{ icon("plus") }} {{ _("New technician") }}
+  </a>
+</div>
+
+{% set cols = [_("Name"), _("Email"), _("Timezone"), _("Weekly capacity (minutes)"), _("Active"), ""] %}
+{% set rows = [] %}
+{% for t in items %}
+  {% set detail_url = url_for('planning.technician_detail', technician_hex=t.id.hex()) %}
+  {% set actions %}
+    <a href="{{ detail_url }}" class="btn btn-sm btn-ghost">{{ icon("eye") }}</a>
+  {% endset %}
+  {% set _ = rows.append([
+    t.label,
+    (t.user.email if t.user else '—'),
+    t.timezone,
+    t.weekly_capacity_minutes,
+    (_("Yes") if t.is_active else _("No")),
+    actions,
+  ]) %}
+{% endfor %}
+{{ data_table(cols, rows, empty=_("No technicians yet.")) }}
+{% endblock %}
